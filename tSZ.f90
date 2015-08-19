@@ -23,6 +23,8 @@ Character(len=15) :: halo_definition
 
 halo_definition = 'virial'    ! halo definition that we are using 
 
+open(20,file='./output/execution_information.txt')
+
 !####################################################################
 ! Allocate memory : red-shift, multipoles, virial mass,one halo term, 
 ! two halo term, full Cl's, halo mass function, form factor function,
@@ -40,6 +42,12 @@ Clpsilimber(1:number_of_l),stat = status1)
 allocate (dndM(1:number_of_M,1:number_of_z),ylMz(1:number_of_l,1:number_of_M,1:number_of_z),&
 philMz(1:number_of_l,1:number_of_M,1:number_of_z),d2VdzdO(1:number_of_z),&
 bMz(1:number_of_M,1:number_of_z),mbz(1:number_of_z),Scrit(1:number_of_z),stat = status2)
+
+If ((status1 .eq. 0) .and. (status2 .eq. 0)) then
+
+    write(20,*) 'Memory allocated succesfully '
+
+End If
 
 !########################################################
 ! Filling arrays of red-shift, virial mass and multipoles
@@ -72,40 +80,38 @@ End Do
 ! Computing functions 
 !####################
 
-!call compute_M_delta_c_from_M_and_z(DeltaSO)
+write(20,*) 'Executing mass conversion '
 
-call read_M200dc_r200dc()
+call compute_M_delta_c_from_M_and_z(DeltaSO)
+
+write(20,*) 'Mass conversion ended '
+
+!call read_M200dc_r200dc()
 
 wtime = omp_get_wtime()    ! setting starting time 
 
 call compute_normalization()    ! Normalising matter power spectrum with fiducial sigma_8 
 
-!print *, r_delta_d(200.d0,z(1),M(100))/concentration_mass_mean(M(100),z(1))
-!stop
-
-!print *, lensing_potential(1,1,1,halo_definition)
-
-!call compute_matter_power_spectrum_at_z(1)
-!call compute_transfer_function()
-
-!stop
-
-!call compute_bMz()    ! computing linear halo bias array as a function of mass and red-shift
-call read_bMz()
+call compute_bMz()    ! computing linear halo bias array as a function of mass and red-shift
+!call read_bMz()
 
 call compute_alpha_halo_mass_function()    ! computing alpha constant in halo mass function in order to fulfill condition 
                                            ! that mean bias of all matter at a fixed red-shift is unity
-!call compute_dndM()   ! Computing halo mass function array as a function of mass and red-shift 
-call read_dndM()    
 
+write(20,*) 'Computing halo mass function '
+call compute_dndM()   ! Computing halo mass function array as a function of mass and red-shift 
+!call read_dndM()    
+
+write(20,*) 'Computing mean bias of all matter '
 call compute_mean_bias_matter()    ! Verify that mean bias of all matter is unity for red-shift array 
 
 call compute_d2VdzdO()   ! Computing comoving volume element per steradian array as a function of red-shift  
 
 call compute_critical_surface_density()    ! Computing critical surface density as a function of red-shift
 
-!call compute_lensing_potential(halo_definition)    ! Computing lensing potential as a function of mass and red-shift
-call read_philMz()
+write(20,*) 'Computing lensing potential '
+call compute_lensing_potential(halo_definition)    ! Computing lensing potential as a function of mass and red-shift
+!call read_philMz()
 
 call compute_Clphiphi1h()    ! Compute lensing potential angular power spectrum (one halo term)
 
@@ -113,6 +119,7 @@ call compute_Clphiphi2h()    ! Compute lensing potential angular power spectrum 
 
 call compute_Clpsilimber()    ! Compute angular power spectrum of lensing potential in the Limber approximation
 
+write(20,*) 'Computing form factor '
 call compute_form_factor()    ! Compute form factor as a function of mass and red-shift
 !call read_ylMz()
 
@@ -123,6 +130,8 @@ call compute_Cl2h()
 call compute_Cl()    ! Compute total angular power spectrum 
 
 call write_Cl()    ! Write angular power spectrum into a text file
+
+write(20,*) 'Angular power spectra have been written out '
 
 print *,omp_get_wtime()-wtime
 

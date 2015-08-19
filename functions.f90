@@ -310,12 +310,12 @@ function integral_r_delta_c(M,z,rdc)    !    Equation (4) in published version o
     use omp_lib
     Implicit none
     Real*8 :: M,z,rdc,rmin,integral_r_delta_c
-    Integer*4,parameter :: number_of_r = 1d4
+    Integer*4,parameter :: number_of_r = 1d5
     Integer*4,parameter :: intervals = number_of_r - 1
     Integer*4 :: n
     Real*8,dimension(number_of_r) :: r,f 
 
-    rmin = 1.d-8   
+    rmin = 1.d-10   
  
     Do n=1,number_of_r
 
@@ -485,12 +485,12 @@ function integral_r_delta_d(M,z,rdd)    !    Similar to 'integral_r_delta_c' abo
     use fiducial
     Implicit none
     Real*8 :: M,z,rdd,rmin,integral_r_delta_d
-    Integer*4,parameter :: number_of_r = 1d4
+    Integer*4,parameter :: number_of_r = 1d5
     Integer*4,parameter :: intervals = number_of_r - 1
     Integer*4 :: n
     Real*8,dimension(intervals+1) :: r,f
 
-    rmin = 1.d-8
+    rmin = 1.d-10
     
     Do n=1,number_of_r
 
@@ -839,12 +839,12 @@ function form_factor(indexM,indexz,indexl)    ! Form factor. Equation (2.9) in 1
     use arrays
     Implicit none
     Real*8 :: l_s,x_y_min,x_y_max,form_factor,y,prefactor
-    Integer*4,parameter :: number_of_x = 1d4
+    Integer*4,parameter :: number_of_x = 1d5
     Integer*4,parameter :: intervals = number_of_x - 1 ! It gives error less than 1% 
     Integer*4 :: indexx,indexM,indexz,indexl
     Real*8,dimension(number_of_x) :: x,f
 
-    x_y_min = 1.d-5*virial_radius(z(indexz),M(indexM))/r200c(indexM,indexz) ! dimensionless
+    x_y_min = 1.d-10*virial_radius(z(indexz),M(indexM))/r200c(indexM,indexz) ! dimensionless
 
     l_s = angular_diameter_distance(z(indexz))/r200c(indexM,indexz)         ! dimensionless
 
@@ -975,7 +975,7 @@ function lensing_potential(indexM,indexz,indexl,halo_definition)    ! Lensing po
     Implicit none
     Real*8 :: lensing_potential,r_s,l_s,phi_l,prefactor,xmin,xmax
     Integer*4 :: n,points,i,indexM,indexz,indexl
-    Integer*4,parameter :: number_of_x = 1d3
+    Integer*4,parameter :: number_of_x = 1d5
     Integer*4,parameter :: intervals = number_of_x - 1  ! It gives less than 1% error
     Real*8,dimension(number_of_x) :: x,f    
     Character(len=*) :: halo_definition 
@@ -1003,7 +1003,7 @@ function lensing_potential(indexM,indexz,indexl,halo_definition)    ! Lensing po
 
         r_s = virial_radius(z(indexz),M(indexM))/concentration_mass_virial(M(indexM),z(indexz))    ! Mpc
 
-        xmin = 1.d-5*virial_radius(z(indexz),M(indexM))/r_s    ! dimensionless
+        xmin = 1.d-10*virial_radius(z(indexz),M(indexM))/r_s    ! dimensionless
 
         xmax = 1.05d0*virial_radius(z(indexz),M(indexM))/r_s    ! dimensionless
 
@@ -1815,11 +1815,9 @@ function C_l_yphi_one_halo(indexl) ! Dimensionless
     use arrays
     Implicit none
     Real*8 :: C_l_yphi_one_halo,sum
-    Integer*4 :: indexl,i,indexz,points
+    Integer*4 :: indexl,i,indexz
     Integer*4,parameter :: intervals = number_of_z - 1
     Real*8,dimension(number_of_z):: f
-
-    points = number_of_z
 
     Do indexz=1,number_of_z
 
@@ -2215,7 +2213,7 @@ function pre_Cl_2(indexz,indexl) ! Units 1/Mpc**3
 end function pre_Cl_2
 
 function C_l_yphi_two_halo(indexl) ! Equation (2.11) in 1312.4525
-    use fiducial                   ! Dimensionless
+    use fiducial                   ! Units : dimensionless
     use arrays
     Implicit none
     Real*8 :: C_l_yphi_two_halo,sum
@@ -2226,7 +2224,7 @@ function C_l_yphi_two_halo(indexl) ! Equation (2.11) in 1312.4525
     Do indexz=1,number_of_z
 
         f(indexz) = pre_Cl_1(indexz,indexl)*pre_Cl_2(indexz,indexl)*d2VdzdO(indexz)*&
-        matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance(z(indexz)),z(indexz)) ! Units : 
+        matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance(z(indexz)),z(indexz)) ! Units : 1/h**3
 
     End Do
 
