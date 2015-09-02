@@ -354,6 +354,32 @@ function integral_r_delta_minus_total_matter(M,z,rdc,delta)    !    Units of M :
 
 end function integral_r_delta_minus_total_matter
 
+function dMdc_dM(indexM,indexz)
+    use fiducial
+    use arrays
+    Implicit none
+    Integer*4 :: indexM,indexz
+    Real*8 :: dMdc_dM
+    Real*8,parameter :: dM = 10**((log10(Mmax) - log10(Mmin))/real(number_of_M-1))
+
+    dMdc_dM  = (-M200c(indexM+2,indexz) + 8.d0*M200c(indexM+1,indexz) - 8.d0*M200c(indexM-1,indexz) +&
+    M200c(indexM-2,indexz))/12.d0/dM
+
+end function dMdc_dM
+
+function dMdd_dM(indexM,indexz)
+    use fiducial
+    use arrays
+    Implicit none
+    Integer*4 :: indexM,indexz
+    Real*8 :: dMdd_dM
+    Real*8,parameter :: dM = 10**((log10(Mmax) - log10(Mmin))/real(number_of_M-1))
+
+    dMdd_dM = (-M200d(indexM+2,indexz) + 8.d0*M200d(indexM+1,indexz) - 8.d0*M200d(indexM-1,indexz) +&
+    M200d(indexM-2,indexz))/12.d0/dM
+
+end function dMdd_dM
+
 function r_delta_c_from_M_virial(M,z,delta)    !    Units of M : solar mass. Units of r_delta_c_from_M_virial : Mpc
     use fiducial
     Implicit none
@@ -660,7 +686,7 @@ subroutine compute_M_delta_c_from_M_and_z(delta)
     use arrays
     Implicit none
     Integer*4 :: indexz,indexM
-    Real*8,dimension(number_of_M,number_of_z) :: rdc,rdd
+    Real*8,dimension(-1:number_of_M+2,number_of_z) :: rdc,rdd
     Real*8 :: delta
 
     rdc(:,:) = 0.d0
@@ -669,13 +695,15 @@ subroutine compute_M_delta_c_from_M_and_z(delta)
 
     open(15,file='./precomputed_quantities/M_delta_c_d.dat')
 
-    write(15,*) '# red-shift z    virial mass M [solar mass]    r_delta_c [Mpc]    M_delta_c [solar mass]'
+    write(15,*) '# Mass conversion file. The number of masses is ',number_of_z*(number_of_M+4)
 
-    write(15,*) '# r_delta_d [Mpc]    M_delta_d [solar mass]'
+    write(15,*) '# index_of_red-shift    red-shift    index_of_M    virial_mass_M[solar mass]    r_delta_c[Mpc]'    
+
+    write(15,*) '# M_delta_c[solar mass]    r_delta_d[Mpc]    M_delta_d[solar mass] '
 
     Do indexz = 1,number_of_z
 
-        Do indexM = 1,number_of_M
+        Do indexM = -1,number_of_M+2
 
             rdc(indexM,indexz) = r_delta_c_from_M_virial(M(indexM),z(indexz),delta)
 
@@ -687,9 +715,9 @@ subroutine compute_M_delta_c_from_M_and_z(delta)
 
     Do indexz = 1,number_of_z
 
-        Do indexM = 1,number_of_M
+        Do indexM = -1,number_of_M+2
 
-            write(15,'(6es18.10)') z(indexz), M(indexM), rdc(indexM,indexz), &
+            write(15,'(i5,es18.10,i5,5es18.10)') indexz, z(indexz), indexM, M(indexM), rdc(indexM,indexz), &
             M_delta_c_from_M_virial(z(indexz),rdc(indexM,indexz),delta), &
             rdd(indexM,indexz),M_delta_d_from_M_virial(z(indexz),rdd(indexM,indexz),delta)
 
@@ -705,7 +733,7 @@ subroutine read_M200dc_r200dc()
     use arrays
     use fiducial
     Implicit none
-    Integer*4 :: indexz,indexM
+    Integer*4 :: index,iz,iM
     Real*8 :: MM,zz,tM200c,tM200d,tr200c,tr200d
 
     open(15,file='./precomputed_quantities/M_delta_c_d.dat')
@@ -714,33 +742,27 @@ subroutine read_M200dc_r200dc()
 
     read(15,*)
 
-    Do indexz=1,number_of_z
+    read(15,*)
 
-        Do indexM=1,number_of_M
+    Do index=1,number_of_z*(number_of_M+4)
 
-            read(15,'(6es18.10)') zz,MM,tr200c,tM200c,tr200d,tM200d
+        read(15,'(i5,es18.10,i5,5es18.10)') iz,zz,iM,MM,tr200c,tM200c,tr200d,tM200d
 
-            If ( ( abs( M(indexM) - MM) .lt. 1.d5 ) .and. ( abs( z(indexz) - zz ) .lt. 1.d-8 ) ) then
+        r200c(iM,iz) = tr200c
 
-                r200c(indexM,indexz) = tr200c
+        M200c(iM,iz) = tM200c
 
-                M200c(indexM,indexz) = tM200c
+        r200d(iM,iz) = tr200d
 
-                r200d(indexM,indexz) = tr200d
+        M200d(iM,iz) = tM200d
 
-                M200d(indexM,indexz) = tM200d
+        If ((iM .ge. 1) .and. (iM .le. number_of_M) ) then
 
-            else 
+            dM200ddM(iM,iz) = dMdd_dM(iM,iz)
 
-                print *, 'Problem reading the file '
-
-                print *, zz,z(indexz),MM,M(indexM)
-
-                stop
-
-            End If
-
-        End Do
+            dM200cdM(iM,iz) = dMdc_dM(iM,iz)
+ 
+        End If
 
     End Do
 
@@ -839,16 +861,16 @@ function form_factor(indexM,indexz,indexl)    ! Form factor. Equation (2.9) in 1
     use arrays
     Implicit none
     Real*8 :: l_s,x_y_min,x_y_max,form_factor,y,prefactor
-    Integer*4,parameter :: number_of_x = 1d5
+    Integer*4,parameter :: number_of_x = 1d4
     Integer*4,parameter :: intervals = number_of_x - 1 ! It gives error less than 1% 
     Integer*4 :: indexx,indexM,indexz,indexl
     Real*8,dimension(number_of_x) :: x,f
 
-    x_y_min = 1.d-10*virial_radius(z(indexz),M(indexM))/r200c(indexM,indexz) ! dimensionless
+    x_y_min = 1.d-5*virial_radius(z(indexz),M(indexM))/r200c(indexM,indexz) ! dimensionless
 
     l_s = angular_diameter_distance(z(indexz))/r200c(indexM,indexz)         ! dimensionless
 
-    x_y_max = 1.05d0*virial_radius(z(indexz),M(indexM))/r200c(indexM,indexz) ! dimensionless
+    x_y_max = 0.5d0*virial_radius(z(indexz),M(indexM))/r200c(indexM,indexz) ! dimensionless
 
     prefactor = sigma_e*4.d0*Pi*r200c(indexM,indexz)*M_sun/m_e/c**2/l_s**2  ! Units : Mpc*s**2/solar mass
 
@@ -905,7 +927,9 @@ subroutine compute_form_factor()
 
     open(15,file='./precomputed_quantities/form_factor/form_factor.dat')
 
-    write(15,*) '# l  virial mass[solar mass]  red-shift  y'
+    write(15,*) '# Form factor file. Number of lines is ',number_of_l*number_of_z*number_of_M
+
+    write(15,*) '# index_of_l    l    index_of_M    virial_mass[solar mass]    index_of_z    red-shift    y'
 
     Do indexl=1,number_of_l
 
@@ -913,7 +937,7 @@ subroutine compute_form_factor()
 
             Do indexz=1,number_of_z
 
-                write(15,'(i5,3es18.10)') ml(indexl),M(indexM),z(indexz),ylMz(indexl,indexM,indexz)
+                write(15,'(3i5,es18.10,i5,2es18.10)') indexl,ml(indexl),indexM,M(indexM),indexz,z(indexz),ylMz(indexl,indexM,indexz)
 
             End Do
 
@@ -930,37 +954,20 @@ subroutine read_ylMz()
     use arrays
     use fiducial
     Implicit none
-    Integer*4 :: indexz,indexM,indexl
+    Integer*4 :: index,il,iM,iz
     Real*8 :: ll,MM,zz,tylMz
 
     open(15,file='./precomputed_quantities/form_factor/form_factor.dat')
 
     read(15,*)
 
-    Do indexl=1,number_of_l
+    read(15,*)
 
-        Do indexM=1,number_of_M
+    Do index=1,number_of_l*number_of_z*number_of_M
 
-            Do indexz=1,number_of_z
+        read(15,'(3i5,es18.10,i5,2es18.10)') il,ll,iM,MM,iz,zz,tylMz
 
-                read(15,'(i5,3es18.10)') ll,MM,zz,tylMz
-
-                If ( ( ml(indexl) .eq. ll ) .and. ( ( abs( M(indexM) - MM) .lt. 1.d5 ) &
-                .and. ( abs( z(indexz) - zz ) .lt. 1.d-8 ) ) ) then
-
-                    ylMz(indexl,indexM,indexz) = tylMz
-
-                else 
-
-                    print *, 'Problem reading the file '
-
-                    stop
-
-                End If
-
-            End Do
-
-        End Do
+        ylMz(il,iM,iz) = tylMz
 
     End Do
 
@@ -968,14 +975,14 @@ subroutine read_ylMz()
 
 end subroutine read_ylMz
 
-function lensing_potential(indexM,indexz,indexl,halo_definition)    ! Lensing potential. Equation (2.10) in 1312.4525. Units of M : solar mass
+function lensing_potential_2(indexM,indexz,indexl,halo_definition)    ! Lensing potential. Equation (2.10) in 1312.4525. Units of M : solar mass
     use fiducial    ! Units : dimensionless
     use arrays
     use omp_lib
     Implicit none
-    Real*8 :: lensing_potential,r_s,l_s,phi_l,prefactor,xmin,xmax
+    Real*8 :: lensing_potential_2,r_s,l_s,phi_l,prefactor,xmin,xmax
     Integer*4 :: n,points,i,indexM,indexz,indexl
-    Integer*4,parameter :: number_of_x = 1d5
+    Integer*4,parameter :: number_of_x = 1d4
     Integer*4,parameter :: intervals = number_of_x - 1  ! It gives less than 1% error
     Real*8,dimension(number_of_x) :: x,f    
     Character(len=*) :: halo_definition 
@@ -1003,9 +1010,9 @@ function lensing_potential(indexM,indexz,indexl,halo_definition)    ! Lensing po
 
         r_s = virial_radius(z(indexz),M(indexM))/concentration_mass_virial(M(indexM),z(indexz))    ! Mpc
 
-        xmin = 1.d-10*virial_radius(z(indexz),M(indexM))/r_s    ! dimensionless
+        xmin = 1.d-5*virial_radius(z(indexz),M(indexM))/r_s    ! dimensionless
 
-        xmax = 1.05d0*virial_radius(z(indexz),M(indexM))/r_s    ! dimensionless
+        xmax = 1.043d0*virial_radius(z(indexz),M(indexM))/r_s    ! dimensionless
 
     Else
 
@@ -1053,14 +1060,6 @@ function lensing_potential(indexM,indexz,indexl,halo_definition)    ! Lensing po
 
     !$omp End Parallel Do
 
-!    open(15,file='./output/array_lensing.dat')
-!    Do n=1,number_of_x
-
-!        write(15,*) x(n), f(n)
-
-!    End Do
-
-!    close(15)
     phi_l = 0.d0
 
     Do i=1,intervals
@@ -1069,13 +1068,133 @@ function lensing_potential(indexM,indexz,indexl,halo_definition)    ! Lensing po
 
     End Do
 
-    lensing_potential = prefactor*phi_l
+    lensing_potential_2 = prefactor*phi_l
+
+end function lensing_potential_2
+
+function lensing_potential(indexM,indexz,indexl,halo_definition)    ! Lensing potential. Equation (2.10) in 1312.4525. Units of M : solar mass
+    use fiducial    ! Units : dimensionless
+    use arrays
+    use omp_lib
+    Implicit none
+    Real*8 :: lensing_potential,r_s,l_s,wavevector,prefactor,Delta_cr,delta_c
+    Integer*4 :: indexM,indexz,indexl
+    Character(len=*) :: halo_definition 
+
+    If (halo_definition .eq. 'virial') then
+
+        r_s = virial_radius(z(indexz),M(indexM))/concentration_mass_virial(M(indexM),z(indexz))    ! Mpc
+
+        Delta_cr = 18.d0*Pi**2 + 82.d0*(Omega_m(z(indexz)) - 1.d0) - 39.d0*(Omega_m(z(indexz)) - 1.d0)**2
+
+        delta_c = Delta_cr*concentration_mass_virial(M(indexM),z(indexz))**3/3.d0/&
+        (log(1.d0 + concentration_mass_virial(M(indexM),z(indexz))) - &
+        concentration_mass_virial(M(indexM),z(indexz))/(1.d0 + concentration_mass_virial(M(indexM),z(indexz))))
+
+        l_s = angular_diameter_distance(z(indexz))/r_s                             ! dimensionless
+
+        prefactor = 8.d0*Pi*critical_density(z(indexz))*delta_c*r_s/dble(ml(indexl))/dble(ml(indexl)+1.d0)/&
+        l_s**2/Scrit(indexz)
+
+        wavevector = ( dble(ml(indexl)) + 1.d0/2.d0 )/l_s
+
+    Else
+
+         print *,'Not halo definition implemented with name ', halo_definition
+
+         stop
+
+    End If
+
+    lensing_potential = prefactor*FT_NFW_density_profile(wavevector,M(indexM),z(indexz)) ! Mpc
 
 end function lensing_potential
+
+function FT_NFW_density_profile(k,M,z)    ! It computes the normalized Fourier transform of the NFW density profile
+    Implicit none    ! Eq. (9) in "Clustering of submillimetre galaxies in a self-regulated baryon collapse model" by 
+                     ! Xia et al. M is the virial mass. The Fourier transform is truncated to the virial radius
+    Real*8 :: k,M,z,FT_NFW_density_profile,Si1,Si2,Ci1,Ci2
+    Real*8 :: alpha     ! It determines upper limit in Eq. (2.10) of 1312.4525
+    Real*8,parameter :: alphafactor = 1.045d0
+
+    alpha = alphafactor*concentration_mass_virial(M,z)
+
+    call trigint((1.d0 + alpha)*k,Ci1,Si1)
+
+    call trigint(k,Ci2,Si2)
+
+    FT_NFW_density_profile = -sin(alpha*k)/(1.d0+alpha)/k + sin(k)*( Si1 - Si2 ) &
+    + cos(k)*( Ci1 - Ci2 ) 
+
+end function FT_NFW_density_profile
+
+subroutine trigint(x,ci,si)
+    use fiducial
+    Implicit none
+    Real*8 :: x,ci,si,f,g1,x2,y
+
+    x2 = x**2
+    y  = 1./x2
+
+    ! ... formulas from wikipedia page http://en.wikipedia.org/wiki/Trigonometric_integral ...
+
+    If (x.le.4.) then
+
+        Si = x*(1. + x2*(-4.54393409816329991e-2 + x2*(1.15457225751016682e-3 + &
+        x2*(-1.41018536821330254e-5 + x2*(9.43280809438713025e-8 + &
+        x2*(-3.53201978997168357e-10 + x2*(7.08240282274875911e-13 + &
+        x2*(-6.05338212010422477e-16)))))))) &
+        /(1. + x2*(1.01162145739225565e-2 + x2*(4.99175116169755106e-5 + &
+        x2*(1.55654986308745614e-7 + x2*(3.28067571055789734e-10 + &
+        x2*(4.5049097575386581e-13 + x2*(3.21107051193712168e-16)))))))
+
+        Ci = 0.577215664901532861 + log(x) + x2*(-0.25 + x2*(7.51851524438898291e-3 + &
+        x2*(-1.27528342240267686e-4 + x2*(1.05297363846239184e-6 + &
+        x2*(-4.68889508144848019e-9 + x2*(1.06480802891189243e-11 + &
+        x2*(-9.93728488857585407e-15))))))) &
+        /(1. + x2*(1.1592605689110735e-2 + x2*(6.72126800814254432e-5 + &
+        x2*(2.55533277086129636e-7 + x2*(6.97071295760958946e-10 + &
+        x2*(1.38536352772778619e-12 + x2*(1.89106054713059759e-15 + &
+        x2*(1.39759616731376855e-18))))))))
+
+    Else
+
+       f  = (1. + y*(7.44437068161936700618e2 + y*(1.96396372895146869801e5 + &
+       y*(2.37750310125431834034e7 + y*(1.43073403821274636888e9 + &
+       y*(4.33736238870432522765e10 + y*(6.40533830574022022911e11 + &
+       y*(4.20968180571076940208e12 + y*(1.00795182980368574617e13 + &
+       y*(4.94816688199951963482e12 + y*(-4.94701168645415959931e11))))))))))) &
+       /(x*(1. + y*(7.46437068161927678031e2 + y*(1.97865247031583951450e5 + &
+       y*(2.41535670165126845144e7 + y*(1.47478952192985464958e9 + &
+       y*(4.58595115847765779830e10 + y*(7.08501308149515401563e11 + &
+       y*(5.06084464593475076774e12 + y*(1.43468549171581016479e13 + &
+       y*(1.11535493509914254097e13)))))))))))
+
+       g1 = y*(1. + y*(8.1359520115168615e2 + y*(2.35239181626478200e5 + &
+       y*(3.12557570795778731e7 + y*(2.06297595146763354e9 + &
+       y*(6.83052205423625007e10 + y*(1.09049528450362786e12 + &
+       y*(7.57664583257834349e12 + y*(1.81004487464664575e13 + &
+       y*(6.43291613143049485e12 + y*(-1.36517137670871689e12))))))))))) &
+       /(1. + y*(8.19595201151451564e2 + y*(2.40036752835578777e5 + &
+       y*(3.26026661647090822e7 + y*(2.23355543278099360e9 + &
+       y*(7.87465017341829930e10 + y*(1.39866710696414565e12 + &
+       y*(1.17164723371736605e13 + y*(4.01839087307656620e13 + &
+       y*(3.99653257887490811e13))))))))))
+
+       Si = 0.5*Pi - f*cos(x) - g1*sin(x)
+
+       Ci = f*sin(x) - g1*cos(x)
+
+    End If
+
+    return
+
+end subroutine trigint
 
 subroutine compute_lensing_potential(halo_definition)
     use arrays
     use fiducial
+    use omp_lib
     Implicit none
     Integer*4 :: indexl,indexM,indexz
     Character(len=*) :: halo_definition 
@@ -1085,6 +1204,8 @@ subroutine compute_lensing_potential(halo_definition)
     If (halo_definition .eq. 'critical_density') then
 
         write(15,*) '#  l  virial mass [solar mass]  red-shift  phi'
+
+        !$omp Parallel Do Shared(philMz)        
 
         Do indexl=1,number_of_l
 
@@ -1102,12 +1223,16 @@ subroutine compute_lensing_potential(halo_definition)
 
         End Do
 
+        !$omp End Parallel Do
+
         close(15)
 
         
     Else If (halo_definition .eq. 'mean_background') then 
 
         write(15,*) '#  l  virial mass [solar mass]  red-shift  phi'
+
+        !$omp Parallel Do Shared(philMz)        
 
         Do indexl=1,number_of_l
 
@@ -1125,12 +1250,18 @@ subroutine compute_lensing_potential(halo_definition)
 
         End Do
 
+        !$omp End Parallel Do
+
         close(15)
 
         
     Else If (halo_definition .eq. 'virial') then
 
-        write(15,*) '#  l  virial mass[solar mass]  red-shift  phi'
+        write(15,*) '# Lensing potential file. Number of lines is ',number_of_l*number_of_M*number_of_z
+
+        write(15,*) '#  index_of_l    l   index_of_M    virial_mass[solar mass]    index_of_z    red-shift    phi'
+
+        !$omp Parallel Do Shared(philMz)        
 
         Do indexl=1,number_of_l
 
@@ -1140,13 +1271,16 @@ subroutine compute_lensing_potential(halo_definition)
 
                     philMz(indexl,indexM,indexz) = lensing_potential(indexM,indexz,indexl,'virial')
 
-                    write(15,'(i5,3es18.10)') ml(indexl),M(indexM),z(indexz),philMz(indexl,indexM,indexz)
+                    write(15,'(3i5,es18.10,i5,2es18.10)') indexl,ml(indexl),indexM,M(indexM),indexz,z(indexz),&
+                    philMz(indexl,indexM,indexz)
 
                 End Do
 
             End Do
 
         End Do
+
+        !$omp End Parallel Do
 
         close(15)
         
@@ -1159,37 +1293,20 @@ subroutine read_philMz()
     use arrays
     use fiducial
     Implicit none
-    Integer*4 :: indexz,indexM,indexl,ll
+    Integer*4 :: indexz,indexM,indexl,ll,q,iz,iM,il
     Real*8 :: MM,zz,tphilMz
 
     open(15,file='./precomputed_quantities/lensing_potential/lensing_potential.dat')
 
     read(15,*)
 
-    Do indexl=1,number_of_l
+    read(15,*)
 
-        Do indexM=1,number_of_M
+    Do q=1,number_of_l*number_of_M*number_of_z
 
-            Do indexz=1,number_of_z
-
-                read(15,'(i5,3es18.10)') ll,MM,zz,tphilMz
-
-                If ( ( ml(indexl) .eq. ll ) .and. ( ( abs( M(indexM) - MM) .lt. 1.d5 ) &
-                .and. ( abs( z(indexz) - zz ) .lt. 1.d-8 ) ) ) then
-
-                    philMz(indexl,indexM,indexz) = tphilMz
-
-                else 
-
-                    print *, 'Problem reading the file '
-
-                    stop
-
-                End If
-
-            End Do
-
-        End Do
+        read(15,'(3i5,es18.10,i5,2es18.10)') il,ll,iM,MM,iz,zz,tphilMz
+     
+        philMz(il,iM,iz) = tphilMz
 
     End Do
 
@@ -1606,8 +1723,11 @@ subroutine compute_alpha_halo_mass_function()    ! It computes \alpha constant i
 
         Do indexM=1,number_of_M
 
+!            f(indexM) = nonnormalised_halo_mass_function(indexM,indexz)*bMz(indexM,indexz)*&
+!            M(indexM)/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0
+
             f(indexM) = nonnormalised_halo_mass_function(indexM,indexz)*bMz(indexM,indexz)*&
-            M(indexM)/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0
+            M(indexM)/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0*dM200ddM(indexM,indexz)
 
         End Do
 
@@ -1635,15 +1755,17 @@ subroutine compute_dndM()    ! It fills halo mass function array in and writes i
 
     open(15,file='./precomputed_quantities/dndM/dndM.dat')
 
-    write(15,*) '#  virial mass [solar mass]    red-shift        dndM '
+    write(15,*) '# Halo mass function (as function of virial mass and red-shift). Number of lines is ',number_of_z*number_of_M
+
+    write(15,*) '#  index_of_M    virial_mass[solar mass]    index_of_z    red-shift    dndM '
 
     Do indexM=1,number_of_M
 
         Do indexz=1,number_of_z
 
-            dndM(indexM,indexz) = halo_mass_function(indexM,indexz)
+            dndM(indexM,indexz) = halo_mass_function(indexM,indexz)*dM200ddM(indexM,indexz)
 
-            write(15,'(3es18.10)') M(indexM), z(indexz), dndM(indexM,indexz)
+            write(15,'(i5,es18.10,i5,2es18.10)') indexM, M(indexM), indexz, z(indexz), dndM(indexM,indexz)
 
         End Do
 
@@ -1658,32 +1780,20 @@ subroutine read_dndM()
     use arrays
     use fiducial
     Implicit none
-    Integer*4 :: indexz,indexM
+    Integer*4 :: index,iM,iz
     Real*8 :: MM,zz,tdndM
 
     open(15,file='./precomputed_quantities/dndM/dndM.dat')
 
     read(15,*)
 
-    Do indexM=1,number_of_M
+    read(15,*)
 
-        Do indexz=1,number_of_z
+    Do index=1,number_of_M*number_of_z
 
-            read(15,'(3es18.10)') MM,zz,tdndM
+        read(15,'(i5,es18.10,i5,2es18.10)') iM,MM,iz,zz,tdndM
 
-            If ( ( abs( M(indexM) - MM) .lt. 1.d5 ) .and. ( abs( z(indexz) - zz ) .lt. 1.d-8 ) ) then
-
-                dndM(indexM,indexz) = tdndM
-
-            else 
-
-                print *, 'Problem reading the file '
-
-                stop
-
-            End If
-
-        End Do
+        dndM(iM,iz) = tdndM
 
     End Do
 
