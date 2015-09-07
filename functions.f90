@@ -15,18 +15,18 @@ end function Hubble_parameter
 
 function comoving_distance(z)    !    Units : Mpc
     use fiducial
+    use omp_lib
     Implicit none
-    Real*8 :: comoving_distance,xmin,z
+    Real*8 :: comoving_distance,z
     Integer*4,parameter :: number_of_x = 1d5
     Integer*4,parameter :: intervals = number_of_x - 1
     Real*8,dimension(number_of_x) :: x,f
     Integer*4 :: m
-
-    xmin = 1.d-10
+    Real*8,parameter :: xmin = 0.d0
 
     Do m=1,number_of_x
 
-        x(m) = 10**(log10(xmin) + dble((m-1))*(log10(z) - log10(xmin))/dble(number_of_x-1) )
+        x(m) = xmin + dble(m-1)*z/dble(number_of_x-1)
 
     End Do
 
@@ -69,9 +69,49 @@ function comoving_volume_per_steradian(z)    !    Units : Mpc**3
 
 end function comoving_volume_per_steradian
 
+function comoving_volume(z)    !    Units : Mpc
+    use fiducial
+    use omp_lib
+    Implicit none
+    Real*8 :: comoving_volume,z
+    Integer*4,parameter :: number_of_x = 1d5
+    Integer*4,parameter :: intervals = number_of_x - 1
+    Real*8,dimension(number_of_x) :: x,f
+    Integer*4 :: m
+    Real*8,parameter :: xmin = 0.d0
+
+    Do m=1,number_of_x
+
+        x(m) = xmin + dble(m-1)*z/dble(number_of_x-1)
+
+    End Do
+
+    !$omp Parallel Do Shared(f)    
+
+    Do m=1,number_of_x
+
+        f(m) = comoving_volume_per_steradian(x(m))
+
+    End Do
+
+    !$omp End Parallel Do
+
+    comoving_volume = 0.d0
+
+    Do m = 1,intervals
+
+        comoving_volume = (x(m+1)-x(m))/2.d0*(f(m) + f(m+1)) + comoving_volume
+
+    End Do 
+
+    comoving_volume = 4.d0*Pi*comoving_volume
+
+end function comoving_volume
+
 subroutine compute_d2VdzdO()    !    It fills in the vector with comoving volume per steradian
     use arrays
     use fiducial
+    use omp_lib
     Implicit none
     Integer*4 :: indexz
 
@@ -171,6 +211,7 @@ end function critical_surface_density
 subroutine compute_critical_surface_density()    !    It fills in the vector with critical surface density
     use arrays
     use fiducial
+    use omp_lib
     Implicit none
     Integer*4 :: indexz 
 
@@ -307,41 +348,20 @@ end function r2NFW_density_profile
 
 function integral_r_delta_c(M,z,rdc)    !    Equation (4) in published version of 1303.4726. Units of M : solar mass. 
     use fiducial    !    Units of rdc : Mpc. Units : solar mass
-    use omp_lib
     Implicit none
-    Real*8 :: M,z,rdc,rmin,integral_r_delta_c
-    Integer*4,parameter :: number_of_r = 1d5
-    Integer*4,parameter :: intervals = number_of_r - 1
-    Integer*4 :: n
-    Real*8,dimension(number_of_r) :: r,f 
+    Real*8 :: M,z,rdc,rmin,integral_r_delta_c,Delta_cr,delta_c,r_s
 
-    rmin = 1.d-10   
+    Delta_cr = 18.d0*Pi**2 + 82.d0*(Omega_m(z) - 1.d0) - 39.d0*(Omega_m(z) - 1.d0)**2
+
+    delta_c = Delta_cr*concentration_mass_virial(M,z)**3/3.d0/&
+    (log(1.d0 + concentration_mass_virial(M,z)) - &
+    concentration_mass_virial(M,z)/(1.d0 + concentration_mass_virial(M,z)))
+
+    r_s = virial_radius(z,M)/concentration_mass_virial(M,z)
+
+    rmin = rdc/r_s
  
-    Do n=1,number_of_r
-
-        r(n) = 10**(log10(rmin) + dble((n-1))*(log10(rdc) - log10(rmin))/dble(number_of_r-1) )
-
-    End Do
-
-    !$omp Parallel Do Shared(f)
-
-    Do n=1,number_of_r
-
-        f(n) = r2NFW_density_profile(r(n),M,z,'virial')
-
-    End Do
-
-    !$omp End Parallel Do
-
-    integral_r_delta_c = 0.d0
-
-    Do n = 1, intervals
-
-        integral_r_delta_c = (r(n+1)-r(n))/2.d0*(f(n)+ f(n+1)) + integral_r_delta_c
-
-    End Do
-
-    integral_r_delta_c = integral_r_delta_c*4.d0*Pi
+    integral_r_delta_c = 4.d0*Pi*r_s**3*critical_density(z)*delta_c*(-1.d0 + 1.d0/(1.d0 + rmin) + log(1.d0 + rmin)  )
 
 end function integral_r_delta_c
 
@@ -384,8 +404,8 @@ function r_delta_c_from_M_virial(M,z,delta)    !    Units of M : solar mass. Uni
     use fiducial
     Implicit none
     Real*8 :: r_delta_c_from_M_virial,M,z,delta,r1,r2,step,rini,f1,f2,rmid,dr,fmid
-    Integer*4,parameter :: iter = 1d3
-    Real*8,parameter :: racc = 1.d-12
+    Integer*4,parameter :: iter = 1d4
+    Real*8,parameter :: racc = 1.d-25
     Integer*4 :: p
     logical :: root
 
@@ -508,41 +528,21 @@ end function M_delta_c_from_M_virial
 
 
 function integral_r_delta_d(M,z,rdd)    !    Similar to 'integral_r_delta_c' above. Units of M : solar mass. Units of rdd : Mpc. Units: solar mass
-    use fiducial
+    use fiducial    !    Units of rdc : Mpc. Units : solar mass
     Implicit none
-    Real*8 :: M,z,rdd,rmin,integral_r_delta_d
-    Integer*4,parameter :: number_of_r = 1d5
-    Integer*4,parameter :: intervals = number_of_r - 1
-    Integer*4 :: n
-    Real*8,dimension(intervals+1) :: r,f
+    Real*8 :: M,z,rdd,rmin,integral_r_delta_d,Delta_cr,delta_c,r_s
 
-    rmin = 1.d-10
-    
-    Do n=1,number_of_r
+    Delta_cr = 18.d0*Pi**2 + 82.d0*(Omega_m(z) - 1.d0) - 39.d0*(Omega_m(z) - 1.d0)**2
 
-        r(n) = 10**(log10(rmin) + dble((n-1))*(log10(rdd) - log10(rmin))/dble(number_of_r-1) )
+    delta_c = Delta_cr*concentration_mass_virial(M,z)**3/3.d0/&
+    (log(1.d0 + concentration_mass_virial(M,z)) - &
+    concentration_mass_virial(M,z)/(1.d0 + concentration_mass_virial(M,z)))
 
-    End Do
+    r_s = virial_radius(z,M)/concentration_mass_virial(M,z)
 
-    !$omp Parallel Do Shared(f)
-
-    Do n=1,number_of_r
-
-        f(n) = r2NFW_density_profile(r(n),M,z,'virial')
-
-    End Do
-
-    !$omp End Parallel Do
-
-    integral_r_delta_d = 0.d0
-
-    Do n = 1, intervals
-
-        integral_r_delta_d = (r(n+1)-r(n))/2.d0*(f(n) + f(n+1)) + integral_r_delta_d
-
-    End Do
-
-    integral_r_delta_d = integral_r_delta_d*4.d0*Pi
+    rmin = rdd/r_s
+ 
+    integral_r_delta_d = 4.d0*Pi*r_s**3*critical_density(z)*delta_c*(-1.d0 + 1.d0/(1.d0 + rmin) + log(1.d0 + rmin)  )
 
 end function integral_r_delta_d
 
@@ -559,8 +559,8 @@ function r_delta_d_from_M_virial(M,z,delta)    !    Units of M : solar mass. Uni
     use fiducial
     Implicit none
     Real*8 :: r_delta_d_from_M_virial,M,z,delta,r1,r2,step,rini,f1,f2,rmid,dr,fmid
-    Integer*4,parameter :: iter = 1d3
-    Real*8,parameter :: racc = 1.d-12
+    Integer*4,parameter :: iter = 1d4
+    Real*8,parameter :: racc = 1.d-25
     Integer*4 :: p
     logical :: root 
 
@@ -684,6 +684,7 @@ end function M_delta_d_from_M_virial
 subroutine compute_M_delta_c_from_M_and_z(delta)
     use fiducial
     use arrays
+    use omp_lib
     Implicit none
     Integer*4 :: indexz,indexM
     Real*8,dimension(-1:number_of_M+2,number_of_z) :: rdc,rdd
@@ -701,6 +702,8 @@ subroutine compute_M_delta_c_from_M_and_z(delta)
 
     write(15,*) '# M_delta_c[solar mass]    r_delta_d[Mpc]    M_delta_d[solar mass] '
 
+    !$omp Parallel Do Shared(rdc,rdd)
+
     Do indexz = 1,number_of_z
 
         Do indexM = -1,number_of_M+2
@@ -712,6 +715,8 @@ subroutine compute_M_delta_c_from_M_and_z(delta)
         End Do
 
     End Do
+
+    !$omp End Parallel Do
 
     Do indexz = 1,number_of_z
 
@@ -860,41 +865,116 @@ function form_factor(indexM,indexz,indexl)    ! Form factor. Equation (2.9) in 1
     use fiducial                              ! Units : dimensionless
     use arrays
     Implicit none
-    Real*8 :: l_s,x_y_min,x_y_max,form_factor,y,prefactor
+    Real*8 :: l_s,x_y_min,x_y_max,form_factor,y,prefactor,stepsize,x1,x2,f1,f2
     Integer*4,parameter :: number_of_x = 1d4
-    Integer*4,parameter :: intervals = number_of_x - 1 ! It gives error less than 1% 
+    Integer*4,parameter :: intervals = number_of_x - 1 !  
     Integer*4 :: indexx,indexM,indexz,indexl
     Real*8,dimension(number_of_x) :: x,f
-
-    x_y_min = 1.d-5*virial_radius(z(indexz),M(indexM))/r200c(indexM,indexz) ! dimensionless
+    Real*8,parameter :: betafactor = 1.5d0
+    Integer*4,parameter :: max_iterations = 1d9
+    logical :: logscale
 
     l_s = angular_diameter_distance(z(indexz))/r200c(indexM,indexz)         ! dimensionless
 
-    x_y_max = 0.5d0*virial_radius(z(indexz),M(indexM))/r200c(indexM,indexz) ! dimensionless
+    x_y_max = betafactor*virial_radius(z(indexz),M(indexM))/r200c(indexM,indexz) ! dimensionless
+
+    If ( x_y_max .le. ( l_s/(dble(ml(indexl))+ 1.d0/2.d0) ) ) then 
+
+        logscale = .true.
+
+    Else
+
+        logscale = .false.
+
+        stepsize = l_s/(dble(ml(indexl))+ 1.d0/2.d0)*1.d-3
+
+    End If
 
     prefactor = sigma_e*4.d0*Pi*r200c(indexM,indexz)*M_sun/m_e/c**2/l_s**2  ! Units : Mpc*s**2/solar mass
 
-    Do indexx=1,number_of_x
+    If (logscale) then
 
-        x(indexx) = 10**(log10(x_y_min) + dble((indexx-1))*(log10(x_y_max) &
-        - log10(x_y_min))/dble(number_of_x-1)   )
+        x_y_min = 1.d-5*virial_radius(z(indexz),M(indexM))/r200c(indexM,indexz) ! dimensionless
 
-    End Do
+        Do indexx=1,number_of_x
 
-    Do indexx=1,number_of_x 
+            x(indexx) = 10**(log10(x_y_min) + dble((indexx-1))*(log10(x_y_max) &
+            - log10(x_y_min))/dble(number_of_x-1)   )
 
-        f(indexx) = x(indexx)**2*sin((dble(ml(indexl))+1.d0/2.d0)*x(indexx)/l_s)&
-        *ICM_electron_pressure(x(indexx)*r200c(indexM,indexz),indexM,indexz)/(dble(ml(indexl))+1.d0/2.d0)/x(indexx)*l_s
+        End Do
 
-    End Do
+        Do indexx=1,number_of_x 
 
-    y = 0.d0 
+            f(indexx) = x(indexx)**2*sin((dble(ml(indexl))+1.d0/2.d0)*x(indexx)/l_s)&
+            *ICM_electron_pressure(x(indexx)*r200c(indexM,indexz),indexM,indexz)/(dble(ml(indexl))+1.d0/2.d0)/x(indexx)*l_s
 
-    Do indexx=1,intervals
+        End Do
 
-        y = (x(indexx+1)-x(indexx))/2.d0*( f(indexx) + f(indexx+1))+ y
+        y = 0.d0 
 
-    End Do
+        Do indexx=1,intervals
+
+            y = (x(indexx+1)-x(indexx))/2.d0*( f(indexx) + f(indexx+1))+ y
+
+        End Do
+
+    Else
+
+        x_y_min = 0.d0 ! dimensionless
+
+        x1 = 0.d0
+
+        f1 = 0.d0
+
+        x2 = x1 + stepsize
+
+        f2 = x2**2*sin((dble(ml(indexl))+1.d0/2.d0)*x2/l_s)&
+        *ICM_electron_pressure(x2*r200c(indexM,indexz),indexM,indexz)/(dble(ml(indexl))+1.d0/2.d0)/x2*l_s
+
+        y = 0.d0
+
+        y = (x2-x1)/2.d0*( f1 + f2 )+ y
+ 
+        Do indexx=1,max_iterations
+
+            x1 = x2
+
+            f1 = f2
+
+
+            If (x2 .gt. x_y_max) then
+
+                x2 = x_y_max
+
+                f2 = x2**2*sin((dble(ml(indexl))+1.d0/2.d0)*x2/l_s)&
+                *ICM_electron_pressure(x2*r200c(indexM,indexz),indexM,indexz)/(dble(ml(indexl))+1.d0/2.d0)/x2*l_s
+
+            Else If (x2 .eq. x_y_max) then
+
+                exit
+
+            Else
+
+                x2 = x1 + stepsize
+
+                f2 = x2**2*sin((dble(ml(indexl))+1.d0/2.d0)*x2/l_s)&
+                *ICM_electron_pressure(x2*r200c(indexM,indexz),indexM,indexz)/(dble(ml(indexl))+1.d0/2.d0)/x2*l_s
+                
+            End IF
+
+            y = (x2-x1)/2.d0*( f1 + f2 )+ y
+
+            If (indexx .eq. max_iterations) then
+
+                print *,'Maximum number of iterations in integral of form factor achieved.'
+
+                stop
+
+            End If
+
+        End Do
+
+    End If
 
     form_factor = prefactor*y
 
@@ -1115,7 +1195,7 @@ function FT_NFW_density_profile(k,M,z)    ! It computes the normalized Fourier t
                      ! Xia et al. M is the virial mass. The Fourier transform is truncated to the virial radius
     Real*8 :: k,M,z,FT_NFW_density_profile,Si1,Si2,Ci1,Ci2
     Real*8 :: alpha     ! It determines upper limit in Eq. (2.10) of 1312.4525
-    Real*8,parameter :: alphafactor = 1.045d0
+    Real*8,parameter :: alphafactor = 1.5d0
 
     alpha = alphafactor*concentration_mass_virial(M,z)
 
@@ -1491,17 +1571,26 @@ end function Delta_squared_non_normalised
 
 subroutine compute_normalization() ! Compute normalisation constant in the linear matter power spectrum to agree 
     use fiducial                   ! with \sigma_8 in fiducial model 
-    use arrays
+    !use arrays
     Implicit none
-    Real*8 :: sum
+    Real*8 :: sum,x1,x2,f1,f2
     Integer*4 :: indexk,indexz
-    Integer*4,parameter :: intervals = number_of_k - 1 
-    Real*8,dimension(number_of_k) :: f 
+    Integer*4,parameter :: number_of_k_logscale = 1d3
+    Integer*4,parameter :: intervals = number_of_k_logscale - 1 
+    Real*8,dimension(number_of_k_logscale) :: f,k
     Real*8,parameter :: R = 8.d0/h ! Units : Mpc
+    Real*8,parameter :: kmaxlogscale = 1.d-1
+    Real*8,parameter :: stepsize = 1.d-3
+    Integer*4,parameter :: max_iterations = 1d9
+
+    ! Wavevector array. Units : 1/Mpc
+    Do indexk = 1, number_of_k_logscale    
+        k(indexk) = 10**(log10(kmin) + real(indexk-1)*(log10(kmaxlogscale) - log10(kmin))/real(number_of_k_logscale-1))
+    End Do
 
     !$omp Parallel Do Shared(f)
 
-    Do indexk=1,number_of_k
+    Do indexk=1,number_of_k_logscale
 
         f(indexk) = Delta_squared_non_normalised(k(indexk))*(3.d0*(sin(k(indexk)*R)-&
         k(indexk)*R*cos(k(indexk)*R))/k(indexk)**3/R**3)**2/k(indexk)
@@ -1515,6 +1604,52 @@ subroutine compute_normalization() ! Compute normalisation constant in the linea
     Do indexk=1,intervals
 
         sum = (k(indexk+1) - k(indexk))/2.d0*( f(indexk) + f(indexk+1) ) + sum 
+
+    End Do
+
+    x1 = k(number_of_k_logscale)
+
+    f1 = f(number_of_k_logscale)
+
+    x2 = x1 + stepsize
+
+    f2 = Delta_squared_non_normalised(x2)*(3.d0*(sin(x2*R)- x2*R*cos(x2*R))/x2**3/R**3)**2/x2
+
+    sum = (x2-x1)/2.d0*( f1 + f2 )+ sum
+        
+    Do indexk=1,max_iterations
+
+        x1 = x2
+
+        f1 = f2
+
+        If (x2 .gt. kmax) then
+
+            x2 = kmax
+
+            f2 = Delta_squared_non_normalised(x2)*(3.d0*(sin(x2*R)- x2*R*cos(x2*R))/x2**3/R**3)**2/x2
+
+        Else If (x2 .eq. kmax) then
+
+            exit
+
+        Else
+
+            x2 = x1 + stepsize
+
+            f2 = Delta_squared_non_normalised(x2)*(3.d0*(sin(x2*R)- x2*R*cos(x2*R))/x2**3/R**3)**2/x2
+            
+        End IF
+
+        sum = (x2-x1)/2.d0*( f1 + f2 )+ sum
+            
+        If (indexk .eq. max_iterations) then
+
+            print *,'Maximum number of iterations in integral of Normalization achieved.'
+
+            stop
+
+        End If
 
     End Do
 
@@ -1586,6 +1721,16 @@ function sigma_squared(Mass,indexz) ! Equation (6) of 1303.4726. Units of Mass: 
     End Do
 
     !$omp End Parallel Do
+
+    open(16,file='./output/sigma2.dat')
+
+    Do indexk=1,number_of_k
+
+        write(16,'(2es18.10)') k(indexk),f(indexk),R 
+
+    End Do
+
+    close(16)
 
     sum = 0.d0
 
