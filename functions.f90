@@ -1034,8 +1034,8 @@ subroutine read_ylMz()
     use arrays
     use fiducial
     Implicit none
-    Integer*4 :: index,il,iM,iz
-    Real*8 :: ll,MM,zz,tylMz
+    Integer*4 :: index,il,iM,iz,ll
+    Real*8 :: MM,zz,tylMz
 
     open(15,file='./precomputed_quantities/form_factor/form_factor.dat')
 
@@ -1703,40 +1703,80 @@ function sigma_squared(Mass,indexz) ! Equation (6) of 1303.4726. Units of Mass: 
     use fiducial
     use arrays
     Implicit none
-    Real*8 :: sigma_squared,R,sum,prefactor,Mass
+    Real*8 :: sigma_squared,R,sum,prefactor,Mass,x1,x2,f1,f2
     Integer*4 :: indexk,indexz
-    Integer*4,parameter :: intervals = number_of_k - 1 
-    Real*8,dimension(number_of_k) :: f 
+    Integer*4,parameter :: number_of_k_logscale = 1d2
+    Integer*4,parameter :: intervals = number_of_k_logscale - 1 
+    Real*8,dimension(number_of_k) :: f,kf
+    Real*8,parameter :: stepsize = 1.d-2
+    Integer*4,parameter :: max_iterations = 1d9 
 
     prefactor = 1.d0/2.d0/Pi**2
 
     R = (3.d0*Mass/4.d0/Pi/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0)**(1.d0/3.d0) ! Units : Mpc. (1+z)**3 factor to use comoving coordinates
 
-    !$omp Parallel Do Shared(f)
-
-    Do indexk=1,number_of_k
-
-        f(indexk) = k(indexk)**2*window_function(k(indexk),R)**2*matter_power_spectrum(k(indexk),z(indexz))
-
+    ! Wavevector array. Units : 1/Mpc
+    Do indexk = 1, number_of_k_logscale    
+        kf(indexk) = 10**(log10(kmin) + real(indexk-1)*(log10(1/R) - log10(kmin))/real(number_of_k_logscale-1))
     End Do
 
-    !$omp End Parallel Do
+    Do indexk=1,number_of_k_logscale
 
-    open(16,file='./output/sigma2.dat')
-
-    Do indexk=1,number_of_k
-
-        write(16,'(2es18.10)') k(indexk),f(indexk),R 
+        f(indexk) = kf(indexk)**2*window_function(kf(indexk),R)**2*matter_power_spectrum(kf(indexk),z(indexz))
 
     End Do
-
-    close(16)
 
     sum = 0.d0
 
     Do indexk=1,intervals
 
-        sum = (k(indexk+1) - k(indexk))/2.d0*( f(indexk) + f(indexk+1) ) + sum 
+        sum = (kf(indexk+1) - kf(indexk))/2.d0*( f(indexk) + f(indexk+1) ) + sum 
+
+    End Do
+
+    x1 = kf(number_of_k_logscale)
+
+    f1 = f(number_of_k_logscale)
+
+    x2 = x1 + stepsize
+
+    f2 = x2**2*window_function(x2,R)**2*matter_power_spectrum(x2,z(indexz))
+
+    sum = (x2-x1)/2.d0*(f1 + f2) + sum
+
+    Do indexk=1,max_iterations
+
+        x1 = x2
+
+        f1 = f2
+
+        If (x2 .gt. kmax) then
+
+            x2 = kmax
+
+            f2 = x2**2*window_function(x2,R)**2*matter_power_spectrum(x2,z(indexz))
+
+        Else If (x2 .eq. kmax) then
+
+            exit
+
+        Else
+
+            x2 = x1 + stepsize
+
+            f2 = x2**2*window_function(x2,R)**2*matter_power_spectrum(x2,z(indexz))
+            
+        End IF
+
+        sum = (x2-x1)/2.d0*( f1 + f2 ) + sum
+            
+        If (indexk .eq. max_iterations) then
+
+            print *,'Maximum number of iterations in integral of sigma_squared achieved.'
+
+            stop
+
+        End If
 
     End Do
 
@@ -1748,31 +1788,81 @@ function dsigma_squared_dR(Mass,indexz) ! Derivative w.r.t R of Eq. (6) in 1303.
     use fiducial
     use arrays 
     Implicit none
-    Real*8 :: dsigma_squared_dR,R,sum,prefactor,Mass
+    Real*8 :: dsigma_squared_dR,R,sum,prefactor,Mass,x1,x2,f1,f2
     Integer*4 :: indexk,indexz
-    Integer*4,parameter :: intervals = number_of_k - 1 
-    Real*8,dimension(number_of_k) :: f 
+    Integer*4,parameter :: number_of_k_logscale = 1d2
+    Integer*4,parameter :: intervals = number_of_k_logscale - 1 
+    Real*8,dimension(number_of_k_logscale) :: f,kf
+    Real*8,parameter :: stepsize = 1.d-2
+    Integer*4,parameter :: max_iterations = 1d9 
 
     prefactor = 1.d0/Pi**2
 
     R = (3.d0*Mass/4.d0/Pi/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0)**(1.d0/3.d0) ! Units : Mpc. (1+z)**3 factor to use comoving coordinates
 
-    !$omp Parallel Do Shared(f)
-
-    Do indexk=1,number_of_k
-
-        f(indexk) = k(indexk)**3*window_function(k(indexk),R)*d_window_function(k(indexk),R)&
-        *matter_power_spectrum(k(indexk),z(indexz))
-
+    ! Wavevector array. Units : 1/Mpc
+    Do indexk = 1, number_of_k_logscale    
+        kf(indexk) = 10**(log10(kmin) + real(indexk-1)*(log10(1.d-1/R) - log10(kmin))/real(number_of_k_logscale-1))
     End Do
 
-    !$omp End Parallel Do
+    Do indexk=1,number_of_k_logscale
+
+        f(indexk) = kf(indexk)**3*window_function(kf(indexk),R)*d_window_function(kf(indexk),R)&
+        *matter_power_spectrum(kf(indexk),z(indexz))
+
+    End Do
 
     sum = 0.d0
 
     Do indexk=1,intervals
 
-        sum = (k(indexk+1)-k(indexk))/2.d0*( f(indexk) + f(indexk+1) ) + sum 
+        sum = (kf(indexk+1) - kf(indexk))/2.d0*( f(indexk) + f(indexk+1) ) + sum 
+
+    End Do
+
+    x1 = kf(number_of_k_logscale)
+
+    f1 = f(number_of_k_logscale)
+
+    x2 = x1 + stepsize
+
+    f2 = x2**3*window_function(x2,R)*d_window_function(x2,R)*matter_power_spectrum(x2,z(indexz))
+
+    sum = (x2-x1)/2.d0*(f1 + f2) + sum
+
+    Do indexk=1,max_iterations
+
+        x1 = x2
+
+        f1 = f2
+
+        If (x2 .gt. kmax) then
+
+            x2 = kmax
+
+            f2 = x2**3*window_function(x2,R)*d_window_function(x2,R)*matter_power_spectrum(x2,z(indexz))
+
+        Else If (x2 .eq. kmax) then
+
+            exit
+
+        Else
+
+            x2 = x1 + stepsize
+
+            f2 = x2**3*window_function(x2,R)*d_window_function(x2,R)*matter_power_spectrum(x2,z(indexz))
+            
+        End IF
+
+        sum = (x2-x1)/2.d0*( f1 + f2 ) + sum
+            
+        If (indexk .eq. max_iterations) then
+
+            print *,'Maximum number of iterations in integral of dsigma_squared achieved.'
+
+            stop
+
+        End If
 
     End Do
 
@@ -1793,26 +1883,56 @@ function halo_mass_function(indexM,indexz) ! Equation (8) in "The large-scale bi
     Real*8,parameter :: eta0 = -0.243d0
     Real*8,parameter :: gamma0 = 0.864d0
 
-    R = (3.d0*M200d(indexM,indexz)/4.d0/Pi/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
+    If (indexz .gt. indexz_halo_mass_function) then
 
-    sigma = sqrt(sigma_squared(M200d(indexM,indexz),indexz))    ! Units : dimensionless
+        R = (3.d0*M200d(indexM,indexz_halo_mass_function)/4.d0/Pi/mean_density(z(indexz_halo_mass_function))*&
+        (1.d0 + z(indexz_halo_mass_function))**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
 
-    nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
+        sigma = sqrt(sigma_square_M200d(indexM,indexz_halo_mass_function))    ! Units : dimensionless
 
-    beta = beta0*(1+z(indexz))**(0.20d0) 
+        nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
 
-    phi = phi0*(1+z(indexz))**(-0.08d0)
+        beta = beta0*( 1.d0 + z(indexz_halo_mass_function) )**(0.20d0) 
 
-    eta = eta0*(1+z(indexz))**(0.27d0)
+        phi = phi0*( 1.d0 + z(indexz_halo_mass_function) )**(-0.08d0)
 
-    gamma = gamma0*(1+z(indexz))**(-0.01d0)
+        eta = eta0*( 1.d0 + z(indexz_halo_mass_function) )**(0.27d0)
 
-    f_nu = alpha_halo_mass_function(indexz)*(1.d0 + (beta*nu)**(-2.d0*phi))*nu**(2.d0*eta)*dexp(-gamma*nu**2/2.d0)
+        gamma = gamma0*( 1.d0 + z(indexz_halo_mass_function) )**(-0.01d0)
 
-    g_sigma = nu*f_nu ! dimensionless           ! Equation (C2) in "Toward a ... universality"
+        f_nu = alpha_halo_mass_function(indexz)*(1.d0 + (beta*nu)**(-2.d0*phi))*&
+        nu**(2.d0*eta)*exp(-gamma*nu**2/2.d0)
 
-    halo_mass_function = -mean_density(z(indexz))/(1.d0 + z(indexz))**3.d0/2.d0/M200d(indexM,indexz)**2&    ! (1+z)**3 to use comoving coordinates
-    *R/3.d0/sigma_squared(M200d(indexM,indexz),indexz)*dsigma_squared_dR(M200d(indexM,indexz),indexz)*g_sigma
+        g_sigma = nu*f_nu ! dimensionless           ! Equation (C2) in "Toward a ... universality"
+
+        halo_mass_function = -mean_density(z(indexz_halo_mass_function))/(1.d0 + z(indexz_halo_mass_function))**3.d0&
+        /2.d0/M200d(indexM,indexz_halo_mass_function)**2&    ! (1+z)**3 to use comoving coordinates
+        *R/3.d0/sigma_square_M200d(indexM,indexz_halo_mass_function)*dsigma_square_M200d(indexM,indexz_halo_mass_function)*g_sigma
+
+    Else
+
+        R = (3.d0*M200d(indexM,indexz)/4.d0/Pi/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
+
+        sigma = sqrt(sigma_square_M200d(indexM,indexz))    ! Units : dimensionless
+
+        nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
+
+        beta = beta0*(1+z(indexz))**(0.20d0) 
+
+        phi = phi0*(1+z(indexz))**(-0.08d0)
+
+        eta = eta0*(1+z(indexz))**(0.27d0)
+
+        gamma = gamma0*(1+z(indexz))**(-0.01d0)
+
+        f_nu = alpha_halo_mass_function(indexz)*(1.d0 + (beta*nu)**(-2.d0*phi))*nu**(2.d0*eta)*dexp(-gamma*nu**2/2.d0)
+
+        g_sigma = nu*f_nu ! dimensionless           ! Equation (C2) in "Toward a ... universality"
+
+        halo_mass_function = -mean_density(z(indexz))/(1.d0 + z(indexz))**3.d0/2.d0/M200d(indexM,indexz)**2&    ! (1+z)**3 to use comoving coordinates
+        *R/3.d0/sigma_square_M200d(indexM,indexz)*dsigma_square_M200d(indexM,indexz)*g_sigma
+
+    End If
 
 end function halo_mass_function
 
@@ -1829,26 +1949,55 @@ function nonnormalised_halo_mass_function(indexM,indexz)    ! Equation (8) in "T
     Real*8,parameter :: eta0 = -0.243d0
     Real*8,parameter :: gamma0 = 0.864d0
 
-    R = (3.d0*M200d(indexM,indexz)/4.d0/Pi/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
+    If (indexz .gt. indexz_halo_mass_function) then
 
-    sigma = sqrt(sigma_squared(M200d(indexM,indexz),indexz))    ! Units : dimensionless
+        R = (3.d0*M200d(indexM,indexz_halo_mass_function)/4.d0/Pi/mean_density(z(indexz_halo_mass_function))*&
+        (1.d0 + z(indexz_halo_mass_function))**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
 
-    nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
+        sigma = sqrt(sigma_square_M200d(indexM,indexz_halo_mass_function))    ! Units : dimensionless
 
-    beta = beta0*(1+z(indexz))**(0.20d0) 
+        nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
 
-    phi = phi0*(1+z(indexz))**(-0.08d0)
+        beta = beta0*( 1.d0 + z(indexz_halo_mass_function) )**(0.20d0) 
 
-    eta = eta0*(1+z(indexz))**(0.27d0)
+        phi = phi0*( 1.d0 + z(indexz_halo_mass_function) )**(-0.08d0)
 
-    gamma = gamma0*(1+z(indexz))**(-0.01d0)
+        eta = eta0*( 1.d0 + z(indexz_halo_mass_function) )**(0.27d0)
 
-    f_nu = (1.d0 + (beta*nu)**(-2.d0*phi))*nu**(2.d0*eta)*dexp(-gamma*nu**2/2.d0)
+        gamma = gamma0*( 1.d0 + z(indexz_halo_mass_function) )**(-0.01d0)
 
-    g_sigma = nu*f_nu            ! Equation (C2) in "Toward a ... universality"
+        f_nu = (1.d0 + (beta*nu)**(-2.d0*phi))*nu**(2.d0*eta)*dexp(-gamma*nu**2/2.d0)
 
-    nonnormalised_halo_mass_function = -mean_density(z(indexz))/(1.d0 + z(indexz))**3.d0/2.d0/M200d(indexM,indexz)**2&
-    *R/3.d0/sigma_squared(M200d(indexM,indexz),indexz)*dsigma_squared_dR(M200d(indexM,indexz),indexz)*g_sigma
+        g_sigma = nu*f_nu            ! Equation (C2) in "Toward a ... universality"
+
+        nonnormalised_halo_mass_function = -mean_density(z(indexz_halo_mass_function))/(1.d0 + &
+        z(indexz_halo_mass_function))**3.d0/2.d0/M200d(indexM,indexz_halo_mass_function)**2&
+        *R/3.d0/sigma_square_M200d(indexM,indexz_halo_mass_function)*dsigma_square_M200d(indexM,indexz_halo_mass_function)*g_sigma
+
+    Else
+
+        R = (3.d0*M200d(indexM,indexz)/4.d0/Pi/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
+
+        sigma = sqrt(sigma_square_M200d(indexM,indexz))    ! Units : dimensionless
+
+        nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
+
+        beta = beta0*(1+z(indexz))**(0.20d0) 
+
+        phi = phi0*(1+z(indexz))**(-0.08d0)
+
+        eta = eta0*(1+z(indexz))**(0.27d0)
+
+        gamma = gamma0*(1+z(indexz))**(-0.01d0)
+
+        f_nu = (1.d0 + (beta*nu)**(-2.d0*phi))*nu**(2.d0*eta)*dexp(-gamma*nu**2/2.d0)
+
+        g_sigma = nu*f_nu            ! Equation (C2) in "Toward a ... universality"
+
+        nonnormalised_halo_mass_function = -mean_density(z(indexz))/(1.d0 + z(indexz))**3.d0/2.d0/M200d(indexM,indexz)**2&
+        *R/3.d0/sigma_square_M200d(indexM,indexz)*dsigma_square_M200d(indexM,indexz)*g_sigma
+
+    End If
 
 end function nonnormalised_halo_mass_function
 
@@ -1864,12 +2013,9 @@ subroutine compute_alpha_halo_mass_function()    ! It computes \alpha constant i
 
     Do indexz=1,number_of_z
 
-        !$omp Parallel Do Shared(f)
+        !$omp Parallel Do Shared(f,indexz)
 
         Do indexM=1,number_of_M
-
-!            f(indexM) = nonnormalised_halo_mass_function(indexM,indexz)*bMz(indexM,indexz)*&
-!            M(indexM)/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0
 
             f(indexM) = nonnormalised_halo_mass_function(indexM,indexz)*bMz(indexM,indexz)*&
             M(indexM)/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0*dM200ddM(indexM,indexz)
@@ -1904,6 +2050,8 @@ subroutine compute_dndM()    ! It fills halo mass function array in and writes i
 
     write(15,*) '#  index_of_M    virial_mass[solar mass]    index_of_z    red-shift    dndM '
 
+    !$omp Parallel Do Shared(dndM)
+
     Do indexM=1,number_of_M
 
         Do indexz=1,number_of_z
@@ -1916,10 +2064,73 @@ subroutine compute_dndM()    ! It fills halo mass function array in and writes i
 
     End Do
 
+    !$omp End Parallel Do
+
     close(15)
 
 end subroutine compute_dndM
 
+subroutine compute_sigma_square_M200d()    ! It fills sigma square array in and writes it out to a text file
+    use arrays
+    use fiducial
+    Implicit none
+    Integer*4 :: indexz,indexM
+
+    open(15,file='./precomputed_quantities/sigma_square_M200d.dat')
+
+    write(15,*) '# Sigma square function (as function of M200d mass and red-shift). Number of lines is ',number_of_z*number_of_M
+
+    write(15,*) '# index_of_M    M200d[solar mass]    index_of_z    red-shift    sigma_square   dsigma_square '
+
+    !$omp Parallel Do Shared(sigma_square_M200d,dsigma_square_M200d)
+
+    Do indexM=1,number_of_M
+
+        Do indexz=1,number_of_z
+
+            sigma_square_M200d(indexM,indexz) = sigma_squared(M200d(indexM,indexz),indexz)
+
+            dsigma_square_M200d(indexM,indexz) = dsigma_squared_dR(M200d(indexM,indexz),indexz)
+
+            write(15,'(i5,es18.10,i5,3es18.10)') indexM,M200d(indexM,indexz),indexz,z(indexz),&
+            sigma_square_M200d(indexM,indexz),dsigma_square_M200d(indexM,indexz)
+
+        End Do
+
+    End Do
+
+    !$omp End Parallel Do
+
+    close(15)
+
+end subroutine compute_sigma_square_M200d
+
+subroutine read_sigma_square_M200d()
+    use arrays
+    use fiducial
+    Implicit none
+    Integer*4 :: index,iM,iz
+    Real*8 :: MM,zz,ts2,tds2
+
+    open(15,file='./precomputed_quantities/sigma_square_M200d.dat')
+
+    read(15,*)
+
+    read(15,*)
+
+    Do index=1,number_of_M*number_of_z
+
+        read(15,'(i5,es18.10,i5,3es18.10)') iM,MM,iz,zz,ts2,tds2
+
+        sigma_square_M200d(iM,iz) = ts2
+
+        dsigma_square_M200d(iM,iz) = tds2 
+
+    End Do
+
+    close(15)
+
+end subroutine read_sigma_square_M200d
 
 subroutine read_dndM()
     use arrays
@@ -1954,7 +2165,7 @@ subroutine write_dndM_at_z(indexz)
 
     open(15,file='./output/dndM_at_z.dat')
 
-    write(15,*) '# Virial Mass [solar mass/h]  dndM at redshift'
+    write(15,*) '# Virial_ Mass[solar mass]  dndM_at_redshift',z(indexz)
 
     Do indexM=1,number_of_M
 
@@ -1981,6 +2192,16 @@ function pre_Clphiphi(indexz,indexl) ! Required function to compute one halo ter
 
     End Do
 
+!    open(16,file='./output/clphiphi.dat')
+
+!    Do indexM=1,number_of_M
+
+!        write(16,'(2es18.10)') M(indexM),f(indexM) 
+
+!    End Do
+
+!    close(16)
+    
     sum = 0.d0
 
     Do i=1,intervals
@@ -2007,6 +2228,16 @@ function C_l_phiphi_one_halo(indexl) ! It computes lensing potential angular pow
         f(indexz) = pre_Clphiphi(indexz,indexl)          ! Dimensionless
 
     End Do
+
+!    open(16,file='./output/clphiphi.dat')
+
+!    Do indexz=1,number_of_z
+
+!        write(16,'(2es18.10)') z(indexz),f(indexz) 
+
+!    End Do
+
+!    close(16)
 
     sum = 0.d0
 
@@ -2053,6 +2284,16 @@ function pre_Cl(indexz,indexl) ! Dimensionless
 
     End Do
 
+!    open(16,file='./output/clphiphi.dat')
+
+!    Do indexM=1,number_of_M
+
+!        write(16,'(2es18.10)') M(indexM),f(indexM) 
+
+!    End Do
+
+!    close(16)
+
     sum = 0.d0
 
     Do i=1,intervals
@@ -2079,6 +2320,16 @@ function C_l_yphi_one_halo(indexl) ! Dimensionless
         f(indexz) = pre_Cl(indexz,indexl)          ! Dimensionless
 
     End Do
+
+!    open(16,file='./output/clphiphi.dat')
+
+!    Do indexz=1,number_of_z
+
+!        write(16,'(2es18.10)') z(indexz),f(indexz) 
+
+!    End Do
+
+!    close(16)
 
     sum = 0.d0
 
@@ -2126,7 +2377,7 @@ function linear_halo_bias(indexM,indexz)    ! From table 2 and equation (6) of "
     Integer*4 :: indexM,indexz
         
 !    sigma = sqrt(sigma_squared(M(indexM),indexz))    ! M must be the SO mass M_{200d} 
-    sigma = sqrt(sigma_squared(M200d(indexM,indexz),indexz))    ! M must be the SO mass M_{200d} 
+    sigma = sqrt(sigma_square_M200d(indexM,indexz))    ! M must be the SO mass M_{200d} 
 
     nu = delta_c/sigma
 
@@ -2137,12 +2388,17 @@ end function linear_halo_bias
 subroutine compute_bMz()
     use arrays
     use fiducial
+    use omp_lib
     Implicit none
     Integer*4 :: indexz,indexM
 
     open(15,file='./precomputed_quantities/bMz/bMz.dat')
 
-    write(15,*) '#  SO virial mass [solar mass]  red-shift  b '
+    write(15,*) '# Linear bias file. Number of lines is ',number_of_M*number_of_z
+
+    write(15,*) '# index_of_M    SO_virial_mass[solar mass]   index_of_z    red-shift  b '
+
+    !$omp Parallel Do Shared(bMz)
 
     Do indexM=1,number_of_M
 
@@ -2150,11 +2406,13 @@ subroutine compute_bMz()
 
             bMz(indexM,indexz) = linear_halo_bias(indexM,indexz)
 
-            write(15,'(3es18.10)') M(indexM), z(indexz), bMz(indexM,indexz)
+            write(15,'(i5,es18.10,i5,2es18.10)') indexM,M(indexM),indexz,z(indexz),bMz(indexM,indexz)
 
         End Do
 
     End Do
+
+    !$omp End Parallel Do
 
     close(15)
 
@@ -2198,6 +2456,16 @@ function pre_mbz(indexz)    !    It computes mean bias of all matter at a given 
 
     End Do
 
+!    open(16,file='./output/clphiphi.dat')
+
+!    Do indexM=1,number_of_M
+
+!        write(16,'(2es18.10)') M(indexM),f(indexM) 
+
+!    End Do
+
+!    close(16)
+
     sum = 0.d0
 
     Do indexM=1,intervals
@@ -2215,32 +2483,20 @@ subroutine read_bMz()
     use arrays
     use fiducial
     Implicit none
-    Integer*4 :: indexz,indexM
+    Integer*4 :: iz,iM,q
     Real*8 :: MM,zz,tbMz
 
     open(15,file='./precomputed_quantities/bMz/bMz.dat')
 
     read(15,*)
 
-    Do indexM=1,number_of_M
+    read(15,*)
 
-        Do indexz=1,number_of_z
+    Do q=1,number_of_M*number_of_z
 
-            read(15,'(3es18.10)') MM,zz,tbMz
+        read(15,'(i5,es18.10,i5,2es18.10)') iM,MM,iz,zz,tbMz
 
-            If ( ( abs( M(indexM) - MM) .lt. 1.d5 ) .and. ( abs( z(indexz) - zz ) .lt. 1.d-8 ) ) then
-
-                bMz(indexM,indexz) = tbMz
-
-            else 
-
-                print *, 'Problem reading the file '
-
-                stop
-
-            End If
-
-        End Do
+        bMz(iM,iz) = tbMz
 
     End Do
 
@@ -2380,6 +2636,16 @@ function C_l_phiphi_two_halo(indexl)    ! It computes two halo term lensing pote
 
     End Do
 
+!    open(16,file='./output/clphiphi.dat')
+
+!    Do indexz=1,number_of_z
+
+!        write(16,'(2es18.10)') z(indexz),f(indexz) 
+
+!    End Do
+
+!    close(16)
+
     sum = 0.d0
 
     Do indexz=1,intervals
@@ -2427,6 +2693,16 @@ function pre_Cl_1(indexz,indexl) ! Units 1/Mpc**3.
 
     End Do
 
+!    open(16,file='./output/clphiphi.dat')
+
+!    Do indexM=1,number_of_M
+
+!        write(16,'(2es18.10)') M(indexM),f(indexM) 
+
+!    End Do
+
+!    close(16)
+
     sum = 0.d0
 
     Do indexM=1,intervals
@@ -2455,6 +2731,16 @@ function pre_Cl_2(indexz,indexl) ! Units 1/Mpc**3
 
     End Do
 
+!    open(16,file='./output/clphiphi.dat')
+
+!    Do indexM=1,number_of_M
+
+!        write(16,'(2es18.10)') M(indexM),f(indexM) 
+
+!    End Do
+
+!    close(16)
+
     sum = 0.d0
 
     Do indexM=1,intervals
@@ -2482,6 +2768,16 @@ function C_l_yphi_two_halo(indexl) ! Equation (2.11) in 1312.4525
         matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance(z(indexz)),z(indexz)) ! Units : 1/h**3
 
     End Do
+
+    open(16,file='./output/clphiphi.dat')
+
+    Do indexz=1,number_of_z
+
+        write(16,'(2es18.10)') z(indexz),f(indexz) 
+
+    End Do
+
+    close(16)
 
     sum = 0.d0
 
