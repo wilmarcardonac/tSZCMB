@@ -31,11 +31,12 @@ Real*8,parameter :: Pi = 3.141592653589793d0
 Real*8,parameter :: Mmin = 1.d5/h    ! lower mass fiducial value in Hill and Spergel paper 1312.4525
 Real*8,parameter :: Mmax = 5.d15/h    ! upper mass fiducial value in Hill and Spergel paper 1312.4525
 Integer*4,parameter :: number_of_k = 1d3    ! size of wavevector array
-Integer*4,parameter :: number_of_z = 5d2    ! size of red-shift array
-Integer*4,parameter :: number_of_M = 1d3    ! size of virial mass array
-Integer*4,parameter :: number_of_l = 11    ! size of l array
+Integer*4,parameter :: number_of_z = 1d2!5d2    ! size of red-shift array
+Integer*4,parameter :: number_of_M = 1d2!1d3    ! size of virial mass array
+Integer*4,parameter :: number_of_l = 5    ! size of l array
 Integer*4,parameter :: lmax = 1d4    ! highest multipole
 Integer*4,parameter :: lmin = 1d1    ! lowest multipole 
+Integer*4 :: indexz_halo_mass_function
 Real*8,parameter :: tcmb0 = 2.728d0    ! CMB temperature today in Kelvin
 Real*8 :: Normalization    ! Normalization constant for matter power spectrum (Equation (A7) in Eisenstein and Hu)
 Real*8,parameter :: DeltaSO = 2.d2    ! Parameter to define Spherical Overdensity   
