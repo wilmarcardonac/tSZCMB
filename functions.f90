@@ -870,7 +870,7 @@ function form_factor(indexM,indexz,indexl)    ! Form factor. Equation (2.9) in 1
     Integer*4,parameter :: intervals = number_of_x - 1 !  
     Integer*4 :: indexx,indexM,indexz,indexl
     Real*8,dimension(number_of_x) :: x,f
-    Real*8,parameter :: betafactor = 1.5d0
+    Real*8,parameter :: betafactor = 1.037d0
     Integer*4,parameter :: max_iterations = 1d9
     logical :: logscale
 
@@ -1195,7 +1195,7 @@ function FT_NFW_density_profile(k,M,z)    ! It computes the normalized Fourier t
                      ! Xia et al. M is the virial mass. The Fourier transform is truncated to the virial radius
     Real*8 :: k,M,z,FT_NFW_density_profile,Si1,Si2,Ci1,Ci2
     Real*8 :: alpha     ! It determines upper limit in Eq. (2.10) of 1312.4525
-    Real*8,parameter :: alphafactor = 1.5d0
+    Real*8,parameter :: alphafactor = 1.037d0
 
     alpha = alphafactor*concentration_mass_virial(M,z)
 
@@ -2192,16 +2192,6 @@ function pre_Clphiphi(indexz,indexl) ! Required function to compute one halo ter
 
     End Do
 
-!    open(16,file='./output/clphiphi.dat')
-
-!    Do indexM=1,number_of_M
-
-!        write(16,'(2es18.10)') M(indexM),f(indexM) 
-
-!    End Do
-
-!    close(16)
-    
     sum = 0.d0
 
     Do i=1,intervals
