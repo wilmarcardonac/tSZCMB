@@ -722,7 +722,7 @@ subroutine compute_M_delta_c_from_M_and_z(delta)
 
         Do indexM = -1,number_of_M+2
 
-            write(15,'(i5,es18.10,i5,5es18.10)') indexz, z(indexz), indexM, M(indexM), rdc(indexM,indexz), &
+            write(15,'(i5,es18.10,i10,5es18.10)') indexz, z(indexz), indexM, M(indexM), rdc(indexM,indexz), &
             M_delta_c_from_M_virial(z(indexz),rdc(indexM,indexz),delta), &
             rdd(indexM,indexz),M_delta_d_from_M_virial(z(indexz),rdd(indexM,indexz),delta)
 
@@ -751,7 +751,7 @@ subroutine read_M200dc_r200dc()
 
     Do index=1,number_of_z*(number_of_M+4)
 
-        read(15,'(i5,es18.10,i5,5es18.10)') iz,zz,iM,MM,tr200c,tM200c,tr200d,tM200d
+        read(15,'(i5,es18.10,i10,5es18.10)') iz,zz,iM,MM,tr200c,tM200c,tr200d,tM200d
 
         r200c(iM,iz) = tr200c
 
@@ -870,7 +870,7 @@ function form_factor(indexM,indexz,indexl)    ! Form factor. Equation (2.9) in 1
     Integer*4,parameter :: intervals = number_of_x - 1 !  
     Integer*4 :: indexx,indexM,indexz,indexl
     Real*8,dimension(number_of_x) :: x,f
-    Real*8,parameter :: betafactor = 1.037d0
+    Real*8,parameter :: betafactor = 1.060d0!1.037d0
     Integer*4,parameter :: max_iterations = 1d9
     logical :: logscale
 
@@ -1017,7 +1017,8 @@ subroutine compute_form_factor()
 
             Do indexz=1,number_of_z
 
-                write(15,'(3i5,es18.10,i5,2es18.10)') indexl,ml(indexl),indexM,M(indexM),indexz,z(indexz),ylMz(indexl,indexM,indexz)
+                write(15,'(3i10,es18.10,i5,2es18.10)') indexl,ml(indexl),indexM,M(indexM),indexz,z(indexz),&
+                ylMz(indexl,indexM,indexz)
 
             End Do
 
@@ -1045,7 +1046,7 @@ subroutine read_ylMz()
 
     Do index=1,number_of_l*number_of_z*number_of_M
 
-        read(15,'(3i5,es18.10,i5,2es18.10)') il,ll,iM,MM,iz,zz,tylMz
+        read(15,'(3i10,es18.10,i5,2es18.10)') il,ll,iM,MM,iz,zz,tylMz
 
         ylMz(il,iM,iz) = tylMz
 
@@ -1195,7 +1196,7 @@ function FT_NFW_density_profile(k,M,z)    ! It computes the normalized Fourier t
                      ! Xia et al. M is the virial mass. The Fourier transform is truncated to the virial radius
     Real*8 :: k,M,z,FT_NFW_density_profile,Si1,Si2,Ci1,Ci2
     Real*8 :: alpha     ! It determines upper limit in Eq. (2.10) of 1312.4525
-    Real*8,parameter :: alphafactor = 1.037d0
+    Real*8,parameter :: alphafactor = 1.060d0!1.037d0
 
     alpha = alphafactor*concentration_mass_virial(M,z)
 
@@ -1351,7 +1352,7 @@ subroutine compute_lensing_potential(halo_definition)
 
                     philMz(indexl,indexM,indexz) = lensing_potential(indexM,indexz,indexl,'virial')
 
-                    write(15,'(3i5,es18.10,i5,2es18.10)') indexl,ml(indexl),indexM,M(indexM),indexz,z(indexz),&
+                    write(15,'(3i10,es18.10,i5,2es18.10)') indexl,ml(indexl),indexM,M(indexM),indexz,z(indexz),&
                     philMz(indexl,indexM,indexz)
 
                 End Do
@@ -1384,7 +1385,7 @@ subroutine read_philMz()
 
     Do q=1,number_of_l*number_of_M*number_of_z
 
-        read(15,'(3i5,es18.10,i5,2es18.10)') il,ll,iM,MM,iz,zz,tphilMz
+        read(15,'(3i10,es18.10,i5,2es18.10)') il,ll,iM,MM,iz,zz,tphilMz
      
         philMz(il,iM,iz) = tphilMz
 
@@ -2058,7 +2059,7 @@ subroutine compute_dndM()    ! It fills halo mass function array in and writes i
 
             dndM(indexM,indexz) = halo_mass_function(indexM,indexz)*dM200ddM(indexM,indexz)
 
-            write(15,'(i5,es18.10,i5,2es18.10)') indexM, M(indexM), indexz, z(indexz), dndM(indexM,indexz)
+            write(15,'(i10,es18.10,i5,2es18.10)') indexM, M(indexM), indexz, z(indexz), dndM(indexM,indexz)
 
         End Do
 
@@ -2092,7 +2093,7 @@ subroutine compute_sigma_square_M200d()    ! It fills sigma square array in and 
 
             dsigma_square_M200d(indexM,indexz) = dsigma_squared_dR(M200d(indexM,indexz),indexz)
 
-            write(15,'(i5,es18.10,i5,3es18.10)') indexM,M200d(indexM,indexz),indexz,z(indexz),&
+            write(15,'(i10,es18.10,i5,3es18.10)') indexM,M200d(indexM,indexz),indexz,z(indexz),&
             sigma_square_M200d(indexM,indexz),dsigma_square_M200d(indexM,indexz)
 
         End Do
@@ -2120,7 +2121,7 @@ subroutine read_sigma_square_M200d()
 
     Do index=1,number_of_M*number_of_z
 
-        read(15,'(i5,es18.10,i5,3es18.10)') iM,MM,iz,zz,ts2,tds2
+        read(15,'(i10,es18.10,i5,3es18.10)') iM,MM,iz,zz,ts2,tds2
 
         sigma_square_M200d(iM,iz) = ts2
 
@@ -2147,7 +2148,7 @@ subroutine read_dndM()
 
     Do index=1,number_of_M*number_of_z
 
-        read(15,'(i5,es18.10,i5,2es18.10)') iM,MM,iz,zz,tdndM
+        read(15,'(i10,es18.10,i5,2es18.10)') iM,MM,iz,zz,tdndM
 
         dndM(iM,iz) = tdndM
 
@@ -2396,7 +2397,7 @@ subroutine compute_bMz()
 
             bMz(indexM,indexz) = linear_halo_bias(indexM,indexz)
 
-            write(15,'(i5,es18.10,i5,2es18.10)') indexM,M(indexM),indexz,z(indexz),bMz(indexM,indexz)
+            write(15,'(i10,es18.10,i5,2es18.10)') indexM,M(indexM),indexz,z(indexz),bMz(indexM,indexz)
 
         End Do
 
@@ -2484,7 +2485,7 @@ subroutine read_bMz()
 
     Do q=1,number_of_M*number_of_z
 
-        read(15,'(i5,es18.10,i5,2es18.10)') iM,MM,iz,zz,tbMz
+        read(15,'(i10,es18.10,i5,2es18.10)') iM,MM,iz,zz,tbMz
 
         bMz(iM,iz) = tbMz
 

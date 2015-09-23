@@ -94,7 +94,7 @@ End Do
 ! Computing functions 
 !####################
 
-!wtime = omp_get_wtime()    ! setting starting time 
+wtime = omp_get_wtime()    ! setting starting time 
 
 !write(20,*) 'Executing mass conversion '
 
@@ -115,12 +115,12 @@ call compute_normalization()    ! Normalising matter power spectrum with fiducia
 !print *,omp_get_wtime()-wtime
 !stop
 !wtime = omp_get_wtime()    ! setting starting time 
-!call compute_sigma_square_M200d()
+call compute_sigma_square_M200d()
 !print *,omp_get_wtime()-wtime
-call read_sigma_square_M200d() 
+!call read_sigma_square_M200d() 
 !stop
-!call compute_bMz()    ! computing linear halo bias array as a function of mass and red-shift
-call read_bMz()
+call compute_bMz()    ! computing linear halo bias array as a function of mass and red-shift
+!call read_bMz()
 
 !wtime = omp_get_wtime()    ! setting starting time 
 !print *,indexz_halo_mass_function
@@ -135,8 +135,8 @@ call compute_alpha_halo_mass_function()    ! computing alpha constant in halo ma
 !print *,halo_mass_function(number_of_M,indexz_halo_mass_function+10)
 !stop
 !write(20,*) 'Computing halo mass function '
-!call compute_dndM()   ! Computing halo mass function array as a function of mass and red-shift 
-call read_dndM()    
+call compute_dndM()   ! Computing halo mass function array as a function of mass and red-shift 
+!call read_dndM()    
 !call write_dndM_at_z(number_of_z-20)
 !stop
 !write(20,*) 'Computing mean bias of all matter '
