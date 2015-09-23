@@ -1,193 +1,250 @@
 Program tSZ
-!#############################################
-! Here we load all the modules we need
-!#############################################
 
-use fiducial
-use arrays
-use functions 
-use omp_lib
+    ! LOAD NEEDED MODULES
+    use fiducial
+    use arrays
+    use functions 
+    use omp_lib
 
-!################################
-! We declare variables to be used
-!################################
+    ! DECLARATION AND INITIALIZATION OF VARIABLES
+    Implicit none
+    Integer*4 :: index1,q ! COUNTERS
+    Real*8 :: wtime       ! MEASURES TIME
+    Character(len=15),parameter :: halo_definition = 'virial'
 
-Implicit none
-Integer*4 :: index1,q ! size of arrays and auxiliar counter
-Real*8 :: wtime
-Character(len=15) :: halo_definition
+    ! OPEN FILE TO STORE EXECUTION INFORMATION 
+    open(20,file=path_to_execution_information)
 
-!############
-! Assignments
-!############
+    ! ALLOCATING MEMORY FOR : RED-SHIFT, VIRIAL MASS, MULTIPOLES, WAVEVECTOR, ONE- AND TWO-HALO Y-tSZ CROSS CORRELATION AND THEIR SUM, 
+    ! MEAN DENSITY MASS, CRITICAL DENSITY MASS, CRITICAL DENSITY RADIUS, DERIVATIVE OF MEAN DENSITY MASS w.r.t VIRIAL MASS, 
+    ! MEAN DENSITY RADIUS, ONE- AND TWO-HALO LENSING POTENTIAL AUTO-CORRELATION AND THEIR SUM, NORMALIZATION CONSTANT FOR HALO MASS FUNCTION,
+    ! DERIVATIVE OF CRITICAL MASS DENSITY w.r.t VIRIAL MASS, ANGULAR POWER SPECTRUM OF LENSING POTENTIAL IN THE LIMBER APPROXIMATION, 
+    ! HALO MASS FUNCTION, FORM FACTOR, LENSING POTENTIAL, COMOVING VOLUME, LINEAR BIAS, MEAN BIAS OF ALL MATTER, CRITICAL SURFACE,
+    ! SIGMA SQUARE FOR MEAN DENSITY MASS, DERIVATIVE OF SIGMA SQUARE FOR MEAN DENSITY MASS
+    allocate (z(1:number_of_z), M(-1:number_of_M+2), ml(1:number_of_l),k(1:number_of_k),&
+    Cl1h(1:number_of_l),Cl2h(1:number_of_l),Cl(1:number_of_l),M200d(-1:number_of_M+2,1:number_of_z),&
+    M200c(-1:number_of_M+2,1:number_of_z),r200c(-1:number_of_M+2,1:number_of_z),dM200ddM(1:number_of_M,1:number_of_z),&
+    r200d(-1:number_of_M+2,1:number_of_z),Clphiphi1h(1:number_of_l),Clphiphi2h(1:number_of_l),&
+    Clphiphi(1:number_of_l),alpha_halo_mass_function(1:number_of_z),dM200cdM(1:number_of_M,1:number_of_z),&
+    Clpsilimber(1:number_of_l),dndM(1:number_of_M,1:number_of_z),ylMz(1:number_of_l,1:number_of_M,1:number_of_z),&
+    philMz(1:number_of_l,1:number_of_M,1:number_of_z),d2VdzdO(1:number_of_z),&
+    bMz(1:number_of_M,1:number_of_z),mbz(1:number_of_z),Scrit(1:number_of_z),&
+    sigma_square_M200d(1:number_of_M,1:number_of_z),dsigma_square_M200d(1:number_of_M,1:number_of_z),stat = status1)
 
-halo_definition = 'virial'    ! halo definition that we are using 
+    If (status1 .eq. 0) then
+       
+        write(20,*) 'MEMORY ALLOCATED SUCCESSFULLY'
 
-open(20,file='./output/execution_information.txt')
+    Else
 
-!####################################################################
-! Allocate memory : red-shift, multipoles, virial mass,one halo term, 
-! two halo term, full Cl's, halo mass function, form factor function,
-! lensing potential function, comoving volume per steradian function,
-! and linear halo bias function.
-!####################################################################
+        write(20,*) 'PROBLEM ALLOCATING MEMORY'
 
-allocate (z(1:number_of_z), M(-1:number_of_M+2), ml(1:number_of_l),k(1:number_of_k),&
-Cl1h(1:number_of_l),Cl2h(1:number_of_l),Cl(1:number_of_l),M200d(-1:number_of_M+2,1:number_of_z),&
-M200c(-1:number_of_M+2,1:number_of_z),r200c(-1:number_of_M+2,1:number_of_z),dM200ddM(1:number_of_M,1:number_of_z),&
-r200d(-1:number_of_M+2,1:number_of_z),Clphiphi1h(1:number_of_l),Clphiphi2h(1:number_of_l),&
-Clphiphi(1:number_of_l),alpha_halo_mass_function(1:number_of_z),dM200cdM(1:number_of_M,1:number_of_z),&
-Clpsilimber(1:number_of_l),stat = status1)
-
-allocate (dndM(1:number_of_M,1:number_of_z),ylMz(1:number_of_l,1:number_of_M,1:number_of_z),&
-philMz(1:number_of_l,1:number_of_M,1:number_of_z),d2VdzdO(1:number_of_z),&
-bMz(1:number_of_M,1:number_of_z),mbz(1:number_of_z),Scrit(1:number_of_z),&
-sigma_square_M200d(1:number_of_M,1:number_of_z),dsigma_square_M200d(1:number_of_M,1:number_of_z),stat = status2)
-
-If ((status1 .eq. 0) .and. (status2 .eq. 0)) then
-
-    write(20,*) 'Memory allocated succesfully '
-
-End If
-
-!########################################################
-! Filling arrays of red-shift, virial mass and multipoles
-!########################################################
-
-! Wavevector array. Units : 1/Mpc
-Do index1 = 1, number_of_k    
-    k(index1) = 10**(log10(kmin) + real(index1-1)*(log10(kmax) - log10(kmin))/real(number_of_k-1))
-End Do
-
-! Red-shift array. Dimensionless.
-Do index1 = 1, number_of_z      
-    z(index1) = 10**(log10(zmin) + real(index1-1)*(log10(zmax) - log10(zmin))/real(number_of_z-1))
-End Do
-
-! Auxiliar index for halo mass function (red-shift greater than 3)
-Do q=1,number_of_z
-
-    If (z(q) .gt. 3.d0) then
-
-        indexz_halo_mass_function = q - 1
-
-        exit
+        stop
 
     End If
 
-End Do
+    ! FILLING ARRAYS 
 
-! Mass array.  Units : Solar mass 
-! This will be a virial mass array. Hill and Spergel (1312.4525) claim to use Spherical Overdensity (SO) mass M_{200d}
-! (mean background density definition) even though their functions are written in terms of virial mass.
-Do index1 = -1, number_of_M+2    
-    M(index1) = 10**(log10(Mmin) + real(index1-1)*(log10(Mmax) - log10(Mmin))/real(number_of_M-1))
-End Do
+    ! WAVEVECTOR ARRAY. UNITS : 1/Mpc
+    Do index1 = 1, number_of_k    
 
-! Multipole array. Dimensionless
-Do index1 = 1, number_of_l     
-    ml(index1) = int(10**(log10(dble(lmin)) + real(index1-1)*(log10(dble(lmax)) - &
-    log10(dble(lmin)))/real(number_of_l-1)),4)
-End Do
+        k(index1) = 10**(log10(kmin) + real(index1-1)*(log10(kmax) - log10(kmin))/real(number_of_k-1))
 
-!####################
-! Computing functions 
-!####################
+    End Do
 
-wtime = omp_get_wtime()    ! setting starting time 
+    ! RED-SHIFT ARRAY.
+    Do index1 = 1, number_of_z      
 
-!write(20,*) 'Executing mass conversion '
+        z(index1) = 10**(log10(zmin) + real(index1-1)*(log10(zmax) - log10(zmin))/real(number_of_z-1))
 
-!call compute_M_delta_c_from_M_and_z(DeltaSO)
+    End Do
 
-!write(20,*) 'Mass conversion ended '
+    ! COMPUTING INDEX IN RED-SHIFT ARRAY FOR FIRST ELEMENT SATISFYING Z > 3.d0
+    Do q=1,number_of_z
 
-!print *,omp_get_wtime()-wtime
+        If (z(q) .gt. 3.d0) then
 
-!stop
+            indexz_halo_mass_function = q - 1
 
-call read_M200dc_r200dc()
-!print *,dM200ddM(1,1),dM200ddM(number_of_M,number_of_z),M200c(1,1),M200d(2,2)
-!stop
-call compute_normalization()    ! Normalising matter power spectrum with fiducial sigma_8 
-!wtime = omp_get_wtime()    ! setting starting time 
-!print *,sigma_squared(M(number_of_M),number_of_z)
-!print *,omp_get_wtime()-wtime
-!stop
-!wtime = omp_get_wtime()    ! setting starting time 
-call compute_sigma_square_M200d()
-!print *,omp_get_wtime()-wtime
-!call read_sigma_square_M200d() 
-!stop
-call compute_bMz()    ! computing linear halo bias array as a function of mass and red-shift
-!call read_bMz()
+            exit
 
-!wtime = omp_get_wtime()    ! setting starting time 
-!print *,indexz_halo_mass_function
-!print *,nonnormalised_halo_mass_function(1,indexz_halo_mass_function+1)
-!print *,omp_get_wtime()-wtime
-!stop
-call compute_alpha_halo_mass_function()    ! computing alpha constant in halo mass function in order to fulfill condition 
-                                           ! that mean bias of all matter at a fixed red-shift is unity
-!print *,nonnormalised_halo_mass_function(number_of_M,indexz_halo_mass_function+1)
-!print *,nonnormalised_halo_mass_function(number_of_M,indexz_halo_mass_function+10)
-!print *,halo_mass_function(number_of_M,indexz_halo_mass_function+1)
-!print *,halo_mass_function(number_of_M,indexz_halo_mass_function+10)
-!stop
-!write(20,*) 'Computing halo mass function '
-call compute_dndM()   ! Computing halo mass function array as a function of mass and red-shift 
-!call read_dndM()    
-!call write_dndM_at_z(number_of_z-20)
-!stop
-!write(20,*) 'Computing mean bias of all matter '
-!call compute_mean_bias_matter()    ! Verify that mean bias of all matter is unity for red-shift array 
+        End If
 
-call compute_d2VdzdO()   ! Computing comoving volume element per steradian array as a function of red-shift  
+    End Do
 
-call compute_critical_surface_density()    ! Computing critical surface density as a function of red-shift
+    ! VIRIAL MASS ARRAY. UNITS: Solar mass 
+    Do index1 = -1, number_of_M+2    
 
-!wtime = omp_get_wtime()    ! setting starting time 
-!print *,lensing_potential(1,1,10,halo_definition)
-!print *,omp_get_wtime()-wtime
-!stop
+        M(index1) = 10**(log10(Mmin) + real(index1-1)*(log10(Mmax) - log10(Mmin))/real(number_of_M-1))
 
-write(20,*) 'Computing lensing potential '
-call compute_lensing_potential(halo_definition)    ! Computing lensing potential as a function of mass and red-shift
-!call read_philMz()
-!print *, pre_Clphiphi(number_of_z-30,number_of_l-2)
-!print *,C_l_phiphi_one_halo(5)
-!stop
+    End Do
 
-call compute_Clphiphi1h()    ! Compute lensing potential angular power spectrum (one halo term)
+    ! MULTIPOLE ARRAY.
+    Do index1 = 1, number_of_l     
 
-call compute_Clphiphi2h()    ! Compute lensing potential angular power spectrum (two halo term)
+        ml(index1) = int(10**(log10(dble(lmin)) + real(index1-1)*(log10(dble(lmax)) - &
+        log10(dble(lmin)))/real(number_of_l-1)),4)
 
-call compute_Clpsilimber()    ! Compute angular power spectrum of lensing potential in the Limber approximation
+    End Do
 
-write(20,*) 'Computing form factor '
-!wtime = omp_get_wtime()
-!print *,form_factor(1,1,1)
-!print *,omp_get_wtime()-wtime
-!stop
-call compute_form_factor()    ! Compute form factor as a function of mass and red-shift
-!call read_ylMz()
-!print *,C_l_yphi_two_halo(number_of_l-2)
-!stop
-call compute_Cl1h()
+    ! COMPUTATION STARTS
 
-call compute_Cl2h()
+    ! DOING MASS CONVERSION (IF REQUIRED)
+    If (do_mass_conversion) then
+
+        wtime = omp_get_wtime() ! SETTING STARTING TIME OF MASS CONVERSION
+
+        write(20,*) 'EXECUTING MASS CONVERSION'
+
+        call compute_M_delta_c_from_M_and_z(DeltaSO)
+
+        write(20,*) 'MASS CONVERSION ENDED'
+
+        write(20,*) 'MASS CONVERSION FOR RED-SHIFT ARRAY OF SIZE ', size(z),' AND VIRIAL MASS ARRAY OF SIZE ', size(M),&
+        'TOOK ', (omp_get_wtime()-wtime)/3.6d3, 'HOURS'
+
+    Else
+
+        write(20,*) 'USING MASS DATA FILE PREVIOUSLY COMPUTED'
+
+    End If
+
+    ! READING MASS CONVERSION FILE AND COMPUTING DERIVATIVES OF MASS CONVERSION
+    call read_M200dc_r200dc()
+
+    write(20,*) 'MASS CONVERSION FILE READ AND DERIVATIVES OF MASS CONVERSION COMPUTED'
+
+    call compute_normalization() ! IN MATTER POWER SPECTRUM TO FIT FIDUCIAL SIGMA_8
+
+    write(20,*) 'NORMALIZATION OF MATTER POWER SPECTRUM TO MATCH SIGMA_8 (',sigma8,') WAS COMPUTED'
+
+    ! REDO COMPUTATIONS ONLY IF MASS CONVERSION REQUIRED
+    If (do_mass_conversion) then
+
+        wtime = omp_get_wtime() ! SETTING STARTING TIME OF MASS CONVERSION
+
+        write(20,*) 'EXECUTING COMPUTATION OF SIGMA_SQUARE_M200D'
+
+        call compute_sigma_square_M200d()
+
+        write(20,*) 'COMPUTATION OF SIGMA_SQUARE_M200D ENDED'
+
+        write(20,*) 'SIGMA_SQUARE_M200D COMPUTATION FOR RED-SHIFT ARRAY OF SIZE ', size(z),' AND VIRIAL MASS ARRAY OF SIZE ',&
+        size(M),' TOOK ', (omp_get_wtime()-wtime)/3.6d3, 'HOURS'
+
+        write(20,*) 'COMPUTING LINEAR HALO BIAS'
+
+        call compute_bMz() ! LINEAR HALO BIAS AS A FUNCTION OF MASS AND RED-SHIFT
+
+        write(20,*) 'COMPUTING NORMALIZATION OF HALO MASS FUNCTION'
+
+        call compute_alpha_halo_mass_function() ! NORMALIZE HALO MASS FUNCTION TO FULLFILL CONDITION THAT MEAN BIAS OF ALL MATTER
+                                                ! AT A FIXED RED-SHIFT IS UNITY
+
+        write(20,*) 'COMPUTING HALO MASS FUNCTION'
+
+        call compute_dndM() ! COMPUTING HALO MASS FUNCTION AS A FUNCTION OF MASS AND RED-SHIFT 
+
+        write(20,*) 'COMPUTING COMOVING VOLUME ELEMENT PER STERADIAN'
+
+        call compute_d2VdzdO()   ! COMPUTES COMOVING VOLUME ELEMENT PER STERADIAN  
+
+        write(20,*) 'COMPUTING CRITICAL SURFACE DENSITY'
+
+        call compute_critical_surface_density() 
+
+        wtime = omp_get_wtime() ! SETTING STARTING TIME OF LENSING POTENTIAL COMPUTATION
+
+        write(20,*) 'COMPUTING LENSING POTENTIAL'
+
+        call compute_lensing_potential(halo_definition)
+
+        write(20,*) 'LENSING POTENTIAL COMPUTATION FOR RED-SHIFT ARRAY OF SIZE ', size(z),', VIRIAL MASS ARRAY OF SIZE ',&
+        size(M),', AND MULTIPOLES ARRAY OF SIZE ', size(ml),' TOOK ', (omp_get_wtime()-wtime)/3.6d3, 'HOURS'
+
+        write(20,*) 'COMPUTING ANGULAR POWER SPECTRUM OF LENSING POTENTIAL'
+
+        call compute_Clphiphi1h() ! ONE HALO TERM
+
+        call compute_Clphiphi2h() ! TWO HALO TERM
+
+        call compute_Clpsilimber()! LIMBER APPROXIMATION 
+
+        wtime = omp_get_wtime() ! SETTING STARTING TIME OF FORM FACTOR COMPUTATION
+
+        write(20,*) 'COMPUTING FORM FACTOR'
+
+        call compute_form_factor()
+
+        write(20,*) 'FORM FACTOR COMPUTATION FOR RED-SHIFT ARRAY OF SIZE ', size(z),', VIRIAL MASS ARRAY OF SIZE ', size(M),&
+        ', AND MULTIPOLES ARRAY OF SIZE ', size(ml),' TOOK ', (omp_get_wtime()-wtime)/3.6d3, 'HOURS'
+
+        write(20,*) 'COMPUTING ANGULAR POWER SPECTRUM OF Y-tSZ CROSS-CORRELATION'
+
+        call compute_Cl1h() ! ONE HALO TERM
+
+        call compute_Cl2h() ! TWO HALO TERM
  
-call compute_Cl()    ! Compute total angular power spectrum 
+        call compute_Cl()   ! TOTAL 
 
-call write_Cl()    ! Write angular power spectrum into a text file
+        call write_Cl()     ! OF ALL COMPUTATIONS 
 
-write(20,*) 'Angular power spectra have been written out '
+        write(20,*) 'COMPUTATION ENDED'
 
-!print *,omp_get_wtime()-wtime
+    Else
 
-deallocate (z,M,k,ml,Cl1h,Cl2h,Clphiphi1h,Clphiphi2h,Cl,Clphiphi,&
-d2VdzdO,dndM,ylMz,philMz,bMz,mbz,M200c,M200d,r200c,r200d,Scrit,alpha_halo_mass_function,&
-Clpsilimber)
+        write(20,*) 'USING SIGMA_SQUARE_M200D PREVIOUSLY COMPUTED'
+
+        call read_sigma_square_M200d() 
+
+        call read_bMz() ! LINEAR HALO BIAS AS A FUNCTION OF MASS AND RED-SHIFT
+
+        call compute_alpha_halo_mass_function() ! NORMALIZE HALO MASS FUNCTION TO FULLFILL CONDITION THAT MEAN BIAS OF ALL MATTER
+                                                ! AT A FIXED RED-SHIFT IS UNITY
+
+        call read_dndM() ! READING HALO MASS FUNCTION    
+
+        write(20,*) 'COMPUTING COMOVING VOLUME ELEMENT PER STERADIAN'
+
+        call compute_d2VdzdO()   ! COMPUTES COMOVING VOLUME ELEMENT PER STERADIAN  
+
+        write(20,*) 'COMPUTING CRITICAL SURFACE DENSITY'
+
+        call compute_critical_surface_density() 
+
+        call read_philMz() ! READS LENSING POTENTIAL
+
+        write(20,*) 'COMPUTING ANGULAR POWER SPECTRUM OF LENSING POTENTIAL'
+
+        call compute_Clphiphi1h() ! ONE HALO TERM
+
+        call compute_Clphiphi2h() ! TWO HALO TERM
+
+        call compute_Clpsilimber()! LIMBER APPROXIMATION 
+
+        call read_ylMz() ! READS FORM FACTOR
+
+        write(20,*) 'COMPUTING ANGULAR POWER SPECTRUM OF Y-tSZ CROSS-CORRELATION'
+
+        call compute_Cl1h() ! ONE HALO TERM
+
+        call compute_Cl2h() ! TWO HALO TERM
+ 
+        call compute_Cl()   ! TOTAL 
+
+        call write_Cl()     ! OF ALL COMPUTATIONS 
+
+        write(20,*) 'COMPUTATION ENDED'
+
+    End If
+
+    ! DEALLOCATING MEMORY
+    deallocate (z,M,k,ml,Cl1h,Cl2h,Clphiphi1h,Clphiphi2h,Cl,Clphiphi,&
+    d2VdzdO,dndM,ylMz,philMz,bMz,mbz,M200c,M200d,r200c,r200d,Scrit,alpha_halo_mass_function,&
+    Clpsilimber)
+
+    ! CLOSE EXECUTION INFORMATION FILE
+    close(20)
 
 End Program tSZ
 
