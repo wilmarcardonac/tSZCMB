@@ -4,6 +4,88 @@ Module functions
      
     contains
 
+    Subroutine Interpolate_2D(function_value,point_x,point_y,array_x,array_y,matrix_function_values)
+    
+        Implicit none
+    
+        Real*8 :: function_value, point_x, point_y,flowerleft,flowerright,fupperright,fupperleft,t,u
+        Real*8,dimension(:) :: array_x, array_y
+        Real*8,dimension(:,:) :: matrix_function_values
+        Integer*4 :: q,indexleft,indexright,indexup,indexdown
+
+        Do q=1,size(array_x)
+
+            If ( (point_x .lt. array_x(1)) .or. (point_x .gt. array_x(size(array_x))) ) then
+
+                print *, 'COORDINATE X OF POINT ', point_x,' IS OUT OF RANGE OF GIVEN VALUES. EXTRAPOLATION IS NOT IMPLEMENTED'
+
+                stop
+
+            Else If ( ((array_x(q) .gt. point_x) .and. (array_x(q-1) .lt. point_x)) .and. (q .gt. 1) ) then
+
+                indexright = q 
+
+                indexleft = q - 1
+
+                exit
+
+            Else if ( (q .eq. 1) .and. ((array_x(q) .lt. point_x) .and. (array_x(q+1) .gt. point_x)) ) then
+
+                indexright = q + 1 
+
+                indexleft = q 
+
+                exit
+
+            End If 
+
+        End Do
+
+        Do q=1,size(array_y)
+
+            If ( (point_y .lt. array_y(1)) .or. (point_y .gt. array_y(size(array_y))) ) then
+
+                print *, 'COORDINATE Y OF POINT ', point_y,' IS OUT OF RANGE OF GIVEN VALUES. EXTRAPOLATION IS NOT IMPLEMENTED'
+
+                stop
+
+            Else If ( ((array_y(q) .gt. point_y) .and. (array_y(q-1) .lt. point_y)) .and. (q .gt. 1) ) then
+
+                indexup = q 
+
+                indexdown = q - 1
+
+                exit
+
+            Else if ( (q .eq. 1) .and. ((array_y(q) .lt. point_y) .and. (array_y(q+1) .gt. point_y)) ) then
+
+                indexup = q + 1 
+
+                indexdown = q 
+
+                exit
+
+            End If
+
+        End Do
+
+        flowerleft = matrix_function_values(indexleft,indexdown)
+
+        flowerright = matrix_function_values(indexright,indexdown) 
+
+        fupperright = matrix_function_values(indexright,indexup)
+
+        fupperleft = matrix_function_values(indexleft,indexup)
+
+        t = (point_x - array_x(indexleft))/(array_x(indexright) - array_x(indexleft) )
+
+        u = (point_y - array_y(indexdown) )/( array_y(indexup) - array_y(indexdown) )
+
+        function_value = ( 1.d0 - t )*( 1.d0 - u )*flowerleft + t*( 1.d0 - u )*flowerright +&
+        t*u*fupperright + ( 1.d0 - t )*u*fupperleft
+
+    End subroutine Interpolate_2D
+
     function Hubble_parameter(z)    !    Units : m/s/Mpc
     
         use fiducial
@@ -595,7 +677,8 @@ Module functions
 
         Real*8 :: M,z,rdd,delta,integral_r_delta_d_minus_total_matter
 
-        integral_r_delta_d_minus_total_matter = integral_r_delta_d(M,z,rdd) - 4.d0*Pi*rdd**3*mean_density(z)/(1.d0+z)**3.d0*delta/3.d0
+        integral_r_delta_d_minus_total_matter = integral_r_delta_d(M,z,rdd) - &
+        4.d0*Pi*rdd**3*mean_density(z)/(1.d0+z)**3.d0*delta/3.d0
 
     end function integral_r_delta_d_minus_total_matter
 
@@ -2005,7 +2088,8 @@ Module functions
 
             halo_mass_function = -mean_density(z(indexz_halo_mass_function))/(1.d0 + z(indexz_halo_mass_function))**3.d0&
             /2.d0/M200d(indexM,indexz_halo_mass_function)**2&    ! (1+z)**3 to use comoving coordinates
-            *R/3.d0/sigma_square_M200d(indexM,indexz_halo_mass_function)*dsigma_square_M200d(indexM,indexz_halo_mass_function)*g_sigma
+            *R/3.d0/sigma_square_M200d(indexM,indexz_halo_mass_function)*&
+            dsigma_square_M200d(indexM,indexz_halo_mass_function)*g_sigma
 
         Else
 
@@ -2072,7 +2156,8 @@ Module functions
 
             nonnormalised_halo_mass_function = -mean_density(z(indexz_halo_mass_function))/(1.d0 + &
             z(indexz_halo_mass_function))**3.d0/2.d0/M200d(indexM,indexz_halo_mass_function)**2&
-            *R/3.d0/sigma_square_M200d(indexM,indexz_halo_mass_function)*dsigma_square_M200d(indexM,indexz_halo_mass_function)*g_sigma
+            *R/3.d0/sigma_square_M200d(indexM,indexz_halo_mass_function)*&
+            dsigma_square_M200d(indexM,indexz_halo_mass_function)*g_sigma
 
         Else
 
