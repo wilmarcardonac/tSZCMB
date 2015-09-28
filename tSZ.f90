@@ -5,6 +5,7 @@ Program tSZ
     use arrays
     use functions 
     use omp_lib
+    use fgsl
 
     ! DECLARATION AND INITIALIZATION OF VARIABLES
     Implicit none
@@ -29,7 +30,8 @@ Program tSZ
     Clpsilimber(1:number_of_l),dndM(1:number_of_M,1:number_of_z),ylMz(1:number_of_l,1:number_of_M,1:number_of_z),&
     philMz(1:number_of_l,1:number_of_M,1:number_of_z),d2VdzdO(1:number_of_z),&
     bMz(1:number_of_M,1:number_of_z),mbz(1:number_of_z),Scrit(1:number_of_z),&
-    sigma_square_M200d(1:number_of_M,1:number_of_z),dsigma_square_M200d(1:number_of_M,1:number_of_z),stat = status1)
+    sigma_square_M200d(1:number_of_M,1:number_of_z),dsigma_square_M200d(1:number_of_M,1:number_of_z),&
+    comoving_distance_at_z(1:number_of_z),stat = status1)
 
     If (status1 .eq. 0) then
        
@@ -89,6 +91,12 @@ Program tSZ
 
     ! COMPUTATION STARTS
 
+    ! COMPUTE COMOVING DISTANCE ARRAY
+    call compute_comoving_distance()
+
+    ! COMPUTE COMOVING DISTANCE AT DECOUPLING
+    com_dist_at_z_dec = comoving_distance(z_dec)
+    
     ! DOING MASS CONVERSION (IF REQUIRED)
     If (do_mass_conversion) then
 
@@ -125,7 +133,7 @@ Program tSZ
 
         write(20,*) 'EXECUTING COMPUTATION OF SIGMA_SQUARE_M200D'
 
-        call compute_sigma_square_M200d()
+!        call compute_sigma_square_M200d()
 
         write(20,*) 'COMPUTATION OF SIGMA_SQUARE_M200D ENDED'
 
@@ -140,7 +148,7 @@ Program tSZ
 
         call compute_alpha_halo_mass_function() ! NORMALIZE HALO MASS FUNCTION TO FULLFILL CONDITION THAT MEAN BIAS OF ALL MATTER
                                                 ! AT A FIXED RED-SHIFT IS UNITY
-
+        
         write(20,*) 'COMPUTING HALO MASS FUNCTION'
 
         call compute_dndM() ! COMPUTING HALO MASS FUNCTION AS A FUNCTION OF MASS AND RED-SHIFT 
@@ -241,7 +249,7 @@ Program tSZ
     ! DEALLOCATING MEMORY
     deallocate (z,M,k,ml,Cl1h,Cl2h,Clphiphi1h,Clphiphi2h,Cl,Clphiphi,&
     d2VdzdO,dndM,ylMz,philMz,bMz,mbz,M200c,M200d,r200c,r200d,Scrit,alpha_halo_mass_function,&
-    Clpsilimber)
+    Clpsilimber,comoving_distance_at_z)
 
     ! CLOSE EXECUTION INFORMATION FILE
     close(20)

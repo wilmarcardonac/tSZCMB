@@ -4,6 +4,33 @@ Module functions
      
     contains
 
+    Subroutine Interpolate_1D(function_value,point_x,array_x,array_y)
+      
+        use fgsl
+        Implicit none
+
+        Integer(fgsl_int) :: status
+        Integer(fgsl_size_t) :: t
+        real(fgsl_double) :: point_x, function_value, array_x(:), array_y(:)
+        type(fgsl_interp_accel) :: acc
+        type(fgsl_spline) :: spline
+
+        t = size(array_x)
+
+        acc = fgsl_interp_accel_alloc()
+
+        spline = fgsl_spline_alloc(fgsl_interp_cspline,t)
+
+        status = fgsl_spline_init(spline,array_x,array_y,t)
+
+        function_value = fgsl_spline_eval(spline,point_x,acc)
+
+        call fgsl_spline_free(spline)
+
+        call fgsl_interp_accel_free(acc)
+
+    End subroutine Interpolate_1D
+
     Subroutine Interpolate_2D(function_value,point_x,point_y,array_x,array_y,matrix_function_values)
     
         Implicit none
@@ -21,7 +48,7 @@ Module functions
 
                 stop
 
-            Else If ( ((array_x(q) .gt. point_x) .and. (array_x(q-1) .lt. point_x)) .and. (q .gt. 1) ) then
+            Else If ( ((array_x(q) .ge. point_x) .and. (array_x(q-1) .le. point_x)) .and. (q .gt. 1) ) then
 
                 indexright = q 
 
@@ -29,7 +56,7 @@ Module functions
 
                 exit
 
-            Else if ( (q .eq. 1) .and. ((array_x(q) .lt. point_x) .and. (array_x(q+1) .gt. point_x)) ) then
+            Else if ( (q .eq. 1) .and. ((array_x(q) .le. point_x) .and. (array_x(q+1) .ge. point_x)) ) then
 
                 indexright = q + 1 
 
@@ -49,7 +76,7 @@ Module functions
 
                 stop
 
-            Else If ( ((array_y(q) .gt. point_y) .and. (array_y(q-1) .lt. point_y)) .and. (q .gt. 1) ) then
+            Else If ( ((array_y(q) .ge. point_y) .and. (array_y(q-1) .le. point_y)) .and. (q .gt. 1) ) then
 
                 indexup = q 
 
@@ -57,7 +84,7 @@ Module functions
 
                 exit
 
-            Else if ( (q .eq. 1) .and. ((array_y(q) .lt. point_y) .and. (array_y(q+1) .gt. point_y)) ) then
+            Else if ( (q .eq. 1) .and. ((array_y(q) .le. point_y) .and. (array_y(q+1) .ge. point_y)) ) then
 
                 indexup = q + 1 
 
@@ -138,13 +165,16 @@ Module functions
 
     end function comoving_distance
 
-    function angular_diameter_distance(z)    !    Units : Mpc
+    function angular_diameter_distance(redshift)    !    Units : Mpc
 
+        use arrays
         Implicit none
 
-        Real*8 :: angular_diameter_distance,z
+        Real*8 :: angular_diameter_distance,redshift,com_dist_z
 
-        angular_diameter_distance = comoving_distance(z)/(1.d0 + z)
+        call Interpolate_1D(com_dist_z,redshift,z,comoving_distance_at_z)
+
+        angular_diameter_distance = com_dist_z/(1.d0 + redshift)
 
     end function angular_diameter_distance
 
@@ -219,7 +249,23 @@ Module functions
 
         !$omp End Parallel Do
 
-    end subroutine
+    end subroutine compute_d2VdzdO
+
+    subroutine compute_comoving_distance()    !    It fills in the vector with comoving distance
+
+        use arrays
+        use fiducial
+        Implicit none
+
+        Integer*4 :: indexz
+
+        Do indexz=1,number_of_z
+
+            comoving_distance_at_z(indexz) = comoving_distance(z(indexz))
+
+        End Do
+
+    end subroutine compute_comoving_distance
 
     function Omega_m(z)    !    Matter density parameter as seen by an observer at red-shift z
 
@@ -294,17 +340,17 @@ Module functions
 
     end function r_delta_d
 
-    function critical_surface_density(z) ! Units : Solar mass/Mpc**2 
+    function critical_surface_density(redshift) ! Units : Solar mass/Mpc**2 
 
+        use arrays
         use fiducial
         Implicit none
-        Real*8 :: z,critical_surface_density,czdec,cz
 
-        czdec = comoving_distance(z_dec) ! Units Mpc
+        Real*8 :: redshift,critical_surface_density,com_dist_z
 
-        cz = comoving_distance(z)        ! Units Mpc
+        call Interpolate_1D(com_dist_z,redshift,z,comoving_distance_at_z)
 
-        critical_surface_density = c**2*czdec*(1.d0 + z)/4.d0/Pi/G/cz/(czdec-cz)
+        critical_surface_density = c**2*com_dist_at_z_dec*(1.d0 + redshift)/4.d0/Pi/G/com_dist_z/(com_dist_at_z_dec - com_dist_z)
 
         critical_surface_density = critical_surface_density*Mpc/M_sun 
 
@@ -910,21 +956,27 @@ Module functions
 
     end subroutine read_M200dc_r200dc
 
-    function ICM_electron_pressure(r,indexM,indexz) ! Units of Mv : solar mass. Units of r : Mpc. Intracluster medium electron pressure from "On 
+    function ICM_electron_pressure(r,virial_Mass,redshift) ! Units of Mv : solar mass. Units of r : Mpc. Intracluster medium electron pressure from "On 
 
         use fiducial              ! the cluster physics of Sunyaev-Zel'dovich and x-ray surveys. II. Deconstructing the thermal SZ
         use arrays                ! power spectrum" by Battaglia et al. All the masses and distances in this work are given relative to h.
         Implicit none             ! Units of ICM_electron_pressure : solar mass/(Mpc*s**2)        
 
-        Real*8 :: x,A_p,alpha_pm,alpha_pz,P_0,A_xc,alpha_xcm
-        Real*8 :: alpha_xcz,x_c,A_beta,r,ICM_electron_pressure
+        Real*8 :: x,A_p,alpha_pm,alpha_pz,P_0,A_xc,alpha_xcm,virial_Mass,redshift
+        Real*8 :: alpha_xcz,x_c,A_beta,r,ICM_electron_pressure,M200c_M_z,r200c_M_z
         Real*8 :: alpha_betam,alpha_betaz,beta,gamma,alpha,P_th,P_e,P200,P_fit
         Integer*4 :: indexM,indexz
 
-        P200 = G*M200c(indexM,indexz)*DeltaSO*critical_density(z(indexz))&
-        *Omega_b_h2/h**2/Omega_m0/2.d0/r200c(indexM,indexz)*M_sun/(Mpc)**3 ! Units : solar mass/(Mpc*s**2)
+        call Interpolate_2D(M200c_M_z,virial_Mass,redshift,M(1:number_of_M),z(1:number_of_z),M200c(1:number_of_M,1:number_of_z))
 
-        x = r/r200c(indexM,indexz)        ! Dimensionless 
+        call Interpolate_2D(r200c_M_z,virial_Mass,redshift,M(1:number_of_M),z(1:number_of_z),r200c(1:number_of_M,1:number_of_z))
+
+!        P200 = G*M200c(indexM,indexz)*DeltaSO*critical_density(z(indexz))&
+!        *Omega_b_h2/h**2/Omega_m0/2.d0/r200c(indexM,indexz)*M_sun/(Mpc)**3 ! Units : solar mass/(Mpc*s**2)
+        P200 = G*M200c_M_z*DeltaSO*critical_density(redshift)*Omega_b_h2/h**2/Omega_m0/2.d0/r200c_M_z*M_sun/(Mpc)**3 ! Units : solar mass/(Mpc*s**2)
+
+!        x = r/r200c(indexM,indexz)        ! Dimensionless 
+        x = r/r200c_M_z        ! Dimensionless 
                                       ! Parameters from columns "AGN Feedback \Delta = 200" in Table 1 in published version of 1109.3711
         A_p = 18.1d0                      ! For P_0
 
@@ -932,7 +984,8 @@ Module functions
 
         alpha_pz = -0.758d0
 
-        P_0 = A_p*(M200c(indexM,indexz)*1.d-14)**alpha_pm*(1+z(indexz))**alpha_pz
+!        P_0 = A_p*(M200c(indexM,indexz)*1.d-14)**alpha_pm*(1+z(indexz))**alpha_pz
+        P_0 = A_p*(M200c_M_z*1.d-14)**alpha_pm*( 1.d0 + redshift )**alpha_pz
 
         A_xc = 0.497d0                    ! For x_c
 
@@ -940,7 +993,8 @@ Module functions
 
         alpha_xcz = 0.731d0
 
-        x_c = A_xc*(M200c(indexM,indexz)*1.d-14)**alpha_xcm*(1+z(indexz))**alpha_xcz
+!        x_c = A_xc*(M200c(indexM,indexz)*1.d-14)**alpha_xcm*(1+z(indexz))**alpha_xcz
+        x_c = A_xc*(M200c_M_z*1.d-14)**alpha_xcm*( 1.d0 + redshift )**alpha_xcz
 
         A_beta = 4.35d0                   ! For beta
 
@@ -948,7 +1002,8 @@ Module functions
 
         alpha_betaz = 0.415d0
 
-        beta = A_beta*(M200c(indexM,indexz)*1.d-14)**alpha_betam*(1+z(indexz))**alpha_betaz
+!        beta = A_beta*(M200c(indexM,indexz)*1.d-14)**alpha_betam*(1+z(indexz))**alpha_betaz
+        beta = A_beta*(M200c_M_z*1.d-14)**alpha_betam*( 1.d0 + redshift )**alpha_betaz
 
         gamma = -0.3d0                    ! Parameters \gamma and \alpha in equation (10) of published version of 1109.3711
 
@@ -964,48 +1019,48 @@ Module functions
 
     end function ICM_electron_pressure    
 
-    subroutine write_ICM_electron_pressure_at_z(indexM,indexz)
+!    subroutine write_ICM_electron_pressure_at_z(indexM,indexz)
 
-        use arrays
-        use fiducial
-        Implicit none
+ !       use arrays
+  !      use fiducial
+   !     Implicit none
 
-        Integer*4 :: indexM,indexz,index
-        Integer*4,parameter :: indexr = 1d2
-        Real*8 :: rmin,rmax
-        Real*8,dimension(indexr) :: r
+    !    Integer*4 :: indexM,indexz,index
+     !   Integer*4,parameter :: indexr = 1d2
+      !  Real*8 :: rmin,rmax
+       ! Real*8,dimension(indexr) :: r
 
-        rmin = 1.d-2*r200c(indexM,indexz)
+!        rmin = 1.d-2*r200c(indexM,indexz)
 
-        rmax = 3.d0*r200c(indexM,indexz)
+ !       rmax = 3.d0*r200c(indexM,indexz)
 
-        Do index = 1, indexr 
+  !      Do index = 1, indexr 
 
-            r(index) = 10**(log10(rmin) + real(index-1)*(log10(rmax) - log10(rmin))/real(indexr-1))
+   !         r(index) = 10**(log10(rmin) + real(index-1)*(log10(rmax) - log10(rmin))/real(indexr-1))
 
-        End Do
+    !    End Do
 
-        open(15,file='./output/Pth_at_z.dat')
+     !   open(15,file='./output/Pth_at_z.dat')
 
-        write(15,*) '# r/R_200       P_th at redshift and mass',z(indexz),M200c(indexM,indexz)
+      !  write(15,*) '# r/R_200       P_th at redshift and mass',z(indexz),M200c(indexM,indexz)
 
-        Do index =1,indexr
+       ! Do index =1,indexr
 
-            write(15,'(2es18.10)') r(index)/r200c(indexM,indexz), ICM_electron_pressure(r(index),indexM,indexz)
+!            write(15,'(2es18.10)') r(index)/r200c(indexM,indexz), ICM_electron_pressure(r(index),indexM,indexz)
 
-        End Do
+ !       End Do
 
-        close(15)
+  !      close(15)
 
-    end subroutine write_ICM_electron_pressure_at_z
+   ! end subroutine write_ICM_electron_pressure_at_z
 
-    function form_factor(indexM,indexz,indexl)    ! Form factor. Equation (2.9) in 1312.4525. Units of M: solar mass. 
+    function form_factor(virial_Mass,redshift,indexl)    ! Form factor. Equation (2.9) in 1312.4525. Units of M: solar mass. 
 
         use fiducial                              ! Units : dimensionless
         use arrays
         Implicit none
 
-        Real*8 :: l_s,x_y_min,x_y_max,form_factor,y,prefactor,stepsize,x1,x2,f1,f2
+        Real*8 :: l_s,x_y_min,x_y_max,form_factor,y,prefactor,stepsize,x1,x2,f1,f2,virial_Mass,redshift,M200c_M_z,r200c_M_z
         Integer*4,parameter :: number_of_x = 1d4
         Integer*4,parameter :: intervals = number_of_x - 1 !  
         Integer*4 :: indexx,indexM,indexz,indexl
@@ -1014,9 +1069,15 @@ Module functions
         Integer*4,parameter :: max_iterations = 1d9
         logical :: logscale
 
-        l_s = angular_diameter_distance(z(indexz))/r200c(indexM,indexz)         ! dimensionless
+        call Interpolate_2D(M200c_M_z,virial_Mass,redshift,M(1:number_of_M),z(1:number_of_z),M200c(1:number_of_M,1:number_of_z))
 
-        x_y_max = betafactor*virial_radius(z(indexz),M(indexM))/r200c(indexM,indexz) ! dimensionless
+        call Interpolate_2D(r200c_M_z,virial_Mass,redshift,M(1:number_of_M),z(1:number_of_z),r200c(1:number_of_M,1:number_of_z))
+
+!        l_s = angular_diameter_distance(z(indexz))/r200c(indexM,indexz)         ! dimensionless
+        l_s = angular_diameter_distance(redshift)/r200c_M_z         ! dimensionless
+
+!        x_y_max = betafactor*virial_radius(z(indexz),M(indexM))/r200c(indexM,indexz) ! dimensionless
+        x_y_max = betafactor*virial_radius(redshift,virial_Mass)/r200c_M_z ! dimensionless
 
         If ( x_y_max .le. ( l_s/(dble(ml(indexl))+ 1.d0/2.d0) ) ) then 
 
@@ -1030,11 +1091,13 @@ Module functions
 
         End If
 
-        prefactor = sigma_e*4.d0*Pi*r200c(indexM,indexz)*M_sun/m_e/c**2/l_s**2  ! Units : Mpc*s**2/solar mass
+!        prefactor = sigma_e*4.d0*Pi*r200c(indexM,indexz)*M_sun/m_e/c**2/l_s**2  ! Units : Mpc*s**2/solar mass
+        prefactor = sigma_e*4.d0*Pi*r200c_M_z*M_sun/m_e/c**2/l_s**2  ! Units : Mpc*s**2/solar mass
 
         If (logscale) then
 
-            x_y_min = 1.d-5*virial_radius(z(indexz),M(indexM))/r200c(indexM,indexz) ! dimensionless
+!            x_y_min = 1.d-5*virial_radius(z(indexz),M(indexM))/r200c(indexM,indexz) ! dimensionless
+            x_y_min = 1.d-5*virial_radius(redshift,virial_Mass)/r200c_M_z ! dimensionless
 
             Do indexx=1,number_of_x
 
@@ -1045,8 +1108,10 @@ Module functions
 
             Do indexx=1,number_of_x 
 
+!                f(indexx) = x(indexx)**2*sin((dble(ml(indexl))+1.d0/2.d0)*x(indexx)/l_s)&
+!                *ICM_electron_pressure(x(indexx)*r200c(indexM,indexz),indexM,indexz)/(dble(ml(indexl))+1.d0/2.d0)/x(indexx)*l_s
                 f(indexx) = x(indexx)**2*sin((dble(ml(indexl))+1.d0/2.d0)*x(indexx)/l_s)&
-                *ICM_electron_pressure(x(indexx)*r200c(indexM,indexz),indexM,indexz)/(dble(ml(indexl))+1.d0/2.d0)/x(indexx)*l_s
+                *ICM_electron_pressure(x(indexx)*r200c_M_z,virial_Mass,redshift)/(dble(ml(indexl))+1.d0/2.d0)/x(indexx)*l_s
 
             End Do
 
@@ -1068,8 +1133,10 @@ Module functions
 
             x2 = x1 + stepsize
 
+!            f2 = x2**2*sin((dble(ml(indexl))+1.d0/2.d0)*x2/l_s)&
+!            *ICM_electron_pressure(x2*r200c(indexM,indexz),indexM,indexz)/(dble(ml(indexl))+1.d0/2.d0)/x2*l_s
             f2 = x2**2*sin((dble(ml(indexl))+1.d0/2.d0)*x2/l_s)&
-            *ICM_electron_pressure(x2*r200c(indexM,indexz),indexM,indexz)/(dble(ml(indexl))+1.d0/2.d0)/x2*l_s
+            *ICM_electron_pressure(x2*r200c_M_z,virial_Mass,redshift)/(dble(ml(indexl))+1.d0/2.d0)/x2*l_s
 
             y = 0.d0
 
@@ -1085,8 +1152,10 @@ Module functions
 
                     x2 = x_y_max
 
+!                    f2 = x2**2*sin((dble(ml(indexl))+1.d0/2.d0)*x2/l_s)&
+!                    *ICM_electron_pressure(x2*r200c(indexM,indexz),indexM,indexz)/(dble(ml(indexl))+1.d0/2.d0)/x2*l_s
                     f2 = x2**2*sin((dble(ml(indexl))+1.d0/2.d0)*x2/l_s)&
-                    *ICM_electron_pressure(x2*r200c(indexM,indexz),indexM,indexz)/(dble(ml(indexl))+1.d0/2.d0)/x2*l_s
+                    *ICM_electron_pressure(x2*r200c_M_z,virial_Mass,redshift)/(dble(ml(indexl))+1.d0/2.d0)/x2*l_s
 
                 Else If (x2 .eq. x_y_max) then
 
@@ -1096,8 +1165,10 @@ Module functions
 
                     x2 = x1 + stepsize
 
+!                    f2 = x2**2*sin((dble(ml(indexl))+1.d0/2.d0)*x2/l_s)&
+!                    *ICM_electron_pressure(x2*r200c(indexM,indexz),indexM,indexz)/(dble(ml(indexl))+1.d0/2.d0)/x2*l_s
                     f2 = x2**2*sin((dble(ml(indexl))+1.d0/2.d0)*x2/l_s)&
-                    *ICM_electron_pressure(x2*r200c(indexM,indexz),indexM,indexz)/(dble(ml(indexl))+1.d0/2.d0)/x2*l_s
+                    *ICM_electron_pressure(x2*r200c_M_z,virial_Mass,redshift)/(dble(ml(indexl))+1.d0/2.d0)/x2*l_s
                 
                 End IF
 
@@ -1136,7 +1207,7 @@ Module functions
 
                 Do indexz=1,number_of_z
 
-                    ylMz(indexl,indexM,indexz) = form_factor(indexM,indexz,indexl)
+                    ylMz(indexl,indexM,indexz) = form_factor(M(indexM),z(indexz),indexl)
 
                 End Do
 
@@ -1198,129 +1269,30 @@ Module functions
 
     end subroutine read_ylMz
 
-    function lensing_potential_2(indexM,indexz,indexl,halo_definition)    ! Lensing potential. Equation (2.10) in 1312.4525. Units of M : solar mass
+    function lensing_potential(virial_Mass,redshift,indexl,halo_definition)    ! Lensing potential. Equation (2.10) in 1312.4525. Units of M : solar mass
 
         use fiducial    ! Units : dimensionless
         use arrays
-        use omp_lib
         Implicit none
 
-        Real*8 :: lensing_potential_2,r_s,l_s,phi_l,prefactor,xmin,xmax
-        Integer*4 :: n,points,i,indexM,indexz,indexl
-        Integer*4,parameter :: number_of_x = 1d4
-        Integer*4,parameter :: intervals = number_of_x - 1  ! It gives less than 1% error
-        Real*8,dimension(number_of_x) :: x,f    
-        Character(len=*) :: halo_definition 
-
-        If (halo_definition .eq. 'critical_density') then
-
-            r_s = r_delta_c(DeltaSO,z(indexz),M200c(indexM,indexz))/concentration_mass_critical(M200c(indexM,indexz),z(indexz))    ! Mpc
-
-            xmin = 1.d-3*r_delta_c(DeltaSO,z(indexz),M200c(indexM,indexz))/r_s    ! dimensionless
-            
-            xmax = 1.5d0*r_delta_c(DeltaSO,z(indexz),M200c(indexM,indexz))/r_s    ! dimensionless
-
-        Else If (halo_definition .eq. 'mean_background') then 
-
-            r_s = r_delta_d(DeltaSO,z(indexz),M200d(indexM,indexz))/concentration_mass_mean(M200d(indexM,indexz),z(indexz))    ! Mpc. 
-                                                                                                     
-            xmin = 1.d-5*r_delta_d(DeltaSO,z(indexz),M200d(indexM,indexz))/r_s    ! dimensionless                  
-
-            !        xmax = 1.05150d0*r_delta_d(DeltaSO,z(indexz),M200d(indexM,indexz))/r_s    ! dimensionless
-
-            xmax = 1.65d0*virial_radius(z(indexz),M(indexM))/r_s    ! dimensionless
-
-        Else If (halo_definition .eq. 'virial') then
-
-            r_s = virial_radius(z(indexz),M(indexM))/concentration_mass_virial(M(indexM),z(indexz))    ! Mpc
-
-            xmin = 1.d-5*virial_radius(z(indexz),M(indexM))/r_s    ! dimensionless
-
-            xmax = 1.043d0*virial_radius(z(indexz),M(indexM))/r_s    ! dimensionless
-
-        Else
-
-            print *,'Not halo definition implemented with name ', halo_definition
-
-            stop
-
-        End If
-
-        l_s = angular_diameter_distance(z(indexz))/r_s                             ! dimensionless
-
-        prefactor = 2.d0*4.d0*Pi*r_s/dble(ml(indexl))/(dble(ml(indexl))+1.d0)/l_s**2 ! Mpc
-
-        Do n=1,number_of_x
-
-            x(n) = 10**(log10(xmin) + dble((n-1))*(log10(xmax) - log10(xmin))/dble(number_of_x-1) ) ! dimensionless
-
-        End Do
-
-        !$omp Parallel Do Shared(f)    
-
-        Do n=1,number_of_x
-
-            If (halo_definition .eq. 'critical_density') then
-
-                f(n) = x(n)**2*sin((dble(ml(indexl))+1.d0/2.d0)*x(n)/l_s)*&
-                NFW_density_profile(x(n)*r_s,M200c(indexM,indexz),z(indexz),'critical_density')/&
-                (dble(ml(indexl))+1.d0/2.d0)/x(n)*l_s/Scrit(indexz)    ! 1/Mpc
-        
-            Else If (halo_definition .eq. 'mean_background') then 
-
-                f(n) = x(n)**2*sin((dble(ml(indexl))+1.d0/2.d0)*x(n)/l_s)*&
-                NFW_density_profile(x(n)*r_s,M200d(indexM,indexz),z(indexz),'mean_background')/&
-                (dble(ml(indexl))+1.d0/2.d0)/x(n)*l_s/Scrit(indexz)    ! 1/Mpc
-        
-            Else If (halo_definition .eq. 'virial') then
-
-                f(n) = x(n)**2*sin((dble(ml(indexl))+1.d0/2.d0)*x(n)/l_s)*&
-                NFW_density_profile(x(n)*r_s,M(indexM),z(indexz),'virial')/&
-                (dble(ml(indexl))+1.d0/2.d0)/x(n)*l_s/Scrit(indexz)    ! 1/Mpc
-        
-            End If
-
-        End Do
-
-        !$omp End Parallel Do
-
-        phi_l = 0.d0
-
-        Do i=1,intervals
-
-            phi_l = (x(i+1)-x(i))/2.d0*(f(i) + f(i+1)) + phi_l
-
-        End Do
-
-        lensing_potential_2 = prefactor*phi_l
-
-    end function lensing_potential_2
-
-    function lensing_potential(indexM,indexz,indexl,halo_definition)    ! Lensing potential. Equation (2.10) in 1312.4525. Units of M : solar mass
-
-        use fiducial    ! Units : dimensionless
-        use arrays
-        use omp_lib
-        Implicit none
-
-        Real*8 :: lensing_potential,r_s,l_s,wavevector,prefactor,Delta_cr,delta_c
+        Real*8 :: lensing_potential,r_s,l_s,wavevector,prefactor,Delta_cr,delta_c,virial_Mass,redshift
         Integer*4 :: indexM,indexz,indexl
         Character(len=*) :: halo_definition 
 
         If (halo_definition .eq. 'virial') then
 
-            r_s = virial_radius(z(indexz),M(indexM))/concentration_mass_virial(M(indexM),z(indexz))    ! Mpc
+            r_s = virial_radius(redshift,virial_Mass)/concentration_mass_virial(virial_Mass,redshift)    ! Mpc
 
-            Delta_cr = 18.d0*Pi**2 + 82.d0*(Omega_m(z(indexz)) - 1.d0) - 39.d0*(Omega_m(z(indexz)) - 1.d0)**2
+            Delta_cr = 18.d0*Pi**2 + 82.d0*(Omega_m(redshift) - 1.d0) - 39.d0*(Omega_m(redshift) - 1.d0)**2
 
-            delta_c = Delta_cr*concentration_mass_virial(M(indexM),z(indexz))**3/3.d0/&
-            (log(1.d0 + concentration_mass_virial(M(indexM),z(indexz))) - &
-            concentration_mass_virial(M(indexM),z(indexz))/(1.d0 + concentration_mass_virial(M(indexM),z(indexz))))
+            delta_c = Delta_cr*concentration_mass_virial(virial_Mass,redshift)**3/3.d0/&
+            (log(1.d0 + concentration_mass_virial(virial_Mass,redshift)) - &
+            concentration_mass_virial(virial_Mass,redshift)/(1.d0 + concentration_mass_virial(virial_Mass,redshift)))
 
-            l_s = angular_diameter_distance(z(indexz))/r_s                             ! dimensionless
+            l_s = angular_diameter_distance(redshift)/r_s                             ! dimensionless
 
-            prefactor = 8.d0*Pi*critical_density(z(indexz))*delta_c*r_s/dble(ml(indexl))/dble(ml(indexl)+1.d0)/&
-            l_s**2/Scrit(indexz)
+            prefactor = 8.d0*Pi*critical_density(redshift)*delta_c*r_s/dble(ml(indexl))/dble(ml(indexl)+1.d0)/&
+            l_s**2/critical_surface_density(redshift)
 
             wavevector = ( dble(ml(indexl)) + 1.d0/2.d0 )/l_s
 
@@ -1332,7 +1304,7 @@ Module functions
 
         End If
 
-        lensing_potential = prefactor*FT_NFW_density_profile(wavevector,M(indexM),z(indexz)) ! Mpc
+        lensing_potential = prefactor*FT_NFW_density_profile(wavevector,virial_Mass,redshift) ! Mpc
 
     end function lensing_potential
 
@@ -1436,25 +1408,25 @@ Module functions
 
             write(15,*) '#  l  virial mass [solar mass]  red-shift  phi'
 
-            !$omp Parallel Do Shared(philMz)        
+!            !$omp Parallel Do Shared(philMz)        
 
-            Do indexl=1,number_of_l
+!            Do indexl=1,number_of_l
 
-                Do indexM=1,number_of_M
+!                Do indexM=1,number_of_M
 
-                    Do indexz=1,number_of_z
+!                    Do indexz=1,number_of_z
 
-                        philMz(indexl,indexM,indexz) = lensing_potential(indexM,indexz,indexl,'critical_density')
+!                        philMz(indexl,indexM,indexz) = lensing_potential(indexM,indexz,indexl,'critical_density')
 
-                        write(15,'(i5,3es18.10)') ml(indexl),M(indexM),z(indexz),philMz(indexl,indexM,indexz)
+!                        write(15,'(i5,3es18.10)') ml(indexl),M(indexM),z(indexz),philMz(indexl,indexM,indexz)
 
-                    End Do
+!                    End Do
 
-                End Do
+!                End Do
 
-            End Do
+!            End Do
 
-            !$omp End Parallel Do
+!            !$omp End Parallel Do
 
             close(15)
         
@@ -1462,25 +1434,25 @@ Module functions
 
             write(15,*) '#  l  virial mass [solar mass]  red-shift  phi'
 
-            !$omp Parallel Do Shared(philMz)        
+!            !$omp Parallel Do Shared(philMz)        
 
-            Do indexl=1,number_of_l
+!            Do indexl=1,number_of_l
 
-                Do indexM=1,number_of_M
+!                Do indexM=1,number_of_M
 
-                    Do indexz=1,number_of_z
+!                    Do indexz=1,number_of_z
 
-                        philMz(indexl,indexM,indexz) = lensing_potential(indexM,indexz,indexl,'mean_background')
+!                        philMz(indexl,indexM,indexz) = lensing_potential(indexM,indexz,indexl,'mean_background')
 
-                        write(15,'(i5,3es18.10)') ml(indexl),M(indexM),z(indexz),philMz(indexl,indexM,indexz)
+!                        write(15,'(i5,3es18.10)') ml(indexl),M(indexM),z(indexz),philMz(indexl,indexM,indexz)
 
-                    End Do
+!                    End Do
 
-                End Do
+!                End Do
 
-            End Do
+!            End Do
 
-            !$omp End Parallel Do
+!            !$omp End Parallel Do
 
             close(15)
         
@@ -1498,7 +1470,7 @@ Module functions
 
                     Do indexz=1,number_of_z
 
-                        philMz(indexl,indexM,indexz) = lensing_potential(indexM,indexz,indexl,'virial')
+                        philMz(indexl,indexM,indexz) = lensing_potential(M(indexM),z(indexz),indexl,'virial')
 
                         write(15,'(3i10,es18.10,i5,2es18.10)') indexl,ml(indexl),indexM,M(indexM),indexz,z(indexz),&
                         philMz(indexl,indexM,indexz)
@@ -1870,13 +1842,12 @@ Module functions
 
     end subroutine compute_matter_power_spectrum_at_z
 
-    function sigma_squared(Mass,indexz) ! Equation (6) of 1303.4726. Units of Mass: solar mass. Units : dimensionless
+    function sigma_squared(Mass,redshift) ! Equation (6) of 1303.4726. Units of Mass: solar mass. Units : dimensionless
 
         use fiducial
-        use arrays
         Implicit none
 
-        Real*8 :: sigma_squared,R,sum,prefactor,Mass,x1,x2,f1,f2
+        Real*8 :: sigma_squared,R,sum,prefactor,Mass,x1,x2,f1,f2,redshift
         Integer*4 :: indexk,indexz
         Integer*4,parameter :: number_of_k_logscale = 1d2
         Integer*4,parameter :: intervals = number_of_k_logscale - 1 
@@ -1886,7 +1857,7 @@ Module functions
 
         prefactor = 1.d0/2.d0/Pi**2
 
-        R = (3.d0*Mass/4.d0/Pi/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0)**(1.d0/3.d0) ! Units : Mpc. (1+z)**3 factor to use comoving coordinates
+        R = (3.d0*Mass/4.d0/Pi/mean_density(redshift)*(1.d0 + redshift)**3.d0)**(1.d0/3.d0) ! Units : Mpc. (1+z)**3 factor to use comoving coordinates
 
         ! Wavevector array. Units : 1/Mpc
         Do indexk = 1, number_of_k_logscale  
@@ -1897,7 +1868,7 @@ Module functions
 
         Do indexk=1,number_of_k_logscale
 
-            f(indexk) = kf(indexk)**2*window_function(kf(indexk),R)**2*matter_power_spectrum(kf(indexk),z(indexz))
+            f(indexk) = kf(indexk)**2*window_function(kf(indexk),R)**2*matter_power_spectrum(kf(indexk),redshift)
 
         End Do
 
@@ -1915,7 +1886,7 @@ Module functions
 
         x2 = x1 + stepsize
 
-        f2 = x2**2*window_function(x2,R)**2*matter_power_spectrum(x2,z(indexz))
+        f2 = x2**2*window_function(x2,R)**2*matter_power_spectrum(x2,redshift)
 
         sum = (x2-x1)/2.d0*(f1 + f2) + sum
 
@@ -1929,7 +1900,7 @@ Module functions
 
                 x2 = kmax
 
-                f2 = x2**2*window_function(x2,R)**2*matter_power_spectrum(x2,z(indexz))
+                f2 = x2**2*window_function(x2,R)**2*matter_power_spectrum(x2,redshift)
 
             Else If (x2 .eq. kmax) then
 
@@ -1939,7 +1910,7 @@ Module functions
 
                 x2 = x1 + stepsize
 
-                f2 = x2**2*window_function(x2,R)**2*matter_power_spectrum(x2,z(indexz))
+                f2 = x2**2*window_function(x2,R)**2*matter_power_spectrum(x2,redshift)
             
             End IF
 
@@ -1959,13 +1930,12 @@ Module functions
 
     end function sigma_squared
 
-    function dsigma_squared_dR(Mass,indexz) ! Derivative w.r.t R of Eq. (6) in 1303.4726. Units of Mass: solar mass. Units : 1/Mpc
+    function dsigma_squared_dR(Mass,redshift) ! Derivative w.r.t R of Eq. (6) in 1303.4726. Units of Mass: solar mass. Units : 1/Mpc
 
         use fiducial
-        use arrays 
         Implicit none
 
-        Real*8 :: dsigma_squared_dR,R,sum,prefactor,Mass,x1,x2,f1,f2
+        Real*8 :: dsigma_squared_dR,R,sum,prefactor,Mass,x1,x2,f1,f2,redshift
         Integer*4 :: indexk,indexz
         Integer*4,parameter :: number_of_k_logscale = 1d2
         Integer*4,parameter :: intervals = number_of_k_logscale - 1 
@@ -1975,7 +1945,7 @@ Module functions
 
         prefactor = 1.d0/Pi**2
 
-        R = (3.d0*Mass/4.d0/Pi/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0)**(1.d0/3.d0) ! Units : Mpc. (1+z)**3 factor to use comoving coordinates
+        R = (3.d0*Mass/4.d0/Pi/mean_density(redshift)*(1.d0 + redshift)**3.d0)**(1.d0/3.d0) ! Units : Mpc. (1+z)**3 factor to use comoving coordinates
 
         ! Wavevector array. Units : 1/Mpc
         Do indexk = 1, number_of_k_logscale    
@@ -1987,7 +1957,7 @@ Module functions
         Do indexk=1,number_of_k_logscale
 
             f(indexk) = kf(indexk)**3*window_function(kf(indexk),R)*d_window_function(kf(indexk),R)&
-            *matter_power_spectrum(kf(indexk),z(indexz))
+            *matter_power_spectrum(kf(indexk),redshift)
 
         End Do
 
@@ -2005,7 +1975,7 @@ Module functions
 
         x2 = x1 + stepsize
 
-        f2 = x2**3*window_function(x2,R)*d_window_function(x2,R)*matter_power_spectrum(x2,z(indexz))
+        f2 = x2**3*window_function(x2,R)*d_window_function(x2,R)*matter_power_spectrum(x2,redshift)
 
         sum = (x2-x1)/2.d0*(f1 + f2) + sum
 
@@ -2019,7 +1989,7 @@ Module functions
 
                 x2 = kmax
 
-                f2 = x2**3*window_function(x2,R)*d_window_function(x2,R)*matter_power_spectrum(x2,z(indexz))
+                f2 = x2**3*window_function(x2,R)*d_window_function(x2,R)*matter_power_spectrum(x2,redshift)
 
             Else If (x2 .eq. kmax) then
 
@@ -2029,7 +1999,7 @@ Module functions
 
                 x2 = x1 + stepsize
 
-                f2 = x2**3*window_function(x2,R)*d_window_function(x2,R)*matter_power_spectrum(x2,z(indexz))
+                f2 = x2**3*window_function(x2,R)*d_window_function(x2,R)*matter_power_spectrum(x2,redshift)
             
             End IF
 
@@ -2049,14 +2019,14 @@ Module functions
 
     end function dsigma_squared_dR
 
-    function halo_mass_function(indexM,indexz) ! Equation (8) in "The large-scale bias of dark matter halos: numerical calibration and model tests".
+    function halo_mass_function(virial_Mass,redshift) ! Equation (8) in "The large-scale bias of dark matter halos: numerical calibration and model tests".
 
         use fiducial                 ! Units of M [M_{200d}] : solar mass. Units : 1/(solar mass*Mpc**3). Halo definition : mean density
         use arrays                    
         Implicit none                 
 
-        Real*8 :: halo_mass_function,R,sigma,nu,beta,phi,eta,gamma
-        Real*8 :: f_nu,g_sigma        
+        Real*8 :: halo_mass_function,R,sigma,nu,beta,phi,eta,gamma,virial_Mass,redshift,M200d_M_z
+        Real*8 :: f_nu,g_sigma,alpha_halo_mass_function_z        
         Integer*4 :: indexM,indexz
         Real*8,parameter :: delta_c = 1.686d0    ! page 880 in "The large-scale ..."
         Real*8,parameter :: beta0 = 0.589d0
@@ -2064,67 +2034,75 @@ Module functions
         Real*8,parameter :: eta0 = -0.243d0
         Real*8,parameter :: gamma0 = 0.864d0
 
-        If (indexz .gt. indexz_halo_mass_function) then
 
-            R = (3.d0*M200d(indexM,indexz_halo_mass_function)/4.d0/Pi/mean_density(z(indexz_halo_mass_function))*&
-            (1.d0 + z(indexz_halo_mass_function))**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
 
-            sigma = sqrt(sigma_square_M200d(indexM,indexz_halo_mass_function))    ! Units : dimensionless
+        If (redshift .gt. 3.d0) then
+
+            call Interpolate_2D(M200d_M_z,virial_Mass,3.d0,M(1:number_of_M),z(1:number_of_z),M200d(1:number_of_M,1:number_of_z))
+
+            call Interpolate_1D(alpha_halo_mass_function_z,redshift,z,alpha_halo_mass_function)
+
+            R = (3.d0*M200d_M_z/4.d0/Pi/mean_density(3.d0)*&
+            (1.d0 + 3.d0 )**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
+
+            sigma = sqrt(sigma_squared(M200d_M_z,3.d0))    ! Units : dimensionless
 
             nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
 
-            beta = beta0*( 1.d0 + z(indexz_halo_mass_function) )**(0.20d0) 
+            beta = beta0*( 1.d0 + 3.d0 )**(0.20d0) 
 
-            phi = phi0*( 1.d0 + z(indexz_halo_mass_function) )**(-0.08d0)
+            phi = phi0*( 1.d0 + 3.d0 )**(-0.08d0)
 
-            eta = eta0*( 1.d0 + z(indexz_halo_mass_function) )**(0.27d0)
+            eta = eta0*( 1.d0 + 3.d0 )**(0.27d0)
 
-            gamma = gamma0*( 1.d0 + z(indexz_halo_mass_function) )**(-0.01d0)
+            gamma = gamma0*( 1.d0 + 3.d0 )**(-0.01d0)
 
-            f_nu = alpha_halo_mass_function(indexz)*(1.d0 + (beta*nu)**(-2.d0*phi))*&
+            f_nu = alpha_halo_mass_function_z*(1.d0 + (beta*nu)**(-2.d0*phi))*&
             nu**(2.d0*eta)*exp(-gamma*nu**2/2.d0)
 
             g_sigma = nu*f_nu ! dimensionless           ! Equation (C2) in "Toward a ... universality"
 
-            halo_mass_function = -mean_density(z(indexz_halo_mass_function))/(1.d0 + z(indexz_halo_mass_function))**3.d0&
-            /2.d0/M200d(indexM,indexz_halo_mass_function)**2&    ! (1+z)**3 to use comoving coordinates
-            *R/3.d0/sigma_square_M200d(indexM,indexz_halo_mass_function)*&
-            dsigma_square_M200d(indexM,indexz_halo_mass_function)*g_sigma
+            halo_mass_function = -mean_density(3.d0)/(1.d0 + 3.d0)**3.d0/2.d0/M200d_M_z**2&    ! (1+z)**3 to use comoving coordinates
+            *R/3.d0/sigma**2*dsigma_squared_dR(M200d_M_z,3.d0)*g_sigma
 
         Else
 
-            R = (3.d0*M200d(indexM,indexz)/4.d0/Pi/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
+            call Interpolate_2D(M200d_M_z,virial_Mass,redshift,M(1:number_of_M),z(1:number_of_z),M200d(1:number_of_M,1:number_of_z))
 
-            sigma = sqrt(sigma_square_M200d(indexM,indexz))    ! Units : dimensionless
+            call Interpolate_1D(alpha_halo_mass_function_z,redshift,z,alpha_halo_mass_function)
+
+            R = (3.d0*M200d_M_z/4.d0/Pi/mean_density(redshift)*(1.d0 + redshift)**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
+
+            sigma = sqrt(sigma_squared(M200d_M_z,redshift))    ! Units : dimensionless
 
             nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
 
-            beta = beta0*(1+z(indexz))**(0.20d0) 
+            beta = beta0*( 1.d0 + redshift )**(0.20d0) 
 
-            phi = phi0*(1+z(indexz))**(-0.08d0)
+            phi = phi0*( 1.d0 + redshift )**(-0.08d0)
 
-            eta = eta0*(1+z(indexz))**(0.27d0)
+            eta = eta0*( 1.d0 + redshift )**(0.27d0)
 
-            gamma = gamma0*(1+z(indexz))**(-0.01d0)
+            gamma = gamma0*( 1.d0 + redshift )**(-0.01d0)
 
-            f_nu = alpha_halo_mass_function(indexz)*(1.d0 + (beta*nu)**(-2.d0*phi))*nu**(2.d0*eta)*dexp(-gamma*nu**2/2.d0)
+            f_nu = alpha_halo_mass_function_z*(1.d0 + (beta*nu)**(-2.d0*phi))*nu**(2.d0*eta)*dexp(-gamma*nu**2/2.d0)
 
             g_sigma = nu*f_nu ! dimensionless           ! Equation (C2) in "Toward a ... universality"
 
-            halo_mass_function = -mean_density(z(indexz))/(1.d0 + z(indexz))**3.d0/2.d0/M200d(indexM,indexz)**2&    ! (1+z)**3 to use comoving coordinates
-            *R/3.d0/sigma_square_M200d(indexM,indexz)*dsigma_square_M200d(indexM,indexz)*g_sigma
+            halo_mass_function = -mean_density(redshift)/(1.d0 + redshift )**3.d0/2.d0/M200d_M_z**2&    ! (1+z)**3 to use comoving coordinates
+            *R/3.d0/sigma**2*dsigma_squared_dR(M200d_M_z,redshift)*g_sigma
 
         End If
 
     end function halo_mass_function
 
-    function nonnormalised_halo_mass_function(indexM,indexz)    ! Equation (8) in "The large-scale bias of dark matter halos: 
+    function nonnormalised_halo_mass_function(virial_Mass,redshift)    ! Equation (8) in "The large-scale bias of dark matter halos: 
 
         use fiducial    ! numerical calibration and model tests" without \alpha constant. This function corresponds to Equation (C2) in
         use arrays    ! "Toward a halo mass function for precision cosmology: the limits of universality" by Jeremy Tinker et al. Parameters taken 
         Implicit none    ! from first line of table 4. Units : 1/(solar mass*Mpc**3)
 
-        Real*8 :: nonnormalised_halo_mass_function,R,sigma,nu,beta,phi,eta,gamma
+        Real*8 :: nonnormalised_halo_mass_function,R,sigma,nu,beta,phi,eta,gamma,virial_Mass,redshift,M200d_M_z
         Real*8 :: f_nu,g_sigma
         Integer*4 :: indexM,indexz
         Real*8,parameter :: delta_c = 1.686d0    ! page 880 in "The large-scale ..."
@@ -2133,54 +2111,55 @@ Module functions
         Real*8,parameter :: eta0 = -0.243d0
         Real*8,parameter :: gamma0 = 0.864d0
 
-        If (indexz .gt. indexz_halo_mass_function) then
+        If (redshift .gt. 3.d0) then
 
-            R = (3.d0*M200d(indexM,indexz_halo_mass_function)/4.d0/Pi/mean_density(z(indexz_halo_mass_function))*&
-            (1.d0 + z(indexz_halo_mass_function))**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
+            call Interpolate_2D(M200d_M_z,virial_Mass,3.d0,M(1:number_of_M),z(1:number_of_z),M200d(1:number_of_M,1:number_of_z))
 
-            sigma = sqrt(sigma_square_M200d(indexM,indexz_halo_mass_function))    ! Units : dimensionless
+            R = (3.d0*M200d_M_z/4.d0/Pi/mean_density(3.d0)*( 1.d0 + 3.d0 )**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
+
+            sigma = sqrt(sigma_squared(M200d_M_z,3.d0))    ! Units : dimensionless
 
             nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
 
-            beta = beta0*( 1.d0 + z(indexz_halo_mass_function) )**(0.20d0) 
+            beta = beta0*( 1.d0 + 3.d0 )**(0.20d0) 
 
-            phi = phi0*( 1.d0 + z(indexz_halo_mass_function) )**(-0.08d0)
+            phi = phi0*( 1.d0 + 3.d0 )**(-0.08d0)
             
-            eta = eta0*( 1.d0 + z(indexz_halo_mass_function) )**(0.27d0)
+            eta = eta0*( 1.d0 + 3.d0 )**(0.27d0)
 
-            gamma = gamma0*( 1.d0 + z(indexz_halo_mass_function) )**(-0.01d0)
+            gamma = gamma0*( 1.d0 + 3.d0 )**(-0.01d0)
 
             f_nu = (1.d0 + (beta*nu)**(-2.d0*phi))*nu**(2.d0*eta)*dexp(-gamma*nu**2/2.d0)
 
             g_sigma = nu*f_nu            ! Equation (C2) in "Toward a ... universality"
 
-            nonnormalised_halo_mass_function = -mean_density(z(indexz_halo_mass_function))/(1.d0 + &
-            z(indexz_halo_mass_function))**3.d0/2.d0/M200d(indexM,indexz_halo_mass_function)**2&
-            *R/3.d0/sigma_square_M200d(indexM,indexz_halo_mass_function)*&
-            dsigma_square_M200d(indexM,indexz_halo_mass_function)*g_sigma
+            nonnormalised_halo_mass_function = -mean_density(3.d0)/(1.d0 + 3.d0 )**3.d0/2.d0/M200d_M_z**2&
+            *R/3.d0/sigma**2*dsigma_squared_dR(M200d_M_z,3.d0)*g_sigma
 
         Else
 
-            R = (3.d0*M200d(indexM,indexz)/4.d0/Pi/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
+            call Interpolate_2D(M200d_M_z,virial_Mass,redshift,M(1:number_of_M),z(1:number_of_z),M200d(1:number_of_M,1:number_of_z))
 
-            sigma = sqrt(sigma_square_M200d(indexM,indexz))    ! Units : dimensionless
+            R = (3.d0*M200d_M_z/4.d0/Pi/mean_density(redshift)*(1.d0 + redshift )**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
+
+            sigma = sqrt(sigma_squared(M200d_M_z,redshift))    ! Units : dimensionless
 
             nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
 
-            beta = beta0*(1+z(indexz))**(0.20d0) 
+            beta = beta0*( 1.d0 + redshift )**(0.20d0) 
 
-            phi = phi0*(1+z(indexz))**(-0.08d0)
+            phi = phi0*( 1.d0 + redshift )**(-0.08d0)
 
-            eta = eta0*(1+z(indexz))**(0.27d0)
+            eta = eta0*( 1.d0 + redshift )**(0.27d0)
 
-            gamma = gamma0*(1+z(indexz))**(-0.01d0)
+            gamma = gamma0*( 1.d0 + redshift )**(-0.01d0)
 
             f_nu = (1.d0 + (beta*nu)**(-2.d0*phi))*nu**(2.d0*eta)*dexp(-gamma*nu**2/2.d0)
 
             g_sigma = nu*f_nu            ! Equation (C2) in "Toward a ... universality"
 
-            nonnormalised_halo_mass_function = -mean_density(z(indexz))/(1.d0 + z(indexz))**3.d0/2.d0/M200d(indexM,indexz)**2&
-            *R/3.d0/sigma_square_M200d(indexM,indexz)*dsigma_square_M200d(indexM,indexz)*g_sigma
+            nonnormalised_halo_mass_function = -mean_density(redshift)/(1.d0 + redshift)**3.d0/2.d0/M200d_M_z**2&
+            *R/3.d0/sigma**2*dsigma_squared_dR(M200d_M_z,redshift)*g_sigma
 
         End If
 
@@ -2204,7 +2183,7 @@ Module functions
 
            Do indexM=1,number_of_M
 
-                f(indexM) = nonnormalised_halo_mass_function(indexM,indexz)*bMz(indexM,indexz)*&
+                f(indexM) = nonnormalised_halo_mass_function(M(indexM),z(indexz))*bMz(indexM,indexz)*&
                 M(indexM)/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0*dM200ddM(indexM,indexz)
 
            End Do
@@ -2245,7 +2224,7 @@ Module functions
 
             Do indexz=1,number_of_z
 
-                dndM(indexM,indexz) = halo_mass_function(indexM,indexz)*dM200ddM(indexM,indexz)
+                dndM(indexM,indexz) = halo_mass_function(M(indexM),z(indexz))*dM200ddM(indexM,indexz)
 
                 write(15,'(i10,es18.10,i5,2es18.10)') indexM, M(indexM), indexz, z(indexz), dndM(indexM,indexz)
 
@@ -2279,9 +2258,9 @@ Module functions
 
             Do indexz=1,number_of_z
 
-                sigma_square_M200d(indexM,indexz) = sigma_squared(M200d(indexM,indexz),indexz)
+                sigma_square_M200d(indexM,indexz) = sigma_squared(M200d(indexM,indexz),z(indexz))
 
-                dsigma_square_M200d(indexM,indexz) = dsigma_squared_dR(M200d(indexM,indexz),indexz)
+                dsigma_square_M200d(indexM,indexz) = dsigma_squared_dR(M200d(indexM,indexz),z(indexz))
 
                 write(15,'(i10,es18.10,i5,3es18.10)') indexM,M200d(indexM,indexz),indexz,z(indexz),&
                 sigma_square_M200d(indexM,indexz),dsigma_square_M200d(indexM,indexz)
@@ -2296,34 +2275,34 @@ Module functions
 
     end subroutine compute_sigma_square_M200d
 
-    subroutine read_sigma_square_M200d()
+!    subroutine read_sigma_square_M200d()
 
-        use arrays
-        use fiducial
-        Implicit none
+!        use arrays
+!        use fiducial
+!        Implicit none
 
-        Integer*4 :: index,iM,iz
-        Real*8 :: MM,zz,ts2,tds2
+!        Integer*4 :: index,iM,iz
+!        Real*8 :: MM,zz,ts2,tds2
 
-        open(15,file='./precomputed_quantities/sigma_square_M200d.dat')
+!        open(15,file='./precomputed_quantities/sigma_square_M200d.dat')
 
-        read(15,*)
+!        read(15,*)
 
-        read(15,*)
+!        read(15,*)
 
-        Do index=1,number_of_M*number_of_z
+!        Do index=1,number_of_M*number_of_z
 
-            read(15,'(i10,es18.10,i5,3es18.10)') iM,MM,iz,zz,ts2,tds2
+!            read(15,'(i10,es18.10,i5,3es18.10)') iM,MM,iz,zz,ts2,tds2
 
-            sigma_square_M200d(iM,iz) = ts2
+!            sigma_square_M200d(iM,iz) = ts2
 
-            dsigma_square_M200d(iM,iz) = tds2 
+!            dsigma_square_M200d(iM,iz) = tds2 
 
-        End Do
+!        End Do
 
-        close(15)
+!        close(15)
 
-    end subroutine read_sigma_square_M200d
+!    end subroutine read_sigma_square_M200d
 
     subroutine read_dndM()
 
@@ -2374,20 +2353,29 @@ Module functions
 
     end subroutine write_dndM_at_z
 
-    function pre_Clphiphi(indexz,indexl) ! Required function to compute one halo term of lensing potential angular power spectrum. Dimensionless
+    function pre_Clphiphi(redshift,indexl) ! Required function to compute one halo term of lensing potential angular power spectrum. Dimensionless
 
         use fiducial
         use arrays
         Implicit none
 
-        Real*8 :: pre_Clphiphi,sum
+        Real*8 :: pre_Clphiphi,sum,redshift,dndM_M_z,philMz_M_z,com_vol_per_ster_z
         Integer*4 :: indexl,i,indexM,indexz
-        Integer*4,parameter :: intervals = number_of_M - 1 
-        Real*8,dimension(number_of_M) :: f
+        Integer*4,parameter :: number_of_virial_Mass = 1d3
+        Integer*4,parameter :: intervals = number_of_virial_Mass - 1 
+        Real*8,dimension(number_of_virial_Mass) :: f,virial_Mass
 
-        Do indexM=1,number_of_M
+        Do indexM = 1, number_of_virial_Mass    
 
-            f(indexM) = dndM(indexM,indexz)*philMz(indexl,indexM,indexz)**2    ! Units : 1/solar mass/Mpc**3
+            virial_Mass(indexM) = 10**(log10(Mmin) + real(indexM-1)*(log10(Mmax) - log10(Mmin))/real(number_of_virial_Mass-1))
+
+            call Interpolate_2D(dndM_M_z,virial_Mass(indexM),redshift,M(1:number_of_M),z(1:number_of_z),&
+            dndM(1:number_of_M,1:number_of_z))
+
+            call Interpolate_2D(philMz_M_z,virial_Mass(indexM),redshift,M(1:number_of_M),z(1:number_of_z),&
+            philMz(indexl,1:number_of_M,1:number_of_z))
+
+            f(indexM) = dndM_M_z*philMz_M_z**2 ! Units : 1/solar mass/Mpc**3
 
         End Do
 
@@ -2395,11 +2383,13 @@ Module functions
 
         Do i=1,intervals
 
-            sum = (M(i+1)- M(i))/2.d0*( f(i) + f(i+1) ) + sum   ! Units : 1/Mpc**3
+            sum = (virial_Mass(i+1)- virial_Mass(i))/2.d0*( f(i) + f(i+1) ) + sum   ! Units : 1/Mpc**3
 
         End Do
 
-        pre_Clphiphi = d2VdzdO(indexz)*sum     ! Dimensionless                     
+        call Interpolate_1D(com_vol_per_ster_z,redshift,z,d2VdzdO)
+
+        pre_Clphiphi = com_vol_per_ster_z*sum     ! Dimensionless                     
 
     end function pre_Clphiphi
 
@@ -2411,12 +2401,15 @@ Module functions
 
         Real*8 :: C_l_phiphi_one_halo,sum
         Integer*4 :: indexl,i,indexz
-        Integer*4,parameter :: intervals = number_of_z - 1
-        Real*8,dimension(number_of_z):: f
+        Integer*4,parameter :: number_of_redshift = 1d3
+        Integer*4,parameter :: intervals = number_of_redshift - 1
+        Real*8,dimension(number_of_redshift):: f,redshift
 
-        Do indexz=1,number_of_z
+        Do indexz=1,number_of_redshift
 
-            f(indexz) = pre_Clphiphi(indexz,indexl)          ! Dimensionless
+            redshift(indexz) = 10**(log10(zmin) + real(indexz-1)*(log10(zmax) - log10(zmin))/real(number_of_redshift-1))
+
+            f(indexz) = pre_Clphiphi(redshift(indexz),indexl)          ! Dimensionless
 
         End Do
 
@@ -2434,7 +2427,7 @@ Module functions
 
         Do indexz=1,intervals
 
-            sum = (z(indexz+1) -  z(indexz))/2.d0*( f(indexz) + f(indexz+1) ) + sum
+            sum = (redshift(indexz+1) -  redshift(indexz))/2.d0*( f(indexz) + f(indexz+1) ) + sum
 
         End Do
 
@@ -2462,20 +2455,32 @@ Module functions
 
     end subroutine compute_Clphiphi1h
 
-    function pre_Cl(indexz,indexl) ! Dimensionless
+    function pre_Cl(redshift,indexl) ! Dimensionless
 
         use fiducial
         use arrays
         Implicit none
 
-        Real*8 :: pre_Cl,sum
+        Real*8 :: pre_Cl,sum,redshift,dndM_M_z,ylMz_M_z,philMz_M_z,com_vol_per_ster_z
         Integer*4 :: indexl,i,indexM,indexz
-        Integer*4,parameter :: intervals = number_of_M - 1 
-        Real*8,dimension(number_of_M) :: f
+        Integer*4,parameter :: number_of_virial_Mass = 1d3
+        Integer*4,parameter :: intervals = number_of_virial_Mass - 1 
+        Real*8,dimension(number_of_virial_Mass) :: f,virial_Mass
 
-        Do indexM=1,number_of_M
+        Do indexM = 1, number_of_virial_Mass    
 
-            f(indexM) = dndM(indexM,indexz)*ylMz(indexl,indexM,indexz)*philMz(indexl,indexM,indexz) ! Units : 1/solar mass/Mpc**3
+            virial_Mass(indexM) = 10**(log10(Mmin) + real(indexM-1)*(log10(Mmax) - log10(Mmin))/real(number_of_virial_Mass-1))
+
+            call Interpolate_2D(dndM_M_z,virial_Mass(indexM),redshift,M(1:number_of_M),z(1:number_of_z),&
+            dndM(1:number_of_M,1:number_of_z))
+
+            call Interpolate_2D(philMz_M_z,virial_Mass(indexM),redshift,M(1:number_of_M),z(1:number_of_z),&
+            philMz(indexl,1:number_of_M,1:number_of_z))
+
+            call Interpolate_2D(ylMz_M_z,virial_Mass(indexM),redshift,M(1:number_of_M),z(1:number_of_z),&
+            ylMz(indexl,1:number_of_M,1:number_of_z))
+
+            f(indexM) = dndM_M_z*ylMz_M_z*philMz_M_z ! Units : 1/solar mass/Mpc**3
 
         End Do
 
@@ -2493,11 +2498,13 @@ Module functions
 
         Do i=1,intervals
 
-            sum = (M(i+1)- M(i))/2.d0*( f(i) + f(i+1) ) + sum 
+            sum = (virial_Mass(i+1)- virial_Mass(i))/2.d0*( f(i) + f(i+1) ) + sum 
 
         End Do
 
-        pre_Cl = d2VdzdO(indexz)*sum       ! dimensionless                   
+        call Interpolate_1D(com_vol_per_ster_z,redshift,z,d2VdzdO)
+
+        pre_Cl = com_vol_per_ster_z*sum       ! dimensionless                   
 
     end function pre_Cl
 
@@ -2509,12 +2516,15 @@ Module functions
 
         Real*8 :: C_l_yphi_one_halo,sum
         Integer*4 :: indexl,i,indexz
-        Integer*4,parameter :: intervals = number_of_z - 1
-        Real*8,dimension(number_of_z):: f
+        Integer*4,parameter :: number_of_redshift = 1d3
+        Integer*4,parameter :: intervals = number_of_redshift - 1
+        Real*8,dimension(number_of_redshift):: f,redshift
 
-        Do indexz=1,number_of_z
+        Do indexz=1,number_of_redshift
 
-            f(indexz) = pre_Cl(indexz,indexl)          ! Dimensionless
+            redshift(indexz) = 10**(log10(zmin) + real(indexz-1)*(log10(zmax) - log10(zmin))/real(number_of_redshift-1))
+
+            f(indexz) = pre_Cl(redshift(indexz),indexl)          ! Dimensionless
 
         End Do
 
@@ -2532,7 +2542,7 @@ Module functions
 
         Do indexz=1,intervals
 
-            sum = (z(indexz+1) -  z(indexz))/2.d0*( f(indexz) + f(indexz+1) ) + sum
+            sum = (redshift(indexz+1) -  redshift(indexz))/2.d0*( f(indexz) + f(indexz+1) ) + sum
 
         End Do
 
@@ -2560,13 +2570,13 @@ Module functions
 
     end subroutine compute_Cl1h
 
-    function linear_halo_bias(indexM,indexz)    ! From table 2 and equation (6) of "The large-scale bias of dark matter halos:  
+    function linear_halo_bias(virial_Mass,redshift)    ! From table 2 and equation (6) of "The large-scale bias of dark matter halos:  
 
         use arrays    ! numerical calibration and model tests". It computes the linear halo bias. (See paper for details about parameters). 
         use fiducial  ! Mass given must be M_{200d}. Dimensionless. 
         Implicit none    
 
-        Real*8 :: linear_halo_bias,sigma,nu
+        Real*8 :: linear_halo_bias,sigma,nu,virial_Mass,redshift,M200d_M_z
         Real*8,parameter :: y = log10(DeltaSO)
         Real*8,parameter :: A = 1.d0 + 2.4d-1*y*dexp(-(4.d0/y)**4)
         Real*8,parameter :: aa = 4.4d-1*y - 8.8d-1
@@ -2577,8 +2587,10 @@ Module functions
         Real*8,parameter :: delta_c = 1.686d0
         Integer*4 :: indexM,indexz
         
-        !    sigma = sqrt(sigma_squared(M(indexM),indexz))    ! M must be the SO mass M_{200d} 
-        sigma = sqrt(sigma_square_M200d(indexM,indexz))    ! M must be the SO mass M_{200d} 
+        call Interpolate_2D(M200d_M_z,virial_Mass,redshift,M(1:number_of_M),z(1:number_of_z),M200d(1:number_of_M,1:number_of_z))
+
+        sigma = sqrt(sigma_squared(M200d_M_z,redshift))    ! M must be the SO mass M_{200d} 
+!        sigma = sqrt(sigma_square_M200d(indexM,indexz))    ! M must be the SO mass M_{200d} 
 
         nu = delta_c/sigma
 
@@ -2607,7 +2619,7 @@ Module functions
 
             Do indexz=1,number_of_z
 
-                bMz(indexM,indexz) = linear_halo_bias(indexM,indexz)
+                bMz(indexM,indexz) = linear_halo_bias(M(indexM),z(indexz))
 
                 write(15,'(i10,es18.10,i5,2es18.10)') indexM,M(indexM),indexz,z(indexz),bMz(indexM,indexz)
 
@@ -2734,36 +2746,36 @@ Module functions
 
     end subroutine write_bMz_at_z
 
-    subroutine write_bnu_at_z(indexz)
+!    subroutine write_bnu_at_z(indexz)
 
-        use arrays
-        use fiducial
-        Implicit none
+!        use arrays
+!        use fiducial
+!        Implicit none
 
-        Integer*4 :: indexM,indexz
-        Real*8 :: sigma,delta_c,nu
+!        Integer*4 :: indexM,indexz
+!        Real*8 :: sigma,delta_c,nu
 
-        open(15,file='./output/bnu_at_z.dat')
+!        open(15,file='./output/bnu_at_z.dat')
         
-        write(15,*) '# Virial Mass [solar mass/h]  bnu at redshift'
+!        write(15,*) '# Virial Mass [solar mass/h]  bnu at redshift'
 
-        Do indexM=1,number_of_M
+!        Do indexM=1,number_of_M
 
-            sigma = sqrt(sigma_squared(M(indexM),indexz))
+!            sigma = sqrt(sigma_squared(M(indexM),indexz))
 
             !    sigma = sqrt(sigma_squared(M200d(indexM,indexz),indexz))
 
-            delta_c = 1.686d0
+!            delta_c = 1.686d0
 
-            nu = delta_c/sigma
+!            nu = delta_c/sigma
 
-            write(15,'(2es18.10)') nu, bMz(indexM,indexz)
+!            write(15,'(2es18.10)') nu, bMz(indexM,indexz)
 
-        End Do
+!        End Do
 
-        close(15)
+!        close(15)
 
-    end subroutine write_bnu_at_z
+!    end subroutine write_bnu_at_z
 
     function C_l_psi_limber(indexl)    ! It computes the angular power spectrum of the lensing potential in the Limber approximation 
 
@@ -2785,20 +2797,13 @@ Module functions
 
         End Do
 
-        !    prefactor = 8.d0*Pi**2/dble(ml(indexl))**3
-
         prefactor = 4.d0/dble(ml(indexl))**2/(dble(ml(indexl))+1.d0)**2*9.d0/4.d0/&
         c**4*Hubble_parameter(0.d0)**4*Omega_m(0.d0)**2    !    Units : 
 
         Do indexz=1,number_of_z
 
-           !        f(indexz) = comoving_distance(zlimber(indexz))*c/Hubble_parameter(zlimber(indexz))*&
-           !        power_spectrum_weyl_potential(dble(ml(indexl))/comoving_distance(zlimber(indexz)),zlimber(indexz))*&
-           !        ( comoving_distance(z_dec) - comoving_distance(zlimber(indexz)) )**2/&
-           !        comoving_distance(z_dec)**2/comoving_distance(zlimber(indexz))**2/(1.d0 + zlimber(indexz))**4
-
-           f(indexz) = (1.d0 + zlimber(indexz))**2*( comoving_distance(z_dec) - comoving_distance(zlimber(indexz)) )**2/&
-           comoving_distance(z_dec)**2*c/Hubble_parameter(zlimber(indexz))*&
+           f(indexz) = (1.d0 + zlimber(indexz))**2*( com_dist_at_z_dec - comoving_distance(zlimber(indexz)) )**2/&
+           com_dist_at_z_dec**2*c/Hubble_parameter(zlimber(indexz))*&
            matter_power_spectrum((dble(ml(indexl)) + 1.d0/2.d0)/comoving_distance(zlimber(indexz)),zlimber(indexz))
 
         End Do
@@ -2841,15 +2846,22 @@ Module functions
         use arrays
         Implicit none
 
-        Real*8 :: C_l_phiphi_two_halo,sum
+        Real*8 :: C_l_phiphi_two_halo,sum,com_dist_z,com_vol_per_ster_z
         Integer*4 :: indexl,indexz
-        Integer*4,parameter :: intervals = number_of_z - 1 
-        Real*8,dimension(number_of_z):: f
+        Integer*4,parameter :: number_of_redshift = 1d3
+        Integer*4,parameter :: intervals = number_of_redshift - 1 
+        Real*8,dimension(number_of_redshift):: f,redshift
 
-        Do indexz=1,number_of_z
+        Do indexz=1,number_of_redshift
 
-            f(indexz) = pre_Cl_1(indexz,indexl)**2*d2VdzdO(indexz)*&
-            matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance(z(indexz)),z(indexz))    !  Dimensionless
+            redshift(indexz) = 10**(log10(zmin) + real(indexz-1)*(log10(zmax) - log10(zmin))/real(number_of_redshift-1))
+
+            call Interpolate_1D(com_dist_z,redshift(indexz),z,comoving_distance_at_z)
+
+            call Interpolate_1D(com_vol_per_ster_z,redshift(indexz),z,d2VdzdO)
+
+            f(indexz) = pre_Cl_1(redshift(indexz),indexl)**2*com_vol_per_ster_z*&
+            matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/com_dist_z,redshift(indexz))    !  Dimensionless
 
         End Do
 
@@ -2867,7 +2879,7 @@ Module functions
 
         Do indexz=1,intervals
 
-            sum = (z(indexz+1)-z(indexz))/2.d0*( f(indexz) + f(indexz+1) ) + sum
+            sum = (redshift(indexz+1)-redshift(indexz))/2.d0*( f(indexz) + f(indexz+1) ) + sum
 
         End Do
 
@@ -2895,21 +2907,33 @@ Module functions
 
     end subroutine compute_Clphiphi2h
 
-    function pre_Cl_1(indexz,indexl) ! Units 1/Mpc**3. 
+    function pre_Cl_1(redshift,indexl) ! Units 1/Mpc**3. 
 
         use fiducial
         use omp_lib
         use arrays
         Implicit none
 
-        Real*8 :: pre_Cl_1,sum
+        Real*8 :: pre_Cl_1,sum,redshift,dndM_M_z,bMz_M_z,philMz_M_z
         Integer*4 :: indexl,indexM,indexz
+        Integer*4,parameter :: number_of_virial_Mass = 1d3
         Integer*4,parameter :: intervals = number_of_M - 1
-        Real*8,dimension(number_of_M) :: f
+        Real*8,dimension(number_of_virial_Mass) :: f,virial_Mass
         
-        Do indexM=1,number_of_M
+        Do indexM = 1, number_of_virial_Mass    
 
-            f(indexM) = dndM(indexM,indexz)*bMz(indexM,indexz)*philMz(indexl,indexM,indexz) 
+            virial_Mass(indexM) = 10**(log10(Mmin) + real(indexM-1)*(log10(Mmax) - log10(Mmin))/real(number_of_virial_Mass-1))
+
+            call Interpolate_2D(dndM_M_z,virial_Mass(indexM),redshift,M(1:number_of_M),z(1:number_of_z),&
+            dndM(1:number_of_M,1:number_of_z))
+
+            call Interpolate_2D(bMz_M_z,virial_Mass(indexM),redshift,M(1:number_of_M),z(1:number_of_z),&
+            bMz(1:number_of_M,1:number_of_z))
+
+            call Interpolate_2D(philMz_M_z,virial_Mass(indexM),redshift,M(1:number_of_M),z(1:number_of_z),&
+            philMz(indexl,1:number_of_M,1:number_of_z))
+
+            f(indexM) = dndM_M_z*bMz_M_z*philMz_M_z 
 
         End Do
 
@@ -2927,7 +2951,7 @@ Module functions
 
         Do indexM=1,intervals
 
-            sum = (M(indexM+1)-M(indexM))/2.d0*( f(indexM) + f(indexM+1) ) + sum
+            sum = (virial_Mass(indexM+1)-virial_Mass(indexM))/2.d0*( f(indexM) + f(indexM+1) ) + sum
 
         End Do
 
@@ -2935,23 +2959,36 @@ Module functions
 
     end function pre_Cl_1
 
-    function pre_Cl_2(indexz,indexl) ! Units 1/Mpc**3
+    function pre_Cl_2(redshift,indexl) ! Units 1/Mpc**3
 
         use fiducial
         use arrays
         use omp_lib
         Implicit none
 
-        Real*8 :: pre_Cl_2,sum
+        Real*8 :: pre_Cl_2,sum,redshift,dndM_M_z,bMz_M_z,ylMz_M_z
         Integer*4 :: indexl,indexM,indexz
-        Integer*4,parameter :: intervals = number_of_M - 1
-        Real*8,dimension(number_of_M) :: f
+        Integer*4,parameter :: number_of_virial_Mass = 1d3
+        Integer*4,parameter :: intervals = number_of_virial_Mass - 1
+        Real*8,dimension(number_of_virial_Mass) :: f,virial_Mass
 
-        Do indexM=1,number_of_M
+        Do indexM = 1, number_of_virial_Mass    
 
-            f(indexM) = dndM(indexM,indexz)*ylMz(indexl,indexM,indexz)*bMz(indexM,indexz)
+            virial_Mass(indexM) = 10**(log10(Mmin) + real(indexM-1)*(log10(Mmax) - log10(Mmin))/real(number_of_virial_Mass-1))
+
+            call Interpolate_2D(dndM_M_z,virial_Mass(indexM),redshift,M(1:number_of_M),z(1:number_of_z),&
+            dndM(1:number_of_M,1:number_of_z))
+
+            call Interpolate_2D(bMz_M_z,virial_Mass(indexM),redshift,M(1:number_of_M),z(1:number_of_z),&
+            bMz(1:number_of_M,1:number_of_z))
+
+            call Interpolate_2D(ylMz_M_z,virial_Mass(indexM),redshift,M(1:number_of_M),z(1:number_of_z),&
+            ylMz(indexl,1:number_of_M,1:number_of_z))
+
+            f(indexM) = dndM_M_z*bMz_M_z*ylMz_M_z 
 
         End Do
+
 
         !    open(16,file='./output/clphiphi.dat')
 
@@ -2967,7 +3004,7 @@ Module functions
 
         Do indexM=1,intervals
 
-            sum = (M(indexM+1)-M(indexM))/2.d0*( f(indexM) + f(indexM+1) ) + sum
+            sum = (virial_Mass(indexM+1)-virial_Mass(indexM))/2.d0*( f(indexM) + f(indexM+1) ) + sum
 
         End Do
 
@@ -2981,33 +3018,40 @@ Module functions
         use arrays
         Implicit none
 
-        Real*8 :: C_l_yphi_two_halo,sum
+        Real*8 :: C_l_yphi_two_halo,sum,com_dist_z,com_vol_per_ster_z
         Integer*4 :: indexl,indexz
-        Integer*4,parameter :: intervals = number_of_z - 1 
-        Real*8,dimension(number_of_z):: f
+        Integer*4,parameter :: number_of_redshift = 1d3
+        Integer*4,parameter :: intervals = number_of_redshift - 1 
+        Real*8,dimension(number_of_redshift):: f,redshift
 
-        Do indexz=1,number_of_z
+        Do indexz=1,number_of_redshift
 
-            f(indexz) = pre_Cl_1(indexz,indexl)*pre_Cl_2(indexz,indexl)*d2VdzdO(indexz)*&
-            matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance(z(indexz)),z(indexz)) ! Units : 1/h**3
+            redshift(indexz) = 10**(log10(zmin) + real(indexz-1)*(log10(zmax) - log10(zmin))/real(number_of_redshift-1))
+
+            call Interpolate_1D(com_dist_z,redshift(indexz),z,comoving_distance_at_z)
+
+            call Interpolate_1D(com_vol_per_ster_z,redshift(indexz),z,d2VdzdO)
+
+            f(indexz) = pre_Cl_1(redshift(indexz),indexl)*pre_Cl_2(redshift(indexz),indexl)*com_vol_per_ster_z*&
+            matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/com_dist_z,redshift(indexz)) ! Units : 1/h**3
 
         End Do
 
-        open(16,file='./output/clphiphi.dat')
+!        open(16,file='./output/clphiphi.dat')
 
-        Do indexz=1,number_of_z
+!        Do indexz=1,number_of_z
 
-            write(16,'(2es18.10)') z(indexz),f(indexz) 
+!            write(16,'(2es18.10)') z(indexz),f(indexz) 
 
-        End Do
+!        End Do
 
-        close(16)
+!        close(16)
 
         sum = 0.d0
 
         Do indexz=1,intervals
 
-            sum = (z(indexz+1)-z(indexz))/2.d0*( f(indexz) + f(indexz+1) ) + sum
+            sum = (redshift(indexz+1)-redshift(indexz))/2.d0*( f(indexz) + f(indexz+1) ) + sum
 
         End Do
 

@@ -8,8 +8,8 @@ Module fiducial
     ! NOMINAL MISSION DATA" BY HILL & SPERGEL.
 
     Integer*4,parameter :: number_of_k = 1d3 ! SIZE OF WAVEVECTOR ARRAY 
-    Integer*4,parameter :: number_of_z = 1d2 ! SIZE OF RED-SHIFT ARRAY 
-    Integer*4,parameter :: number_of_M = 5d3 ! SIZE OF VIRIAL MASS ARRAY
+    Integer*4,parameter :: number_of_z = 1d1 ! SIZE OF RED-SHIFT ARRAY 
+    Integer*4,parameter :: number_of_M = 1d1 ! SIZE OF VIRIAL MASS ARRAY
     Integer*4,parameter :: number_of_l = 11  ! SIZE OF MULTIPOLE ARRAY 
     Integer*4,parameter :: lmax = 1d4        ! HIGHEST MULTIPOLE
     Integer*4,parameter :: lmin = 1d0        ! LOWEST MULTIPOLE
@@ -41,6 +41,7 @@ Module fiducial
     Real*8,parameter :: Mmax = 5.d15/h             ! UPPER MASS IN HILL & SPERGEL PAPER [1312.4525]
     Real*8,parameter :: tcmb0 = 2.728d0            ! CMB TEMPERATURE TODAY IN KELVIN
     Real*8 :: Normalization                        ! NORMALIZATION CONSTANT FOR MATTER POWER SPECTRUM (EQUATION (A7) IN EISENSTEIN & HU PAPER)
+    Real*8 :: com_dist_at_z_dec                    ! COMOVING DISTANCE AT DECOUPLING
     Real*8,parameter :: DeltaSO = 2.d2             ! PARAMETER TO DEFINE SPHERICAL OVERDENSITY
 
     Character(len=*),parameter :: path_to_execution_information = './output/execution_information.txt'
