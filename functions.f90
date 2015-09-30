@@ -40,6 +40,14 @@ Module functions
         Real*8,dimension(:,:) :: matrix_function_values
         Integer*4 :: q,indexleft,indexright,indexup,indexdown
 
+        indexleft = 1 
+
+        indexright = 1 
+
+        indexup = 1
+
+        indexdown = 1
+
         Do q=1,size(array_x)
 
             If ( (point_x .lt. array_x(1)) .or. (point_x .gt. array_x(size(array_x))) ) then
@@ -356,25 +364,25 @@ Module functions
 
     end function critical_surface_density
 
-    subroutine compute_critical_surface_density()    !    It fills in the vector with critical surface density
+!    subroutine compute_critical_surface_density()    !    It fills in the vector with critical surface density
 
-        use arrays
-        use fiducial
-        use omp_lib
-        Implicit none
-        Integer*4 :: indexz 
+!        use arrays
+!        use fiducial
+!        use omp_lib
+!        Implicit none
+!        Integer*4 :: indexz 
 
-        !$omp Parallel Do Shared(Scrit)
+!        !$omp Parallel Do Shared(Scrit)
 
-        Do indexz=1,number_of_z
+!        Do indexz=1,number_of_z
 
-            Scrit(indexz) = critical_surface_density(z(indexz))
+!            Scrit(indexz) = critical_surface_density(z(indexz))
 
-        End Do
+!        End Do
 
-        !$omp End Parallel Do
+!        !$omp End Parallel Do
 
-    end subroutine
+!    end subroutine
 
     function concentration_mass_critical(M,z)    ! Concentration-mass relation for critical density halo definition. It computes equation (4) in
 
@@ -422,27 +430,25 @@ Module functions
     end function concentration_mass_mean
 
     subroutine write_c200_at_z(indexz)
-    use arrays
-    use fiducial
-    Implicit none
-    Integer*4 :: indexM,indexz
-    Integer*4,parameter :: indexr = 1d2
-    Real*8 :: rmin,rmax
-    Real*8,dimension(indexr) :: r
 
-    print *, M200c(indexM,indexz)
+        use arrays
+        use fiducial
+        Implicit none
 
-    open(15,file='./output/c200_at_z.dat')
+        Integer*4 :: indexM,indexz
+        Integer*4,parameter :: indexr = 1d2
 
-    write(15,*) '# M200c [solar mass/h]       c200 at redshift ',z(indexz)
+        open(15,file='./output/c200_at_z.dat')
 
-    Do indexM =1,number_of_M
+        write(15,*) '# M200c [solar mass/h]       c200 at redshift ',z(indexz)
 
-        write(15,'(2es18.10)') M200c(indexM,indexz), concentration_mass_virial(M200c(indexM,indexz),z(indexz))
+        Do indexM =1,number_of_M
 
-    End Do
+            write(15,'(2es18.10)') M200c(indexM,indexz), concentration_mass_virial(M200c(indexM,indexz),z(indexz))
 
-    close(15)
+        End Do
+
+        close(15)
 
     end subroutine write_c200_at_z
 
@@ -965,7 +971,6 @@ Module functions
         Real*8 :: x,A_p,alpha_pm,alpha_pz,P_0,A_xc,alpha_xcm,virial_Mass,redshift
         Real*8 :: alpha_xcz,x_c,A_beta,r,ICM_electron_pressure,M200c_M_z,r200c_M_z
         Real*8 :: alpha_betam,alpha_betaz,beta,gamma,alpha,P_th,P_e,P200,P_fit
-        Integer*4 :: indexM,indexz
 
         call Interpolate_2D(M200c_M_z,virial_Mass,redshift,M(1:number_of_M),z(1:number_of_z),M200c(1:number_of_M,1:number_of_z))
 
@@ -1063,7 +1068,7 @@ Module functions
         Real*8 :: l_s,x_y_min,x_y_max,form_factor,y,prefactor,stepsize,x1,x2,f1,f2,virial_Mass,redshift,M200c_M_z,r200c_M_z
         Integer*4,parameter :: number_of_x = 1d4
         Integer*4,parameter :: intervals = number_of_x - 1 !  
-        Integer*4 :: indexx,indexM,indexz,indexl
+        Integer*4 :: indexx,indexl
         Real*8,dimension(number_of_x) :: x,f
         Real*8,parameter :: betafactor = 1.060d0!1.037d0
         Integer*4,parameter :: max_iterations = 1d9
@@ -1276,7 +1281,7 @@ Module functions
         Implicit none
 
         Real*8 :: lensing_potential,r_s,l_s,wavevector,prefactor,Delta_cr,delta_c,virial_Mass,redshift
-        Integer*4 :: indexM,indexz,indexl
+        Integer*4 :: indexl
         Character(len=*) :: halo_definition 
 
         If (halo_definition .eq. 'virial') then
@@ -1495,7 +1500,7 @@ Module functions
         use fiducial
         Implicit none
 
-        Integer*4 :: indexz,indexM,indexl,ll,q,iz,iM,il
+        Integer*4 :: ll,q,iz,iM,il
         Real*8 :: MM,zz,tphilMz
 
         open(15,file='./precomputed_quantities/lensing_potential/lensing_potential.dat')
@@ -1709,7 +1714,7 @@ Module functions
         Implicit none
 
         Real*8 :: sum,x1,x2,f1,f2
-        Integer*4 :: indexk,indexz
+        Integer*4 :: indexk
         Integer*4,parameter :: number_of_k_logscale = 1d3
         Integer*4,parameter :: intervals = number_of_k_logscale - 1 
         Real*8,dimension(number_of_k_logscale) :: f,k
@@ -1848,7 +1853,7 @@ Module functions
         Implicit none
 
         Real*8 :: sigma_squared,R,sum,prefactor,Mass,x1,x2,f1,f2,redshift
-        Integer*4 :: indexk,indexz
+        Integer*4 :: indexk
         Integer*4,parameter :: number_of_k_logscale = 1d2
         Integer*4,parameter :: intervals = number_of_k_logscale - 1 
         Real*8,dimension(number_of_k) :: f,kf
@@ -1936,7 +1941,7 @@ Module functions
         Implicit none
 
         Real*8 :: dsigma_squared_dR,R,sum,prefactor,Mass,x1,x2,f1,f2,redshift
-        Integer*4 :: indexk,indexz
+        Integer*4 :: indexk
         Integer*4,parameter :: number_of_k_logscale = 1d2
         Integer*4,parameter :: intervals = number_of_k_logscale - 1 
         Real*8,dimension(number_of_k_logscale) :: f,kf
@@ -2027,7 +2032,6 @@ Module functions
 
         Real*8 :: halo_mass_function,R,sigma,nu,beta,phi,eta,gamma,virial_Mass,redshift,M200d_M_z
         Real*8 :: f_nu,g_sigma,alpha_halo_mass_function_z        
-        Integer*4 :: indexM,indexz
         Real*8,parameter :: delta_c = 1.686d0    ! page 880 in "The large-scale ..."
         Real*8,parameter :: beta0 = 0.589d0
         Real*8,parameter :: phi0 = -0.729d0
@@ -2104,7 +2108,6 @@ Module functions
 
         Real*8 :: nonnormalised_halo_mass_function,R,sigma,nu,beta,phi,eta,gamma,virial_Mass,redshift,M200d_M_z
         Real*8 :: f_nu,g_sigma
-        Integer*4 :: indexM,indexz
         Real*8,parameter :: delta_c = 1.686d0    ! page 880 in "The large-scale ..."
         Real*8,parameter :: beta0 = 0.589d0
         Real*8,parameter :: phi0 = -0.729d0
@@ -2177,6 +2180,12 @@ Module functions
         Integer*4,parameter :: intervals = number_of_M - 1
         Real*8,dimension(number_of_M) :: f
 
+        open(15,file='./precomputed_quantities/alpha_halo_mass_function.dat')
+
+        write(15,*) '# Alpha halo mass function (as function of red-shift). Number of lines is ',number_of_z
+
+        write(15,*) '# index_of_z    red-shift    dndM '
+
         Do indexz=1,number_of_z
 
             !$omp Parallel Do Shared(f,indexz)
@@ -2200,9 +2209,40 @@ Module functions
 
            alpha_halo_mass_function(indexz) = 1.d0/sum    ! dimensionless
 
+           write(15,'(i5,2es18.10)') indexz, z(indexz), alpha_halo_mass_function(indexz)
+
         End Do
 
+        close(15)
+
     end subroutine compute_alpha_halo_mass_function
+
+    subroutine read_alpha_halo_mass_function()
+
+        use arrays
+        use fiducial
+        Implicit none
+
+        Integer*4 :: index,iz
+        Real*8 :: zz,ts2
+
+        open(15,file='./precomputed_quantities/alpha_halo_mass_function.dat')
+
+        read(15,*)
+
+        read(15,*)
+
+        Do index=1,number_of_z
+
+            read(15,'(i5,2es18.10)') iz,zz,ts2
+
+            alpha_halo_mass_function(iz) = ts2
+
+        End Do
+
+        close(15)
+
+    end subroutine read_alpha_halo_mass_function
 
     subroutine compute_dndM()    ! It fills halo mass function array in and writes it out to a text file
 
@@ -2238,42 +2278,42 @@ Module functions
 
     end subroutine compute_dndM
 
-    subroutine compute_sigma_square_M200d()    ! It fills sigma square array in and writes it out to a text file
+!    subroutine compute_sigma_square_M200d()    ! It fills sigma square array in and writes it out to a text file
 
-        use arrays
-        use fiducial
-        Implicit none
+!        use arrays
+!        use fiducial
+!        Implicit none
 
-        Integer*4 :: indexz,indexM
+!        Integer*4 :: indexz,indexM
 
-        open(15,file='./precomputed_quantities/sigma_square_M200d.dat')
+!        open(15,file='./precomputed_quantities/sigma_square_M200d.dat')
 
-        write(15,*) '# Sigma square function (as function of M200d mass and red-shift). Number of lines is ',number_of_z*number_of_M
+!        write(15,*) '# Sigma square function (as function of M200d mass and red-shift). Number of lines is ',number_of_z*number_of_M
 
-        write(15,*) '# index_of_M    M200d[solar mass]    index_of_z    red-shift    sigma_square   dsigma_square '
+!        write(15,*) '# index_of_M    M200d[solar mass]    index_of_z    red-shift    sigma_square   dsigma_square '
 
-        !$omp Parallel Do Shared(sigma_square_M200d,dsigma_square_M200d)
+!        !$omp Parallel Do Shared(sigma_square_M200d,dsigma_square_M200d)
 
-        Do indexM=1,number_of_M
+!        Do indexM=1,number_of_M
 
-            Do indexz=1,number_of_z
+!            Do indexz=1,number_of_z
 
-                sigma_square_M200d(indexM,indexz) = sigma_squared(M200d(indexM,indexz),z(indexz))
+!                sigma_square_M200d(indexM,indexz) = sigma_squared(M200d(indexM,indexz),z(indexz))
 
-                dsigma_square_M200d(indexM,indexz) = dsigma_squared_dR(M200d(indexM,indexz),z(indexz))
+!                dsigma_square_M200d(indexM,indexz) = dsigma_squared_dR(M200d(indexM,indexz),z(indexz))
 
-                write(15,'(i10,es18.10,i5,3es18.10)') indexM,M200d(indexM,indexz),indexz,z(indexz),&
-                sigma_square_M200d(indexM,indexz),dsigma_square_M200d(indexM,indexz)
+!                write(15,'(i10,es18.10,i5,3es18.10)') indexM,M200d(indexM,indexz),indexz,z(indexz),&
+!                sigma_square_M200d(indexM,indexz),dsigma_square_M200d(indexM,indexz)
 
-            End Do
+!            End Do
 
-        End Do
+!        End Do
 
-        !$omp End Parallel Do
+!        !$omp End Parallel Do
 
-        close(15)
+!        close(15)
 
-    end subroutine compute_sigma_square_M200d
+!    end subroutine compute_sigma_square_M200d
 
 !    subroutine read_sigma_square_M200d()
 
@@ -2360,8 +2400,8 @@ Module functions
         Implicit none
 
         Real*8 :: pre_Clphiphi,sum,redshift,dndM_M_z,philMz_M_z,com_vol_per_ster_z
-        Integer*4 :: indexl,i,indexM,indexz
-        Integer*4,parameter :: number_of_virial_Mass = 1d3
+        Integer*4 :: indexl,i,indexM
+        Integer*4,parameter :: number_of_virial_Mass = 1d5
         Integer*4,parameter :: intervals = number_of_virial_Mass - 1 
         Real*8,dimension(number_of_virial_Mass) :: f,virial_Mass
 
@@ -2397,11 +2437,12 @@ Module functions
 
         use fiducial
         use arrays
+        use omp_lib
         Implicit none
 
         Real*8 :: C_l_phiphi_one_halo,sum
-        Integer*4 :: indexl,i,indexz
-        Integer*4,parameter :: number_of_redshift = 1d3
+        Integer*4 :: indexl,indexz
+        Integer*4,parameter :: number_of_redshift = 1d4
         Integer*4,parameter :: intervals = number_of_redshift - 1
         Real*8,dimension(number_of_redshift):: f,redshift
 
@@ -2409,9 +2450,17 @@ Module functions
 
             redshift(indexz) = 10**(log10(zmin) + real(indexz-1)*(log10(zmax) - log10(zmin))/real(number_of_redshift-1))
 
+        End Do
+
+        !$omp Parallel Do Shared(f)
+
+        Do indexz=1,number_of_redshift
+
             f(indexz) = pre_Clphiphi(redshift(indexz),indexl)          ! Dimensionless
 
         End Do
+
+        !$omp End Parallel Do
 
         !    open(16,file='./output/clphiphi.dat')
 
@@ -2443,15 +2492,11 @@ Module functions
 
         Integer*4 :: indexl
 
-        !$omp Parallel Do Shared(Cl1h)
-
         Do indexl=1,number_of_l
 
             Clphiphi1h(indexl) = C_l_phiphi_one_halo(indexl)
 
         End Do
-
-        !$omp End Parallel Do
 
     end subroutine compute_Clphiphi1h
 
@@ -2462,8 +2507,8 @@ Module functions
         Implicit none
 
         Real*8 :: pre_Cl,sum,redshift,dndM_M_z,ylMz_M_z,philMz_M_z,com_vol_per_ster_z
-        Integer*4 :: indexl,i,indexM,indexz
-        Integer*4,parameter :: number_of_virial_Mass = 1d3
+        Integer*4 :: indexl,i,indexM
+        Integer*4,parameter :: number_of_virial_Mass = 1d5
         Integer*4,parameter :: intervals = number_of_virial_Mass - 1 
         Real*8,dimension(number_of_virial_Mass) :: f,virial_Mass
 
@@ -2512,11 +2557,12 @@ Module functions
 
         use fiducial
         use arrays
+        use omp_lib
         Implicit none
 
         Real*8 :: C_l_yphi_one_halo,sum
-        Integer*4 :: indexl,i,indexz
-        Integer*4,parameter :: number_of_redshift = 1d3
+        Integer*4 :: indexl,indexz
+        Integer*4,parameter :: number_of_redshift = 1d4
         Integer*4,parameter :: intervals = number_of_redshift - 1
         Real*8,dimension(number_of_redshift):: f,redshift
 
@@ -2524,9 +2570,17 @@ Module functions
 
             redshift(indexz) = 10**(log10(zmin) + real(indexz-1)*(log10(zmax) - log10(zmin))/real(number_of_redshift-1))
 
+        End Do
+
+        !$omp Parallel Do Shared(f)
+
+        Do indexz=1,number_of_redshift
+
             f(indexz) = pre_Cl(redshift(indexz),indexl)          ! Dimensionless
 
         End Do
+
+        !$omp End Parallel Do
 
         !    open(16,file='./output/clphiphi.dat')
 
@@ -2558,15 +2612,11 @@ Module functions
 
         Integer*4 :: indexl
 
-        !$omp Parallel Do Shared(Cl1h)
-
         Do indexl=1,number_of_l
 
             Cl1h(indexl) = C_l_yphi_one_halo(indexl)
 
         End Do
-
-        !$omp End Parallel Do
 
     end subroutine compute_Cl1h
 
@@ -2585,7 +2635,6 @@ Module functions
         Real*8,parameter :: CC = 1.9d-2 + 1.07d-1*y + 1.9d-1*dexp(-(4.d0/y)**4)
         Real*8,parameter :: ccc = 2.4d0
         Real*8,parameter :: delta_c = 1.686d0
-        Integer*4 :: indexM,indexz
         
         call Interpolate_2D(M200d_M_z,virial_Mass,redshift,M(1:number_of_M),z(1:number_of_z),M200d(1:number_of_M,1:number_of_z))
 
@@ -2639,7 +2688,7 @@ Module functions
         use fiducial
         Implicit none
 
-        Integer*4 :: indexz,indexM
+        Integer*4 :: indexz
 
         open(15,file='./precomputed_quantities/bMz/mean_bias_at_z.dat')
 
@@ -2844,17 +2893,23 @@ Module functions
 
         use fiducial    ! Equation (2.11) in 1312.4525. Dimensionless
         use arrays
+        use omp_lib
         Implicit none
 
         Real*8 :: C_l_phiphi_two_halo,sum,com_dist_z,com_vol_per_ster_z
         Integer*4 :: indexl,indexz
-        Integer*4,parameter :: number_of_redshift = 1d3
+        Integer*4,parameter :: number_of_redshift = 1d4
         Integer*4,parameter :: intervals = number_of_redshift - 1 
         Real*8,dimension(number_of_redshift):: f,redshift
 
         Do indexz=1,number_of_redshift
 
             redshift(indexz) = 10**(log10(zmin) + real(indexz-1)*(log10(zmax) - log10(zmin))/real(number_of_redshift-1))
+
+        End Do
+
+        !$omp Parallel Do Default(Shared) Private(com_dist_z,com_vol_per_ster_z)
+        Do indexz=1,number_of_redshift
 
             call Interpolate_1D(com_dist_z,redshift(indexz),z,comoving_distance_at_z)
 
@@ -2864,6 +2919,7 @@ Module functions
             matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/com_dist_z,redshift(indexz))    !  Dimensionless
 
         End Do
+        !$omp End Parallel Do
 
         !    open(16,file='./output/clphiphi.dat')
 
@@ -2895,15 +2951,11 @@ Module functions
 
         Integer*4 :: indexl
 
-        !$omp Parallel Do Shared(Cl2h)
-
         Do indexl=1,number_of_l
 
             Clphiphi2h(indexl) = C_l_phiphi_two_halo(indexl)
 
         End Do
-
-        !$omp End Parallel Do
 
     end subroutine compute_Clphiphi2h
 
@@ -2915,8 +2967,8 @@ Module functions
         Implicit none
 
         Real*8 :: pre_Cl_1,sum,redshift,dndM_M_z,bMz_M_z,philMz_M_z
-        Integer*4 :: indexl,indexM,indexz
-        Integer*4,parameter :: number_of_virial_Mass = 1d3
+        Integer*4 :: indexl,indexM
+        Integer*4,parameter :: number_of_virial_Mass = 1d5
         Integer*4,parameter :: intervals = number_of_M - 1
         Real*8,dimension(number_of_virial_Mass) :: f,virial_Mass
         
@@ -2967,8 +3019,8 @@ Module functions
         Implicit none
 
         Real*8 :: pre_Cl_2,sum,redshift,dndM_M_z,bMz_M_z,ylMz_M_z
-        Integer*4 :: indexl,indexM,indexz
-        Integer*4,parameter :: number_of_virial_Mass = 1d3
+        Integer*4 :: indexl,indexM
+        Integer*4,parameter :: number_of_virial_Mass = 1d5
         Integer*4,parameter :: intervals = number_of_virial_Mass - 1
         Real*8,dimension(number_of_virial_Mass) :: f,virial_Mass
 
@@ -3016,17 +3068,24 @@ Module functions
 
         use fiducial                   ! Units : dimensionless
         use arrays
+        use omp_lib
         Implicit none
 
         Real*8 :: C_l_yphi_two_halo,sum,com_dist_z,com_vol_per_ster_z
         Integer*4 :: indexl,indexz
-        Integer*4,parameter :: number_of_redshift = 1d3
+        Integer*4,parameter :: number_of_redshift = 1d4
         Integer*4,parameter :: intervals = number_of_redshift - 1 
         Real*8,dimension(number_of_redshift):: f,redshift
 
         Do indexz=1,number_of_redshift
 
             redshift(indexz) = 10**(log10(zmin) + real(indexz-1)*(log10(zmax) - log10(zmin))/real(number_of_redshift-1))
+
+        End Do
+
+        !$omp Parallel Do Default(Shared) Private(com_dist_z,com_vol_per_ster_z)
+
+        Do indexz=1,number_of_redshift
 
             call Interpolate_1D(com_dist_z,redshift(indexz),z,comoving_distance_at_z)
 
@@ -3036,6 +3095,8 @@ Module functions
             matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/com_dist_z,redshift(indexz)) ! Units : 1/h**3
 
         End Do
+
+        !$omp End Parallel Do
 
 !        open(16,file='./output/clphiphi.dat')
 
@@ -3063,20 +3124,15 @@ Module functions
 
         use arrays
         use fiducial
-        use omp_lib
         Implicit none
 
         Integer*4 :: indexl
-
-        !$omp Parallel Do Shared(Cl2h)
 
         Do indexl=1,number_of_l
 
             Cl2h(indexl) = C_l_yphi_two_halo(indexl)
 
         End Do
-
-        !$omp End Parallel Do
 
     end subroutine compute_Cl2h
 

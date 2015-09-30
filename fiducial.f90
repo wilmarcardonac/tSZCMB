@@ -8,14 +8,13 @@ Module fiducial
     ! NOMINAL MISSION DATA" BY HILL & SPERGEL.
 
     Integer*4,parameter :: number_of_k = 1d3 ! SIZE OF WAVEVECTOR ARRAY 
-    Integer*4,parameter :: number_of_z = 1d1 ! SIZE OF RED-SHIFT ARRAY 
-    Integer*4,parameter :: number_of_M = 1d1 ! SIZE OF VIRIAL MASS ARRAY
-    Integer*4,parameter :: number_of_l = 11  ! SIZE OF MULTIPOLE ARRAY 
+    Integer*4,parameter :: number_of_z = 1d3 ! SIZE OF RED-SHIFT ARRAY 
+    Integer*4,parameter :: number_of_M = 1d4 ! SIZE OF VIRIAL MASS ARRAY
+    Integer*4,parameter :: number_of_l = 15  ! SIZE OF MULTIPOLE ARRAY 
     Integer*4,parameter :: lmax = 1d4        ! HIGHEST MULTIPOLE
     Integer*4,parameter :: lmin = 1d0        ! LOWEST MULTIPOLE
-    Integer*4 :: indexz_halo_mass_function   ! INDEX TO SWITCH HALO MASS FUNCTION
-    Real*8,parameter :: Pi = 3.141592653589793d0
 
+    Real*8,parameter :: Pi = 3.141592653589793d0
     Real*8,parameter :: c = 2.99792458d8          ! SPEED OF LIGHT IN m s-1
     Real*8,parameter :: G = 6.67384d-11           ! NEWTONIAN CONSTANT OF GRAVITATION IN m3 kg-1 s-2
     Real*8,parameter :: M_sun = 1.989d30          ! SOLAR MASS IN kg
