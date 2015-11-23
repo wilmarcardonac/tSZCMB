@@ -10,6 +10,7 @@ Program tSZ
     Implicit none
     Integer*4 :: index1                                       ! COUNTER
     Real*8 :: wtime                                           ! STORES TIME OF EXECUTION
+    Character(len=15),parameter :: halo_definition = 'virial' ! HALO DEFINITION USED IN THE COMPUTATIONS
 
     com_dist_at_z_dec = comoving_distance(z_dec) ! COMPUTE COMOVING DISTANCE AT DECOUPLING
 
@@ -159,8 +160,9 @@ Program tSZ
 
         call compute_lensing_potential(halo_definition)
 
-        write(UNIT_EXE_FILE,*) 'LENSING POTENTIAL COMPUTATION FOR RED-SHIFT ARRAY OF SIZE ', size(z),', VIRIAL MASS ARRAY OF SIZE ',&
-        size(M),', AND MULTIPOLES ARRAY OF SIZE ', size(ml),' TOOK ', (omp_get_wtime()-wtime)/3.6d3, 'HOURS'
+        write(UNIT_EXE_FILE,*) 'LENSING POTENTIAL COMPUTATION FOR RED-SHIFT ARRAY OF SIZE ', size(z),&
+             ', VIRIAL MASS ARRAY OF SIZE ',size(M),', AND MULTIPOLES ARRAY OF SIZE ', size(ml),&
+             ' TOOK ', (omp_get_wtime()-wtime)/3.6d3, 'HOURS'
 
      Else
 
@@ -190,8 +192,9 @@ Program tSZ
 
         call compute_form_factor()
 
-        write(UNIT_EXE_FILE,*) 'FORM FACTOR COMPUTATION FOR RED-SHIFT ARRAY OF SIZE ', size(z),', VIRIAL MASS ARRAY OF SIZE ', size(M),&
-        ', AND MULTIPOLES ARRAY OF SIZE ', size(ml),' TOOK ', (omp_get_wtime()-wtime)/3.6d3, 'HOURS'
+        write(UNIT_EXE_FILE,*) 'FORM FACTOR COMPUTATION FOR RED-SHIFT ARRAY OF SIZE ', size(z),&
+             ', VIRIAL MASS ARRAY OF SIZE ', size(M),', AND MULTIPOLES ARRAY OF SIZE ', size(ml),&
+             ' TOOK ', (omp_get_wtime()-wtime)/3.6d3, 'HOURS'
 
      Else
 
