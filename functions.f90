@@ -2968,7 +2968,7 @@ Module functions
 
         Real*8 :: pre_Cl_1,sum,redshift,dndM_M_z,bMz_M_z,philMz_M_z
         Integer*4 :: indexl,indexM
-        Integer*4,parameter :: number_of_virial_Mass = 1d5
+        Integer*4,parameter :: number_of_virial_Mass = 100000
         Integer*4,parameter :: intervals = number_of_M - 1
         Real*8,dimension(number_of_virial_Mass) :: f,virial_Mass
         

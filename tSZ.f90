@@ -85,16 +85,16 @@ Program tSZ
     ! REDO COMPUTATIONS ONLY IF MASS CONVERSION REQUIRED
     If (do_mass_conversion) then
 
-        wtime = omp_get_wtime() ! SETTING STARTING TIME OF MASS CONVERSION
+        !wtime = omp_get_wtime() ! SETTING STARTING TIME OF MASS CONVERSION
 
-        write(20,*) 'EXECUTING MASS CONVERSION'
+        !write(20,*) 'EXECUTING MASS CONVERSION'
 
-        call compute_M_delta_c_from_M_and_z(DeltaSO)
+        !call compute_M_delta_c_from_M_and_z(DeltaSO)
 
-        write(20,*) 'MASS CONVERSION ENDED'
+        !write(20,*) 'MASS CONVERSION ENDED'
 
-        write(20,*) 'MASS CONVERSION FOR RED-SHIFT ARRAY OF SIZE ', size(z),' AND VIRIAL MASS ARRAY OF SIZE ', size(M),&
-        'TOOK ', (omp_get_wtime()-wtime)/3.6d3, 'HOURS'
+        !write(20,*) 'MASS CONVERSION FOR RED-SHIFT ARRAY OF SIZE ', size(z),' AND VIRIAL MASS ARRAY OF SIZE ', size(M),&
+        !'TOOK ', (omp_get_wtime()-wtime)/3.6d3, 'HOURS'
 
         ! READING MASS CONVERSION FILE AND COMPUTING DERIVATIVES OF MASS CONVERSION
         call read_M200dc_r200dc()
@@ -133,7 +133,7 @@ Program tSZ
 
         write(20,*) 'COMPUTING ANGULAR POWER SPECTRUM OF LENSING POTENTIAL'
 
-!        call compute_Clphiphi1h() ! ONE HALO TERM
+        call compute_Clphiphi1h() ! ONE HALO TERM
 
         call compute_Clphiphi2h() ! TWO HALO TERM
 
@@ -166,10 +166,12 @@ Program tSZ
 
     Else
 
+        deallocate(mbz,M200c,M200d,r200c,r200d,dM200ddM,dM200cdM)
+
         write(20,*) 'USING MASS DATA FILE PREVIOUSLY COMPUTED'
 
         ! READING MASS CONVERSION FILE AND COMPUTING DERIVATIVES OF MASS CONVERSION
-        call read_M200dc_r200dc()
+!        call read_M200dc_r200dc()
 
         write(20,*) 'MASS CONVERSION FILE READ AND DERIVATIVES OF MASS CONVERSION COMPUTED'
 
@@ -177,12 +179,17 @@ Program tSZ
 
         write(20,*) 'NORMALIZATION OF MATTER POWER SPECTRUM TO MATCH SIGMA_8 (',sigma8,') WAS COMPUTED'
 
-        call read_bMz() ! LINEAR HALO BIAS AS A FUNCTION OF MASS AND RED-SHIFT
+!        call read_bMz() ! LINEAR HALO BIAS AS A FUNCTION OF MASS AND RED-SHIFT
+        call compute_bMz() ! LINEAR HALO BIAS AS A FUNCTION OF MASS AND RED-SHIFT
 
-        call read_alpha_halo_mass_function() ! NORMALIZE HALO MASS FUNCTION TO FULLFILL CONDITION THAT MEAN BIAS OF ALL MATTER
+!        call read_alpha_halo_mass_function() ! NORMALIZE HALO MASS FUNCTION TO FULLFILL CONDITION THAT MEAN BIAS OF ALL MATTER
+                                                ! AT A FIXED RED-SHIFT IS UNITY
+        call compute_alpha_halo_mass_function() ! NORMALIZE HALO MASS FUNCTION TO FULLFILL CONDITION THAT MEAN BIAS OF ALL MATTER
                                                 ! AT A FIXED RED-SHIFT IS UNITY
 
-        call read_dndM() ! READING HALO MASS FUNCTION    
+
+!        call read_dndM() ! READING HALO MASS FUNCTION    
+        call compute_dndM() ! COMPUTING HALO MASS FUNCTION AS A FUNCTION OF MASS AND RED-SHIFT 
 
         write(20,*) 'COMPUTING COMOVING VOLUME ELEMENT PER STERADIAN'
 
@@ -190,7 +197,8 @@ Program tSZ
 
         write(20,*) 'COMPUTING CRITICAL SURFACE DENSITY'
 
-        call read_philMz() ! READS LENSING POTENTIAL
+        call compute_lensing_potential(halo_definition)
+!        call read_philMz() ! READS LENSING POTENTIAL
 
         write(20,*) 'COMPUTING ANGULAR POWER SPECTRUM OF LENSING POTENTIAL'
 
@@ -224,7 +232,7 @@ Program tSZ
 
     ! DEALLOCATING MEMORY
     deallocate (z,M,k,ml,Cl1h,Cl2h,Clphiphi1h,Clphiphi2h,Cl,Clphiphi,&
-    d2VdzdO,dndM,ylMz,philMz,bMz,mbz,M200c,M200d,r200c,r200d,alpha_halo_mass_function,&
+    d2VdzdO,dndM,ylMz,philMz,bMz,alpha_halo_mass_function,&
     Clpsilimber,comoving_distance_at_z)
 
     ! CLOSE EXECUTION INFORMATION FILE
