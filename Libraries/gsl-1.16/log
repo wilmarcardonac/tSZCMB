@@ -1,0 +1,1714 @@
+Making check in gsl
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/gsl'
+make[1]: Nothing to be done for `check'.
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/gsl'
+Making check in utils
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/utils'
+make[1]: Nothing to be done for `check'.
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/utils'
+Making check in sys
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sys'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sys'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslsys.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ./.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sys'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sys'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sys'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sys'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sys'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sys'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sys'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sys'
+Making check in test
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/test'
+make[1]: Nothing to be done for `check'.
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/test'
+Making check in err
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/err'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/err'
+gcc -DHAVE_CONFIG_H -I. -I..     -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/err'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/err'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/err'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/err'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/err'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/err'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/err'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/err'
+Making check in const
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/const'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/const'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o ../ieee-utils/libgslieeeutils.la  ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/const'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/const'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/const'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/const'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/const'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/const'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/const'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/const'
+Making check in complex
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/complex'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/complex'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslcomplex.la ../err/libgslerr.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la  ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgslcomplex.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/complex'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/complex'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/complex'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/complex'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/complex'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/complex'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/complex'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/complex'
+Making check in cheb
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cheb'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cheb'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslcheb.la ../ieee-utils/libgslieeeutils.la ../test/libgsltest.la ../sys/libgslsys.la ../err/libgslerr.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgslcheb.a ../ieee-utils/.libs/libgslieeeutils.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../err/.libs/libgslerr.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cheb'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cheb'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cheb'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cheb'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cheb'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cheb'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cheb'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cheb'
+Making check in block
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/block'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/block'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslblock.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgslblock.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/block'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/block'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/block'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/block'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/block'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/block'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/block'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/block'
+Making check in vector
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/vector'
+make  test test_static
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/vector'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslvector.la ../block/libgslblock.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgslvector.a ../block/.libs/libgslblock.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_static.o -MD -MP -MF .deps/test_static.Tpo -c -o test_static.o test_static.c
+mv -f .deps/test_static.Tpo .deps/test_static.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test_static test_static.o libgslvector.la ../block/libgslblock.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test_static test_static.o  ./.libs/libgslvector.a ../block/.libs/libgslblock.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/vector'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/vector'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/vector'
+PASS: test
+PASS: test_static
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/vector'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/vector'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 2
+# PASS:  2
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/vector'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/vector'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/vector'
+Making check in matrix
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/matrix'
+make  test test_static
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/matrix'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslmatrix.la ../vector/libgslvector.la ../block/libgslblock.la ../ieee-utils/libgslieeeutils.la  ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgslmatrix.a ../vector/.libs/libgslvector.a ../block/.libs/libgslblock.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_static.o -MD -MP -MF .deps/test_static.Tpo -c -o test_static.o test_static.c
+mv -f .deps/test_static.Tpo .deps/test_static.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test_static test_static.o libgslmatrix.la ../vector/libgslvector.la ../block/libgslblock.la ../ieee-utils/libgslieeeutils.la  ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test_static test_static.o  ./.libs/libgslmatrix.a ../vector/.libs/libgslvector.a ../block/.libs/libgslblock.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/matrix'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/matrix'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/matrix'
+PASS: test
+PASS: test_static
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/matrix'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/matrix'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 2
+# PASS:  2
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/matrix'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/matrix'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/matrix'
+Making check in permutation
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/permutation'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/permutation'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslpermutation.la ../vector/libgslvector.la ../block/libgslblock.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgslpermutation.a ../vector/.libs/libgslvector.a ../block/.libs/libgslblock.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/permutation'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/permutation'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/permutation'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/permutation'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/permutation'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/permutation'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/permutation'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/permutation'
+Making check in combination
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/combination'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/combination'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslcombination.la ../vector/libgslvector.la  ../block/libgslblock.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgslcombination.a ../vector/.libs/libgslvector.a ../block/.libs/libgslblock.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/combination'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/combination'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/combination'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/combination'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/combination'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/combination'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/combination'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/combination'
+Making check in multiset
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiset'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiset'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslmultiset.la ../vector/libgslvector.la  ../block/libgslblock.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgslmultiset.a ../vector/.libs/libgslvector.a ../block/.libs/libgslblock.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiset'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiset'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiset'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiset'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiset'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiset'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiset'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiset'
+Making check in sort
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sort'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sort'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslsort.la ../permutation/libgslpermutation.la ../vector/libgslvector.la ../block/libgslblock.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgslsort.a ../permutation/.libs/libgslpermutation.a ../vector/.libs/libgslvector.a ../block/.libs/libgslblock.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sort'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sort'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sort'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sort'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sort'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sort'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sort'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sort'
+Making check in ieee-utils
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ieee-utils'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ieee-utils'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ieee-utils'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ieee-utils'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ieee-utils'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ieee-utils'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ieee-utils'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ieee-utils'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ieee-utils'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ieee-utils'
+Making check in cblas
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cblas'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cblas'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_amax.o -MD -MP -MF .deps/test_amax.Tpo -c -o test_amax.o test_amax.c
+mv -f .deps/test_amax.Tpo .deps/test_amax.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_asum.o -MD -MP -MF .deps/test_asum.Tpo -c -o test_asum.o test_asum.c
+mv -f .deps/test_asum.Tpo .deps/test_asum.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_axpy.o -MD -MP -MF .deps/test_axpy.Tpo -c -o test_axpy.o test_axpy.c
+mv -f .deps/test_axpy.Tpo .deps/test_axpy.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_copy.o -MD -MP -MF .deps/test_copy.Tpo -c -o test_copy.o test_copy.c
+mv -f .deps/test_copy.Tpo .deps/test_copy.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_dot.o -MD -MP -MF .deps/test_dot.Tpo -c -o test_dot.o test_dot.c
+mv -f .deps/test_dot.Tpo .deps/test_dot.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_gbmv.o -MD -MP -MF .deps/test_gbmv.Tpo -c -o test_gbmv.o test_gbmv.c
+mv -f .deps/test_gbmv.Tpo .deps/test_gbmv.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_gemm.o -MD -MP -MF .deps/test_gemm.Tpo -c -o test_gemm.o test_gemm.c
+mv -f .deps/test_gemm.Tpo .deps/test_gemm.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_gemv.o -MD -MP -MF .deps/test_gemv.Tpo -c -o test_gemv.o test_gemv.c
+mv -f .deps/test_gemv.Tpo .deps/test_gemv.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_ger.o -MD -MP -MF .deps/test_ger.Tpo -c -o test_ger.o test_ger.c
+mv -f .deps/test_ger.Tpo .deps/test_ger.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_hbmv.o -MD -MP -MF .deps/test_hbmv.Tpo -c -o test_hbmv.o test_hbmv.c
+mv -f .deps/test_hbmv.Tpo .deps/test_hbmv.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_hemm.o -MD -MP -MF .deps/test_hemm.Tpo -c -o test_hemm.o test_hemm.c
+mv -f .deps/test_hemm.Tpo .deps/test_hemm.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_hemv.o -MD -MP -MF .deps/test_hemv.Tpo -c -o test_hemv.o test_hemv.c
+mv -f .deps/test_hemv.Tpo .deps/test_hemv.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_her.o -MD -MP -MF .deps/test_her.Tpo -c -o test_her.o test_her.c
+mv -f .deps/test_her.Tpo .deps/test_her.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_her2.o -MD -MP -MF .deps/test_her2.Tpo -c -o test_her2.o test_her2.c
+mv -f .deps/test_her2.Tpo .deps/test_her2.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_her2k.o -MD -MP -MF .deps/test_her2k.Tpo -c -o test_her2k.o test_her2k.c
+mv -f .deps/test_her2k.Tpo .deps/test_her2k.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_herk.o -MD -MP -MF .deps/test_herk.Tpo -c -o test_herk.o test_herk.c
+mv -f .deps/test_herk.Tpo .deps/test_herk.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_hpmv.o -MD -MP -MF .deps/test_hpmv.Tpo -c -o test_hpmv.o test_hpmv.c
+mv -f .deps/test_hpmv.Tpo .deps/test_hpmv.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_hpr.o -MD -MP -MF .deps/test_hpr.Tpo -c -o test_hpr.o test_hpr.c
+mv -f .deps/test_hpr.Tpo .deps/test_hpr.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_hpr2.o -MD -MP -MF .deps/test_hpr2.Tpo -c -o test_hpr2.o test_hpr2.c
+mv -f .deps/test_hpr2.Tpo .deps/test_hpr2.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_nrm2.o -MD -MP -MF .deps/test_nrm2.Tpo -c -o test_nrm2.o test_nrm2.c
+mv -f .deps/test_nrm2.Tpo .deps/test_nrm2.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_rot.o -MD -MP -MF .deps/test_rot.Tpo -c -o test_rot.o test_rot.c
+mv -f .deps/test_rot.Tpo .deps/test_rot.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_rotg.o -MD -MP -MF .deps/test_rotg.Tpo -c -o test_rotg.o test_rotg.c
+mv -f .deps/test_rotg.Tpo .deps/test_rotg.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_rotm.o -MD -MP -MF .deps/test_rotm.Tpo -c -o test_rotm.o test_rotm.c
+mv -f .deps/test_rotm.Tpo .deps/test_rotm.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_rotmg.o -MD -MP -MF .deps/test_rotmg.Tpo -c -o test_rotmg.o test_rotmg.c
+mv -f .deps/test_rotmg.Tpo .deps/test_rotmg.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_sbmv.o -MD -MP -MF .deps/test_sbmv.Tpo -c -o test_sbmv.o test_sbmv.c
+mv -f .deps/test_sbmv.Tpo .deps/test_sbmv.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_scal.o -MD -MP -MF .deps/test_scal.Tpo -c -o test_scal.o test_scal.c
+mv -f .deps/test_scal.Tpo .deps/test_scal.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_spmv.o -MD -MP -MF .deps/test_spmv.Tpo -c -o test_spmv.o test_spmv.c
+mv -f .deps/test_spmv.Tpo .deps/test_spmv.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_spr.o -MD -MP -MF .deps/test_spr.Tpo -c -o test_spr.o test_spr.c
+mv -f .deps/test_spr.Tpo .deps/test_spr.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_spr2.o -MD -MP -MF .deps/test_spr2.Tpo -c -o test_spr2.o test_spr2.c
+mv -f .deps/test_spr2.Tpo .deps/test_spr2.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_swap.o -MD -MP -MF .deps/test_swap.Tpo -c -o test_swap.o test_swap.c
+mv -f .deps/test_swap.Tpo .deps/test_swap.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_symm.o -MD -MP -MF .deps/test_symm.Tpo -c -o test_symm.o test_symm.c
+mv -f .deps/test_symm.Tpo .deps/test_symm.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_symv.o -MD -MP -MF .deps/test_symv.Tpo -c -o test_symv.o test_symv.c
+mv -f .deps/test_symv.Tpo .deps/test_symv.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_syr.o -MD -MP -MF .deps/test_syr.Tpo -c -o test_syr.o test_syr.c
+mv -f .deps/test_syr.Tpo .deps/test_syr.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_syr2.o -MD -MP -MF .deps/test_syr2.Tpo -c -o test_syr2.o test_syr2.c
+mv -f .deps/test_syr2.Tpo .deps/test_syr2.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_syr2k.o -MD -MP -MF .deps/test_syr2k.Tpo -c -o test_syr2k.o test_syr2k.c
+mv -f .deps/test_syr2k.Tpo .deps/test_syr2k.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_syrk.o -MD -MP -MF .deps/test_syrk.Tpo -c -o test_syrk.o test_syrk.c
+mv -f .deps/test_syrk.Tpo .deps/test_syrk.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_tbmv.o -MD -MP -MF .deps/test_tbmv.Tpo -c -o test_tbmv.o test_tbmv.c
+mv -f .deps/test_tbmv.Tpo .deps/test_tbmv.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_tbsv.o -MD -MP -MF .deps/test_tbsv.Tpo -c -o test_tbsv.o test_tbsv.c
+mv -f .deps/test_tbsv.Tpo .deps/test_tbsv.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_tpmv.o -MD -MP -MF .deps/test_tpmv.Tpo -c -o test_tpmv.o test_tpmv.c
+mv -f .deps/test_tpmv.Tpo .deps/test_tpmv.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_tpsv.o -MD -MP -MF .deps/test_tpsv.Tpo -c -o test_tpsv.o test_tpsv.c
+mv -f .deps/test_tpsv.Tpo .deps/test_tpsv.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_trmm.o -MD -MP -MF .deps/test_trmm.Tpo -c -o test_trmm.o test_trmm.c
+mv -f .deps/test_trmm.Tpo .deps/test_trmm.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_trmv.o -MD -MP -MF .deps/test_trmv.Tpo -c -o test_trmv.o test_trmv.c
+mv -f .deps/test_trmv.Tpo .deps/test_trmv.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_trsm.o -MD -MP -MF .deps/test_trsm.Tpo -c -o test_trsm.o test_trsm.c
+mv -f .deps/test_trsm.Tpo .deps/test_trsm.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_trsv.o -MD -MP -MF .deps/test_trsv.Tpo -c -o test_trsv.o test_trsv.c
+mv -f .deps/test_trsv.Tpo .deps/test_trsv.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o test_amax.o test_asum.o test_axpy.o test_copy.o test_dot.o test_gbmv.o test_gemm.o test_gemv.o test_ger.o test_hbmv.o test_hemm.o test_hemv.o test_her.o test_her2.o test_her2k.o test_herk.o test_hpmv.o test_hpr.o test_hpr2.o test_nrm2.o test_rot.o test_rotg.o test_rotm.o test_rotmg.o test_sbmv.o test_scal.o test_spmv.o test_spr.o test_spr2.o test_swap.o test_symm.o test_symv.o test_syr.o test_syr2.o test_syr2k.o test_syrk.o test_tbmv.o test_tbsv.o test_tpmv.o test_tpsv.o test_trmm.o test_trmv.o test_trsm.o test_trsv.o libgslcblas.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la -lm 
+libtool: link: gcc -g -O2 -o .libs/test test.o test_amax.o test_asum.o test_axpy.o test_copy.o test_dot.o test_gbmv.o test_gemm.o test_gemv.o test_ger.o test_hbmv.o test_hemm.o test_hemv.o test_her.o test_her2.o test_her2k.o test_herk.o test_hpmv.o test_hpr.o test_hpr2.o test_nrm2.o test_rot.o test_rotg.o test_rotm.o test_rotmg.o test_sbmv.o test_scal.o test_spmv.o test_spr.o test_spr2.o test_swap.o test_symm.o test_symv.o test_syr.o test_syr2.o test_syr2k.o test_syrk.o test_tbmv.o test_tbsv.o test_tpmv.o test_tpsv.o test_trmm.o test_trmv.o test_trsm.o test_trsv.o  ./.libs/libgslcblas.so ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a -lm -Wl,-rpath -Wl,/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/lib
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cblas'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cblas'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cblas'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cblas'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cblas'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cblas'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cblas'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cblas'
+Making check in blas
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/blas'
+make[1]: Nothing to be done for `check'.
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/blas'
+Making check in linalg
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/linalg'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/linalg'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgsllinalg.la ../blas/libgslblas.la ../cblas/libgslcblas.la ../permutation/libgslpermutation.la ../matrix/libgslmatrix.la ../vector/libgslvector.la ../block/libgslblock.la ../complex/libgslcomplex.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o .libs/test test.o  ./.libs/libgsllinalg.a ../blas/.libs/libgslblas.a ../cblas/.libs/libgslcblas.so ../permutation/.libs/libgslpermutation.a ../matrix/.libs/libgslmatrix.a ../vector/.libs/libgslvector.a ../block/.libs/libgslblock.a ../complex/.libs/libgslcomplex.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm -Wl,-rpath -Wl,/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/lib
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/linalg'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/linalg'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/linalg'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/linalg'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/linalg'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/linalg'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/linalg'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/linalg'
+Making check in eigen
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/eigen'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/eigen'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgsleigen.la  ../test/libgsltest.la ../linalg/libgsllinalg.la ../permutation/libgslpermutation.la ../blas/libgslblas.la ../cblas/libgslcblas.la ../matrix/libgslmatrix.la ../vector/libgslvector.la ../block/libgslblock.la  ../complex/libgslcomplex.la ../ieee-utils/libgslieeeutils.la ../sys/libgslsys.la ../err/libgslerr.la ../utils/libutils.la ../rng/libgslrng.la ../sort/libgslsort.la -lm 
+libtool: link: gcc -g -O2 -o .libs/test test.o  ./.libs/libgsleigen.a ../test/.libs/libgsltest.a ../linalg/.libs/libgsllinalg.a ../permutation/.libs/libgslpermutation.a ../blas/.libs/libgslblas.a ../cblas/.libs/libgslcblas.so ../matrix/.libs/libgslmatrix.a ../vector/.libs/libgslvector.a ../block/.libs/libgslblock.a ../complex/.libs/libgslcomplex.a ../ieee-utils/.libs/libgslieeeutils.a ../sys/.libs/libgslsys.a ../err/.libs/libgslerr.a ../utils/.libs/libutils.a ../rng/.libs/libgslrng.a ../sort/.libs/libgslsort.a -lm -Wl,-rpath -Wl,/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/lib
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/eigen'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/eigen'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/eigen'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/eigen'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/eigen'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/eigen'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/eigen'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/eigen'
+Making check in specfunc
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/specfunc'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/specfunc'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_sf.o -MD -MP -MF .deps/test_sf.Tpo -c -o test_sf.o test_sf.c
+mv -f .deps/test_sf.Tpo .deps/test_sf.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_airy.o -MD -MP -MF .deps/test_airy.Tpo -c -o test_airy.o test_airy.c
+mv -f .deps/test_airy.Tpo .deps/test_airy.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_bessel.o -MD -MP -MF .deps/test_bessel.Tpo -c -o test_bessel.o test_bessel.c
+mv -f .deps/test_bessel.Tpo .deps/test_bessel.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_coulomb.o -MD -MP -MF .deps/test_coulomb.Tpo -c -o test_coulomb.o test_coulomb.c
+mv -f .deps/test_coulomb.Tpo .deps/test_coulomb.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_dilog.o -MD -MP -MF .deps/test_dilog.Tpo -c -o test_dilog.o test_dilog.c
+mv -f .deps/test_dilog.Tpo .deps/test_dilog.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_gamma.o -MD -MP -MF .deps/test_gamma.Tpo -c -o test_gamma.o test_gamma.c
+mv -f .deps/test_gamma.Tpo .deps/test_gamma.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_hyperg.o -MD -MP -MF .deps/test_hyperg.Tpo -c -o test_hyperg.o test_hyperg.c
+mv -f .deps/test_hyperg.Tpo .deps/test_hyperg.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_legendre.o -MD -MP -MF .deps/test_legendre.Tpo -c -o test_legendre.o test_legendre.c
+mv -f .deps/test_legendre.Tpo .deps/test_legendre.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_mathieu.o -MD -MP -MF .deps/test_mathieu.Tpo -c -o test_mathieu.o test_mathieu.c
+mv -f .deps/test_mathieu.Tpo .deps/test_mathieu.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test_sf.o test_airy.o test_bessel.o test_coulomb.o test_dilog.o test_gamma.o test_hyperg.o test_legendre.o test_mathieu.o libgslspecfunc.la ../eigen/libgsleigen.la ../linalg/libgsllinalg.la  ../sort/libgslsort.la ../matrix/libgslmatrix.la ../vector/libgslvector.la ../blas/libgslblas.la ../cblas/libgslcblas.la ../block/libgslblock.la ../complex/libgslcomplex.la ../ieee-utils/libgslieeeutils.la  ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o .libs/test test_sf.o test_airy.o test_bessel.o test_coulomb.o test_dilog.o test_gamma.o test_hyperg.o test_legendre.o test_mathieu.o  ./.libs/libgslspecfunc.a ../eigen/.libs/libgsleigen.a ../linalg/.libs/libgsllinalg.a ../sort/.libs/libgslsort.a ../matrix/.libs/libgslmatrix.a ../vector/.libs/libgslvector.a ../blas/.libs/libgslblas.a ../cblas/.libs/libgslcblas.so ../block/.libs/libgslblock.a ../complex/.libs/libgslcomplex.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm -Wl,-rpath -Wl,/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/lib
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/specfunc'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/specfunc'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/specfunc'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/specfunc'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/specfunc'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/specfunc'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/specfunc'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/specfunc'
+Making check in dht
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/dht'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/dht'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgsldht.la ../specfunc/libgslspecfunc.la ../complex/libgslcomplex.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgsldht.a ../specfunc/.libs/libgslspecfunc.a ../complex/.libs/libgslcomplex.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/dht'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/dht'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/dht'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/dht'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/dht'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/dht'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/dht'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/dht'
+Making check in qrng
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/qrng'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/qrng'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslqrng.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgslqrng.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/qrng'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/qrng'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/qrng'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/qrng'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/qrng'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/qrng'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/qrng'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/qrng'
+Making check in rng
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/rng'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/rng'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslrng.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgslrng.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/rng'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/rng'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/rng'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/rng'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/rng'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/rng'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/rng'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/rng'
+Making check in randist
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/randist'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/randist'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslrandist.la ../rng/libgslrng.la ../specfunc/libgslspecfunc.la ../integration/libgslintegration.la ../complex/libgslcomplex.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgslrandist.a ../rng/.libs/libgslrng.a ../specfunc/.libs/libgslspecfunc.a ../integration/.libs/libgslintegration.a ../complex/.libs/libgslcomplex.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/randist'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/randist'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/randist'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/randist'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/randist'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/randist'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/randist'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/randist'
+Making check in fft
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fft'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fft'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT signals.o -MD -MP -MF .deps/signals.Tpo -c -o signals.o signals.c
+mv -f .deps/signals.Tpo .deps/signals.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o signals.o libgslfft.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o signals.o  ./.libs/libgslfft.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fft'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fft'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fft'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fft'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fft'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fft'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fft'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fft'
+Making check in poly
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/poly'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/poly'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslpoly.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la ../sort/libgslsort.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgslpoly.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a ../sort/.libs/libgslsort.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/poly'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/poly'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/poly'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/poly'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/poly'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/poly'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/poly'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/poly'
+Making check in fit
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fit'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fit'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslfit.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../utils/libutils.la ../sys/libgslsys.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgslfit.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../utils/.libs/libutils.a ../sys/.libs/libgslsys.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fit'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fit'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fit'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fit'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fit'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fit'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fit'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fit'
+Making check in multifit
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multifit'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multifit'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslmultifit.la ../linalg/libgsllinalg.la ../permutation/libgslpermutation.la ../blas/libgslblas.la ../cblas/libgslcblas.la ../matrix/libgslmatrix.la ../sort/libgslsort.la ../statistics/libgslstatistics.la ../vector/libgslvector.la ../block/libgslblock.la  ../complex/libgslcomplex.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../utils/libutils.la ../sys/libgslsys.la -lm 
+libtool: link: gcc -g -O2 -o .libs/test test.o  ./.libs/libgslmultifit.a ../linalg/.libs/libgsllinalg.a ../permutation/.libs/libgslpermutation.a ../blas/.libs/libgslblas.a ../cblas/.libs/libgslcblas.so ../matrix/.libs/libgslmatrix.a ../sort/.libs/libgslsort.a ../statistics/.libs/libgslstatistics.a ../vector/.libs/libgslvector.a ../block/.libs/libgslblock.a ../complex/.libs/libgslcomplex.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../utils/.libs/libutils.a ../sys/.libs/libgslsys.a -lm -Wl,-rpath -Wl,/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/lib
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multifit'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multifit'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multifit'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multifit'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multifit'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multifit'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multifit'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multifit'
+Making check in statistics
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/statistics'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/statistics'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_nist.o -MD -MP -MF .deps/test_nist.Tpo -c -o test_nist.o test_nist.c
+mv -f .deps/test_nist.Tpo .deps/test_nist.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o test_nist.o libgslstatistics.la ../sort/libgslsort.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la ../vector/libgslvector.la -lm 
+libtool: link: gcc -g -O2 -o test test.o test_nist.o  ./.libs/libgslstatistics.a ../sort/.libs/libgslsort.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a ../vector/.libs/libgslvector.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/statistics'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/statistics'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/statistics'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/statistics'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/statistics'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/statistics'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/statistics'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/statistics'
+Making check in siman
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/siman'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/siman'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslsiman.la ../rng/libgslrng.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgslsiman.a ../rng/.libs/libgslrng.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/siman'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/siman'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/siman'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/siman'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/siman'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/siman'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/siman'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/siman'
+Making check in sum
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sum'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sum'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslsum.la ../ieee-utils/libgslieeeutils.la  ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgslsum.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sum'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sum'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sum'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sum'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sum'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sum'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sum'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sum'
+Making check in integration
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/integration'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/integration'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT tests.o -MD -MP -MF .deps/tests.Tpo -c -o tests.o tests.c
+mv -f .deps/tests.Tpo .deps/tests.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o tests.o libgslintegration.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o tests.o  ./.libs/libgslintegration.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/integration'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/integration'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/integration'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/integration'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/integration'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/integration'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/integration'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/integration'
+Making check in interpolation
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/interpolation'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/interpolation'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslinterpolation.la ../poly/libgslpoly.la ../linalg/libgsllinalg.la ../permutation/libgslpermutation.la ../blas/libgslblas.la ../matrix/libgslmatrix.la ../vector/libgslvector.la ../block/libgslblock.la ../complex/libgslcomplex.la ../cblas/libgslcblas.la ../ieee-utils/libgslieeeutils.la  ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o .libs/test test.o  ./.libs/libgslinterpolation.a ../poly/.libs/libgslpoly.a ../linalg/.libs/libgsllinalg.a ../permutation/.libs/libgslpermutation.a ../blas/.libs/libgslblas.a ../matrix/.libs/libgslmatrix.a ../vector/.libs/libgslvector.a ../block/.libs/libgslblock.a ../complex/.libs/libgslcomplex.a ../cblas/.libs/libgslcblas.so ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm -Wl,-rpath -Wl,/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/lib
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/interpolation'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/interpolation'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/interpolation'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/interpolation'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/interpolation'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/interpolation'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/interpolation'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/interpolation'
+Making check in histogram
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/histogram'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/histogram'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test1d.o -MD -MP -MF .deps/test1d.Tpo -c -o test1d.o test1d.c
+mv -f .deps/test1d.Tpo .deps/test1d.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test2d.o -MD -MP -MF .deps/test2d.Tpo -c -o test2d.o test2d.c
+mv -f .deps/test2d.Tpo .deps/test2d.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test1d_resample.o -MD -MP -MF .deps/test1d_resample.Tpo -c -o test1d_resample.o test1d_resample.c
+mv -f .deps/test1d_resample.Tpo .deps/test1d_resample.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test2d_resample.o -MD -MP -MF .deps/test2d_resample.Tpo -c -o test2d_resample.o test2d_resample.c
+mv -f .deps/test2d_resample.Tpo .deps/test2d_resample.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test1d_trap.o -MD -MP -MF .deps/test1d_trap.Tpo -c -o test1d_trap.o test1d_trap.c
+mv -f .deps/test1d_trap.Tpo .deps/test1d_trap.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test2d_trap.o -MD -MP -MF .deps/test2d_trap.Tpo -c -o test2d_trap.o test2d_trap.c
+mv -f .deps/test2d_trap.Tpo .deps/test2d_trap.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o test1d.o test2d.o test1d_resample.o test2d_resample.o test1d_trap.o test2d_trap.o libgslhistogram.la ../block/libgslblock.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la -lm 
+libtool: link: gcc -g -O2 -o test test.o test1d.o test2d.o test1d_resample.o test2d_resample.o test1d_trap.o test2d_trap.o  ./.libs/libgslhistogram.a ../block/.libs/libgslblock.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/histogram'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/histogram'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/histogram'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/histogram'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/histogram'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/histogram'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/histogram'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/histogram'
+Making check in ode-initval
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslodeiv.la ../linalg/libgsllinalg.la ../blas/libgslblas.la ../cblas/libgslcblas.la ../matrix/libgslmatrix.la ../permutation/libgslpermutation.la ../vector/libgslvector.la ../block/libgslblock.la ../complex/libgslcomplex.la ../ieee-utils/libgslieeeutils.la  ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la  -lm 
+libtool: link: gcc -g -O2 -o .libs/test test.o  ./.libs/libgslodeiv.a ../linalg/.libs/libgsllinalg.a ../blas/.libs/libgslblas.a ../cblas/.libs/libgslcblas.so ../matrix/.libs/libgslmatrix.a ../permutation/.libs/libgslpermutation.a ../vector/.libs/libgslvector.a ../block/.libs/libgslblock.a ../complex/.libs/libgslcomplex.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm -Wl,-rpath -Wl,/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/lib
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval'
+Making check in ode-initval2
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval2'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval2'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslodeiv2.la ../linalg/libgsllinalg.la ../blas/libgslblas.la ../cblas/libgslcblas.la ../matrix/libgslmatrix.la ../permutation/libgslpermutation.la ../vector/libgslvector.la ../block/libgslblock.la ../complex/libgslcomplex.la ../ieee-utils/libgslieeeutils.la  ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la  -lm 
+libtool: link: gcc -g -O2 -o .libs/test test.o  ./.libs/libgslodeiv2.a ../linalg/.libs/libgsllinalg.a ../blas/.libs/libgslblas.a ../cblas/.libs/libgslcblas.so ../matrix/.libs/libgslmatrix.a ../permutation/.libs/libgslpermutation.a ../vector/.libs/libgslvector.a ../block/.libs/libgslblock.a ../complex/.libs/libgslcomplex.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm -Wl,-rpath -Wl,/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/lib
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval2'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval2'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval2'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval2'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval2'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval2'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval2'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval2'
+Making check in roots
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/roots'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/roots'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_funcs.o -MD -MP -MF .deps/test_funcs.Tpo -c -o test_funcs.o test_funcs.c
+mv -f .deps/test_funcs.Tpo .deps/test_funcs.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o test_funcs.o libgslroots.la ../ieee-utils/libgslieeeutils.la  ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o test_funcs.o  ./.libs/libgslroots.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/roots'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/roots'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/roots'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/roots'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/roots'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/roots'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/roots'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/roots'
+Making check in multiroots
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiroots'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiroots'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_funcs.o -MD -MP -MF .deps/test_funcs.Tpo -c -o test_funcs.o test_funcs.c
+mv -f .deps/test_funcs.Tpo .deps/test_funcs.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o test_funcs.o libgslmultiroots.la ../linalg/libgsllinalg.la ../blas/libgslblas.la ../cblas/libgslcblas.la ../permutation/libgslpermutation.la ../matrix/libgslmatrix.la ../vector/libgslvector.la ../block/libgslblock.la ../complex/libgslcomplex.la ../ieee-utils/libgslieeeutils.la  ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o .libs/test test.o test_funcs.o  ./.libs/libgslmultiroots.a ../linalg/.libs/libgsllinalg.a ../blas/.libs/libgslblas.a ../cblas/.libs/libgslcblas.so ../permutation/.libs/libgslpermutation.a ../matrix/.libs/libgslmatrix.a ../vector/.libs/libgslvector.a ../block/.libs/libgslblock.a ../complex/.libs/libgslcomplex.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm -Wl,-rpath -Wl,/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/lib
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiroots'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiroots'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiroots'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiroots'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiroots'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiroots'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiroots'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiroots'
+Making check in min
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/min'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/min'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_funcs.o -MD -MP -MF .deps/test_funcs.Tpo -c -o test_funcs.o test_funcs.c
+mv -f .deps/test_funcs.Tpo .deps/test_funcs.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o test_funcs.o libgslmin.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../utils/libutils.la ../sys/libgslsys.la -lm 
+libtool: link: gcc -g -O2 -o test test.o test_funcs.o  ./.libs/libgslmin.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../utils/.libs/libutils.a ../sys/.libs/libgslsys.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/min'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/min'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/min'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/min'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/min'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/min'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/min'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/min'
+Making check in multimin
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multimin'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multimin'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test_funcs.o -MD -MP -MF .deps/test_funcs.Tpo -c -o test_funcs.o test_funcs.c
+mv -f .deps/test_funcs.Tpo .deps/test_funcs.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o test_funcs.o libgslmultimin.la ../min/libgslmin.la ../poly/libgslpoly.la ../blas/libgslblas.la ../cblas/libgslcblas.la ../linalg/libgsllinalg.la ../permutation/libgslpermutation.la ../matrix/libgslmatrix.la ../vector/libgslvector.la ../block/libgslblock.la ../complex/libgslcomplex.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o .libs/test test.o test_funcs.o  ./.libs/libgslmultimin.a ../min/.libs/libgslmin.a ../poly/.libs/libgslpoly.a ../blas/.libs/libgslblas.a ../cblas/.libs/libgslcblas.so ../linalg/.libs/libgsllinalg.a ../permutation/.libs/libgslpermutation.a ../matrix/.libs/libgslmatrix.a ../vector/.libs/libgslvector.a ../block/.libs/libgslblock.a ../complex/.libs/libgslcomplex.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm -Wl,-rpath -Wl,/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/lib
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multimin'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multimin'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multimin'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multimin'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multimin'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multimin'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multimin'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multimin'
+Making check in monte
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/monte'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/monte'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslmonte.la ../rng/libgslrng.la  ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgslmonte.a ../rng/.libs/libgslrng.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/monte'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/monte'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/monte'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/monte'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/monte'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/monte'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/monte'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/monte'
+Making check in ntuple
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ntuple'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ntuple'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslntuple.la ../histogram/libgslhistogram.la ../block/libgslblock.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgslntuple.a ../histogram/.libs/libgslhistogram.a ../block/.libs/libgslblock.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ntuple'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ntuple'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ntuple'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ntuple'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ntuple'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ntuple'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ntuple'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ntuple'
+Making check in diff
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/diff'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/diff'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgsldiff.la  ../vector/libgslvector.la ../block/libgslblock.la  ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgsldiff.a ../vector/.libs/libgslvector.a ../block/.libs/libgslblock.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/diff'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/diff'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/diff'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/diff'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/diff'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/diff'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/diff'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/diff'
+Making check in deriv
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/deriv'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/deriv'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslderiv.la  ../vector/libgslvector.la ../block/libgslblock.la  ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgslderiv.a ../vector/.libs/libgslvector.a ../block/.libs/libgslblock.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/deriv'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/deriv'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/deriv'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/deriv'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/deriv'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/deriv'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/deriv'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/deriv'
+Making check in cdf
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cdf'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cdf'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslcdf.la ../randist/libgslrandist.la ../rng/libgslrng.la ../specfunc/libgslspecfunc.la ../complex/libgslcomplex.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o test test.o  ./.libs/libgslcdf.a ../randist/.libs/libgslrandist.a ../rng/.libs/libgslrng.a ../specfunc/.libs/libgslspecfunc.a ../complex/.libs/libgslcomplex.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cdf'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cdf'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cdf'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cdf'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cdf'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cdf'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cdf'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cdf'
+Making check in wavelet
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/wavelet'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/wavelet'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslwavelet.la ../blas/libgslblas.la ../cblas/libgslcblas.la ../matrix/libgslmatrix.la ../vector/libgslvector.la ../block/libgslblock.la ../ieee-utils/libgslieeeutils.la  ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la -lm 
+libtool: link: gcc -g -O2 -o .libs/test test.o  ./.libs/libgslwavelet.a ../blas/.libs/libgslblas.a ../cblas/.libs/libgslcblas.so ../matrix/.libs/libgslmatrix.a ../vector/.libs/libgslvector.a ../block/.libs/libgslblock.a ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a -lm -Wl,-rpath -Wl,/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/lib
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/wavelet'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/wavelet'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/wavelet'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/wavelet'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/wavelet'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/wavelet'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/wavelet'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/wavelet'
+Making check in bspline
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/bspline'
+make  test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/bspline'
+gcc -DHAVE_CONFIG_H -I. -I.. -I..    -g -O2 -MT test.o -MD -MP -MF .deps/test.Tpo -c -o test.o test.c
+mv -f .deps/test.Tpo .deps/test.Po
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -g -O2   -o test test.o libgslbspline.la ../linalg/libgsllinalg.la ../permutation/libgslpermutation.la ../blas/libgslblas.la ../matrix/libgslmatrix.la ../vector/libgslvector.la ../block/libgslblock.la ../complex/libgslcomplex.la ../cblas/libgslcblas.la ../ieee-utils/libgslieeeutils.la  ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la ../utils/libutils.la ../statistics/libgslstatistics.la -lm 
+libtool: link: gcc -g -O2 -o .libs/test test.o  ./.libs/libgslbspline.a ../linalg/.libs/libgsllinalg.a ../permutation/.libs/libgslpermutation.a ../blas/.libs/libgslblas.a ../matrix/.libs/libgslmatrix.a ../vector/.libs/libgslvector.a ../block/.libs/libgslblock.a ../complex/.libs/libgslcomplex.a ../cblas/.libs/libgslcblas.so ../ieee-utils/.libs/libgslieeeutils.a ../err/.libs/libgslerr.a ../test/.libs/libgsltest.a ../sys/.libs/libgslsys.a ../utils/.libs/libutils.a ../statistics/.libs/libgslstatistics.a -lm -Wl,-rpath -Wl,/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/lib
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/bspline'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/bspline'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/bspline'
+PASS: test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/bspline'
+make[4]: Nothing to be done for `all'.
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/bspline'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 1
+# PASS:  1
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/bspline'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/bspline'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/bspline'
+Making check in doc
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/doc'
+make[1]: Nothing to be done for `check'.
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/doc'
+make[1]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16'
+make  test_gsl_histogram.sh pkgconfig.test
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16'
+make[2]: Nothing to be done for `test_gsl_histogram.sh'.
+make[2]: Nothing to be done for `pkgconfig.test'.
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16'
+make  check-TESTS
+make[2]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16'
+make[3]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16'
+PASS: test_gsl_histogram.sh
+PASS: pkgconfig.test
+make[4]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16'
+make  all-recursive
+make[5]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16'
+Making all in gsl
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/gsl'
+rm -f gsl*.h
+HEADERLIST="../gsl*.h ../*/gsl*.h"; \
+	for h in $HEADERLIST; do \
+	  BASENAME=`basename $h`; \
+	  test -r $BASENAME || ln -s $h $BASENAME; \
+	done
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/gsl'
+Making all in utils
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/utils'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/utils'
+Making all in sys
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sys'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sys'
+Making all in test
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/test'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/test'
+Making all in err
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/err'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/err'
+Making all in const
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/const'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/const'
+Making all in complex
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/complex'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/complex'
+Making all in cheb
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cheb'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cheb'
+Making all in block
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/block'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/block'
+Making all in vector
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/vector'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/vector'
+Making all in matrix
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/matrix'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/matrix'
+Making all in permutation
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/permutation'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/permutation'
+Making all in combination
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/combination'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/combination'
+Making all in multiset
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiset'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiset'
+Making all in sort
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sort'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sort'
+Making all in ieee-utils
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ieee-utils'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ieee-utils'
+Making all in cblas
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cblas'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cblas'
+Making all in blas
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/blas'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/blas'
+Making all in linalg
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/linalg'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/linalg'
+Making all in eigen
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/eigen'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/eigen'
+Making all in specfunc
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/specfunc'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/specfunc'
+Making all in dht
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/dht'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/dht'
+Making all in qrng
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/qrng'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/qrng'
+Making all in rng
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/rng'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/rng'
+Making all in randist
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/randist'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/randist'
+Making all in fft
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fft'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fft'
+Making all in poly
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/poly'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/poly'
+Making all in fit
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fit'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/fit'
+Making all in multifit
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multifit'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multifit'
+Making all in statistics
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/statistics'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/statistics'
+Making all in siman
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/siman'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/siman'
+Making all in sum
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sum'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/sum'
+Making all in integration
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/integration'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/integration'
+Making all in interpolation
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/interpolation'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/interpolation'
+Making all in histogram
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/histogram'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/histogram'
+Making all in ode-initval
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval'
+Making all in ode-initval2
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval2'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ode-initval2'
+Making all in roots
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/roots'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/roots'
+Making all in multiroots
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiroots'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multiroots'
+Making all in min
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/min'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/min'
+Making all in multimin
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multimin'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/multimin'
+Making all in monte
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/monte'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/monte'
+Making all in ntuple
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ntuple'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/ntuple'
+Making all in diff
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/diff'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/diff'
+Making all in deriv
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/deriv'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/deriv'
+Making all in cdf
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cdf'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/cdf'
+Making all in wavelet
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/wavelet'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/wavelet'
+Making all in bspline
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/bspline'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/bspline'
+Making all in doc
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/doc'
+make[6]: Nothing to be done for `all'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16/doc'
+make[6]: Entering directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16'
+make[6]: Nothing to be done for `all-am'.
+make[6]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16'
+make[5]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16'
+make[4]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16'
+============================================================================
+Testsuite summary for gsl 1.16
+============================================================================
+# TOTAL: 2
+# PASS:  2
+# SKIP:  0
+# XFAIL: 0
+# FAIL:  0
+# XPASS: 0
+# ERROR: 0
+============================================================================
+make[3]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16'
+make[2]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16'
+make[1]: Leaving directory `/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/gsl-1.16'

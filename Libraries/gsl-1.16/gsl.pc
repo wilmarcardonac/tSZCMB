@@ -1,0 +1,11 @@
+prefix=/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries
+exec_prefix=/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries
+libdir=/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/lib
+includedir=/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/include
+GSL_CBLAS_LIB=-lgslcblas
+
+Name: GSL
+Description: GNU Scientific Library
+Version: 1.16
+Libs: -L/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/lib -lgsl ${GSL_CBLAS_LIB} -lm -lm 
+Cflags: -I/home/cardonac/projects/tSZ-CMB-lensing-bispectrum/tSZCMB/Libraries/include
