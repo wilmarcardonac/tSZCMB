@@ -7,4 +7,5 @@ output/*.txt
 *.tgz
 *.out
 precomputed_quantities/*
+Libraries/*
 *~
