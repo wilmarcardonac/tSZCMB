@@ -1,9 +1,0 @@
- Processed error in interp.c at line           76
- Reason was: data must match size of interpolation object
- Processed error in error.F90 at line           63
- Reason was: my_own_call
- output range error
- now check GSL-internal abort ...
-OK: All 6 tests passed
-gsl: interp.c:38: ERROR: insufficient number of points for interpolation type
-Default GSL error handler invoked.
