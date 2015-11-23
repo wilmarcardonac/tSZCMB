@@ -2401,7 +2401,7 @@ Module functions
 
         Real*8 :: pre_Clphiphi,sum,redshift,dndM_M_z,philMz_M_z,com_vol_per_ster_z
         Integer*4 :: indexl,i,indexM
-        Integer*4,parameter :: number_of_virial_Mass = 1d5
+        Integer*4,parameter :: number_of_virial_Mass = 1000 !1d5
         Integer*4,parameter :: intervals = number_of_virial_Mass - 1 
         Real*8,dimension(number_of_virial_Mass) :: f,virial_Mass
 
@@ -2442,7 +2442,7 @@ Module functions
 
         Real*8 :: C_l_phiphi_one_halo,sum
         Integer*4 :: indexl,indexz
-        Integer*4,parameter :: number_of_redshift = 1d4
+        Integer*4,parameter :: number_of_redshift = 1000 !1d4
         Integer*4,parameter :: intervals = number_of_redshift - 1
         Real*8,dimension(number_of_redshift):: f,redshift
 
@@ -2834,22 +2834,22 @@ Module functions
 
         Real*8 :: C_l_psi_limber,sum,prefactor
         Integer*4 :: indexl,indexz
-        Integer*4,parameter :: intervals = number_of_z - 1 
-        Real*8,dimension(number_of_z):: f,zlimber
+        Integer*4,parameter :: intervals = number_of_z_limber - 1 
+        Real*8,dimension(number_of_z_limber):: f,zlimber
         Real*8,parameter :: zminlimber = 1.d-5
 
         ! Red-shift array. Dimensionless.
 
-        Do indexz = 1, number_of_z      
+        Do indexz = 1, number_of_z_limber      
 
-            zlimber(indexz) = 10**(log10(zminlimber) + real(indexz-1)*(log10(z_dec) - log10(zminlimber))/real(number_of_z-1))
+            zlimber(indexz) = 10**(log10(zminlimber) + real(indexz-1)*(log10(z_dec) - log10(zminlimber))/real(number_of_z_limber-1))
 
         End Do
 
         prefactor = 4.d0/dble(ml(indexl))**2/(dble(ml(indexl))+1.d0)**2*9.d0/4.d0/&
         c**4*Hubble_parameter(0.d0)**4*Omega_m(0.d0)**2    !    Units : 
 
-        Do indexz=1,number_of_z
+        Do indexz=1,number_of_z_limber
 
            f(indexz) = (1.d0 + zlimber(indexz))**2*( com_dist_at_z_dec - comoving_distance(zlimber(indexz)) )**2/&
            com_dist_at_z_dec**2*c/Hubble_parameter(zlimber(indexz))*&
@@ -2898,7 +2898,7 @@ Module functions
 
         Real*8 :: C_l_phiphi_two_halo,sum,com_dist_z,com_vol_per_ster_z
         Integer*4 :: indexl,indexz
-        Integer*4,parameter :: number_of_redshift = 1d4
+        Integer*4,parameter :: number_of_redshift = number_of_z!*1 !1d4
         Integer*4,parameter :: intervals = number_of_redshift - 1 
         Real*8,dimension(number_of_redshift):: f,redshift
 
@@ -2968,7 +2968,7 @@ Module functions
 
         Real*8 :: pre_Cl_1,sum,redshift,dndM_M_z,bMz_M_z,philMz_M_z
         Integer*4 :: indexl,indexM
-        Integer*4,parameter :: number_of_virial_Mass = 100000
+        Integer*4,parameter :: number_of_virial_Mass = number_of_M!*2 !100000
         Integer*4,parameter :: intervals = number_of_M - 1
         Real*8,dimension(number_of_virial_Mass) :: f,virial_Mass
         

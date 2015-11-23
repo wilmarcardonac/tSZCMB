@@ -174,7 +174,7 @@ Program tSZ
 
      write(UNIT_EXE_FILE,*) 'COMPUTING ANGULAR POWER SPECTRUM OF LENSING POTENTIAL'
 
-     call compute_Clphiphi1h() ! ONE HALO TERM
+     !call compute_Clphiphi1h() ! ONE HALO TERM
 
      call compute_Clphiphi2h() ! TWO HALO TERM
 
@@ -183,6 +183,8 @@ Program tSZ
      call compute_Cl()   ! TOTAL 
 
      call write_Cl()     ! OF ALL COMPUTATIONS 
+
+     stop
 
      If (compute_the_form_factor) then
 

@@ -8,32 +8,33 @@ h1 = np.loadtxt('1-halo.dat')
 h2 = np.loadtxt('2-halo.dat')
 total = np.loadtxt('Total.dat')
 
-py.plot(h1[:,0],h1[:,1]*1.e-11,label='H&S 1-halo')
-py.plot(h2[:,0],h2[:,1]*1.e-11,label='H&S 2-halo')
-py.plot(total[:,0],total[:,1]*1.e-11,label='H&S total')
+#py.plot(h1[:,0],h1[:,1]*1.e-11,label='H&S 1-halo')
+#py.plot(h2[:,0],h2[:,1]*1.e-11,label='H&S 2-halo')
+#py.plot(total[:,0],total[:,1]*1.e-11,label='H&S total')
 
-py.xscale('log')
+#py.xscale('log')
 
-py.yscale('linear')
+#py.yscale('linear')
 
-py.xlim(1.e1,1.e4)
+#py.xlim(1.e1,1.e4)
 
-py.ylim(0.e-11,4.e-11)
+#py.ylim(0.e-11,4.e-11)
 
-py.show()
+#py.show()
 #exit()
-fig1 = py.figure()
+#fig1 = py.figure()
 
 
-py.loglog(l,l**4*cl1h,label='lensing (1-halo)')
+#py.loglog(l,l**4*cl1h,label='lensing (1-halo)')
 
 py.loglog(l,l**4*cl2h,label='lensing (2-halo)')
 
 py.loglog(l,l**4*cllimber,label='lensing (limber approx.)')
 
-py.legend()
+py.legend(loc=0)
 
 py.show()
+exit()
 
 py.loglog(l,clpp,label='lensing (1-halo + 2-halo)')
 
