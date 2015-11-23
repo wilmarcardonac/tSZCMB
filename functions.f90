@@ -132,7 +132,7 @@ Module functions
 
     end function Hubble_parameter
 
-    function comoving_distance(z)    !    Units : Mpc
+    function comoving_distance(z)    !    UNITS: Mpc
 
         use fiducial
         use omp_lib

@@ -1,20 +1,19 @@
 Program tSZ
 
-    ! LOAD NEEDED MODULES
-    use fiducial
-    use arrays
-    use functions 
+    use fiducial   ! CONTAINS PARAMETERS 
+    use arrays     ! CONTAINS ARRAYS 
+    use functions  ! CONTAINS ALL THE FUNCTIONS
     use omp_lib
     use fgsl
 
     ! DECLARATION AND INITIALIZATION OF VARIABLES
     Implicit none
-    Integer*4 :: index1 ! COUNTERS
-    Real*8 :: wtime       ! MEASURES TIME
-    Character(len=15),parameter :: halo_definition = 'virial'
+    Integer*4 :: index1                                       ! COUNTER
+    Real*8 :: wtime                                           ! STORES TIME OF EXECUTION
 
-    ! OPEN FILE TO STORE EXECUTION INFORMATION 
-    open(20,file=path_to_execution_information)
+    com_dist_at_z_dec = comoving_distance(z_dec) ! COMPUTE COMOVING DISTANCE AT DECOUPLING
+
+    open(UNIT_EXE_FILE,file=path_to_execution_information)     ! OPEN FILE TO STORE EXECUTION INFORMATION 
 
     ! ALLOCATING MEMORY FOR : RED-SHIFT, VIRIAL MASS, MULTIPOLES, WAVEVECTOR, ONE- AND TWO-HALO Y-tSZ CROSS CORRELATION AND THEIR SUM, 
     ! MEAN DENSITY MASS, CRITICAL DENSITY MASS, CRITICAL DENSITY RADIUS, DERIVATIVE OF MEAN DENSITY MASS w.r.t VIRIAL MASS, 
@@ -33,41 +32,36 @@ Program tSZ
 
     If (status1 .eq. 0) then
        
-        write(20,*) 'MEMORY ALLOCATED SUCCESSFULLY'
+        write(UNIT_EXE_FILE,*) 'MEMORY ALLOCATED SUCCESSFULLY'
 
     Else
 
-        write(20,*) 'PROBLEM ALLOCATING MEMORY'
+        write(UNIT_EXE_FILE,*) 'PROBLEM ALLOCATING MEMORY'
 
         stop
 
     End If
 
-    ! FILLING ARRAYS 
-
-    ! WAVEVECTOR ARRAY. UNITS : 1/Mpc
-    Do index1 = 1, number_of_k    
+    Do index1 = 1, number_of_k ! FILLS WAVEVECTOR ARRAY. UNITS : 1/Mpc
 
         k(index1) = 10**(log10(kmin) + real(index1-1)*(log10(kmax) - log10(kmin))/real(number_of_k-1))
 
     End Do
 
-    ! RED-SHIFT ARRAY.
-    Do index1 = 1, number_of_z      
+
+    Do index1 = 1, number_of_z ! FILLS RED-SHIFT ARRAY.     
 
         z(index1) = 10**(log10(zmin) + real(index1-1)*(log10(zmax) - log10(zmin))/real(number_of_z-1))
 
     End Do
-
-    ! VIRIAL MASS ARRAY. UNITS: Solar mass 
-    Do index1 = -1, number_of_M+2    
+    
+    Do index1 = -1, number_of_M+2 ! FILLS VIRIAL MASS ARRAY. UNITS: Solar mass    
 
         M(index1) = 10**(log10(Mmin) + real(index1-1)*(log10(Mmax) - log10(Mmin))/real(number_of_M-1))
 
     End Do
 
-    ! MULTIPOLE ARRAY.
-    Do index1 = 1, number_of_l     
+    Do index1 = 1, number_of_l ! FILLS MULTIPOLE ARRAY.    
 
         ml(index1) = int(10**(log10(dble(lmin)) + real(index1-1)*(log10(dble(lmax)) - &
         log10(dble(lmin)))/real(number_of_l-1)),4)
@@ -76,167 +70,156 @@ Program tSZ
 
     ! COMPUTATION STARTS
 
-    ! COMPUTE COMOVING DISTANCE ARRAY
-    call compute_comoving_distance()
+    call compute_comoving_distance() ! COMPUTE COMOVING DISTANCE ARRAY
 
-    ! COMPUTE COMOVING DISTANCE AT DECOUPLING
-    com_dist_at_z_dec = comoving_distance(z_dec)
+    If (do_mass_conversion) then ! COMPUTE MASSES
 
-    ! REDO COMPUTATIONS ONLY IF MASS CONVERSION REQUIRED
-    If (do_mass_conversion) then
+        wtime = omp_get_wtime() ! SETTING STARTING TIME OF MASS CONVERSION
 
-        !wtime = omp_get_wtime() ! SETTING STARTING TIME OF MASS CONVERSION
+        write(UNIT_EXE_FILE,*) 'EXECUTING MASS CONVERSION'
 
-        !write(20,*) 'EXECUTING MASS CONVERSION'
+        call compute_M_delta_c_from_M_and_z(DeltaSO)
 
-        !call compute_M_delta_c_from_M_and_z(DeltaSO)
+        write(UNIT_EXE_FILE,*) 'MASS CONVERSION ENDED'
 
-        !write(20,*) 'MASS CONVERSION ENDED'
+        write(UNIT_EXE_FILE,*) 'MASS CONVERSION FOR RED-SHIFT ARRAY OF SIZE ', size(z),' AND VIRIAL MASS ARRAY OF SIZE ', size(M),&
+        'TOOK ', (omp_get_wtime()-wtime)/3.6d3, 'HOURS'
+        
+        call read_M200dc_r200dc() ! READING MASS CONVERSION FILE AND COMPUTING DERIVATIVES OF MASS CONVERSION
 
-        !write(20,*) 'MASS CONVERSION FOR RED-SHIFT ARRAY OF SIZE ', size(z),' AND VIRIAL MASS ARRAY OF SIZE ', size(M),&
-        !'TOOK ', (omp_get_wtime()-wtime)/3.6d3, 'HOURS'
+        write(UNIT_EXE_FILE,*) 'MASS CONVERSION FILE READ AND DERIVATIVES OF MASS CONVERSION COMPUTED'
 
-        ! READING MASS CONVERSION FILE AND COMPUTING DERIVATIVES OF MASS CONVERSION
-        call read_M200dc_r200dc()
+     Else
 
-        write(20,*) 'MASS CONVERSION FILE READ AND DERIVATIVES OF MASS CONVERSION COMPUTED'
+        write(UNIT_EXE_FILE,*) 'USING MASS DATA FILE PREVIOUSLY COMPUTED'
 
-        call compute_normalization() ! IN MATTER POWER SPECTRUM TO FIT FIDUCIAL SIGMA_8
+        call read_M200dc_r200dc() ! READING MASS CONVERSION FILE AND COMPUTING DERIVATIVES OF MASS CONVERSION
 
-        write(20,*) 'NORMALIZATION OF MATTER POWER SPECTRUM TO MATCH SIGMA_8 (',sigma8,') WAS COMPUTED'
+        write(UNIT_EXE_FILE,*) 'MASS CONVERSION FILE READ AND DERIVATIVES OF MASS CONVERSION COMPUTED'
 
-        write(20,*) 'COMPUTING LINEAR HALO BIAS'
+     End If
+
+     call compute_normalization() ! IN MATTER POWER SPECTRUM TO FIT FIDUCIAL SIGMA_8
+
+     write(UNIT_EXE_FILE,*) 'NORMALIZATION OF MATTER POWER SPECTRUM TO MATCH SIGMA_8 (',sigma8,') WAS COMPUTED'
+
+     If (compute_linear_halo_bias) then
+
+        write(UNIT_EXE_FILE,*) 'COMPUTING LINEAR HALO BIAS'
 
         call compute_bMz() ! LINEAR HALO BIAS AS A FUNCTION OF MASS AND RED-SHIFT
 
-        write(20,*) 'COMPUTING NORMALIZATION OF HALO MASS FUNCTION'
+     Else
+
+        write(UNIT_EXE_FILE,*) 'READING LINEAR HALO BIAS'
+
+        call read_bMz() ! LINEAR HALO BIAS AS A FUNCTION OF MASS AND RED-SHIFT
+
+     End If
+
+     If (compute_alpha_in_halo_mass_function) then
+
+        write(UNIT_EXE_FILE,*) 'COMPUTING NORMALIZATION OF HALO MASS FUNCTION'
 
         call compute_alpha_halo_mass_function() ! NORMALIZE HALO MASS FUNCTION TO FULLFILL CONDITION THAT MEAN BIAS OF ALL MATTER
                                                 ! AT A FIXED RED-SHIFT IS UNITY
+
+     Else 
+
+        write(UNIT_EXE_FILE,*) 'READING NORMALIZATION OF HALO MASS FUNCTION'
+
+        call read_alpha_halo_mass_function() ! NORMALIZE HALO MASS FUNCTION TO FULLFILL CONDITION THAT MEAN BIAS OF ALL MATTER
+                                             ! AT A FIXED RED-SHIFT IS UNITY
+
+     End If
         
-        write(20,*) 'COMPUTING HALO MASS FUNCTION'
+     If (compute_halo_mass_function) then
+
+        write(UNIT_EXE_FILE,*) 'COMPUTING HALO MASS FUNCTION'
 
         call compute_dndM() ! COMPUTING HALO MASS FUNCTION AS A FUNCTION OF MASS AND RED-SHIFT 
 
-        write(20,*) 'COMPUTING COMOVING VOLUME ELEMENT PER STERADIAN'
+     Else
 
-        call compute_d2VdzdO()   ! COMPUTES COMOVING VOLUME ELEMENT PER STERADIAN  
+        write(UNIT_EXE_FILE,*) 'READING HALO MASS FUNCTION'
+
+        call read_dndM() ! READING HALO MASS FUNCTION    
+
+     End If
+
+     write(UNIT_EXE_FILE,*) 'COMPUTING COMOVING VOLUME ELEMENT PER STERADIAN'
+
+     call compute_d2VdzdO()   ! COMPUTES COMOVING VOLUME ELEMENT PER STERADIAN  
+
+     If (compute_the_lensing_potential) then 
 
         wtime = omp_get_wtime() ! SETTING STARTING TIME OF LENSING POTENTIAL COMPUTATION
 
-        write(20,*) 'COMPUTING LENSING POTENTIAL'
+        write(UNIT_EXE_FILE,*) 'COMPUTING LENSING POTENTIAL'
 
         call compute_lensing_potential(halo_definition)
 
-        write(20,*) 'LENSING POTENTIAL COMPUTATION FOR RED-SHIFT ARRAY OF SIZE ', size(z),', VIRIAL MASS ARRAY OF SIZE ',&
+        write(UNIT_EXE_FILE,*) 'LENSING POTENTIAL COMPUTATION FOR RED-SHIFT ARRAY OF SIZE ', size(z),', VIRIAL MASS ARRAY OF SIZE ',&
         size(M),', AND MULTIPOLES ARRAY OF SIZE ', size(ml),' TOOK ', (omp_get_wtime()-wtime)/3.6d3, 'HOURS'
 
-        write(20,*) 'COMPUTING ANGULAR POWER SPECTRUM OF LENSING POTENTIAL'
+     Else
 
-        call compute_Clphiphi1h() ! ONE HALO TERM
+        write(UNIT_EXE_FILE,*) 'READING LENSING POTENTIAL'
 
-        call compute_Clphiphi2h() ! TWO HALO TERM
+        call read_philMz() ! READS LENSING POTENTIAL
 
-        call compute_Clpsilimber()! LIMBER APPROXIMATION 
+     End If
 
-        call compute_Cl()   ! TOTAL 
+     write(UNIT_EXE_FILE,*) 'COMPUTING ANGULAR POWER SPECTRUM OF LENSING POTENTIAL'
 
-        call write_Cl()     ! OF ALL COMPUTATIONS 
-        stop
+     call compute_Clphiphi1h() ! ONE HALO TERM
+
+     call compute_Clphiphi2h() ! TWO HALO TERM
+
+     call compute_Clpsilimber()! LIMBER APPROXIMATION 
+
+     call compute_Cl()   ! TOTAL 
+
+     call write_Cl()     ! OF ALL COMPUTATIONS 
+
+     If (compute_the_form_factor) then
+
         wtime = omp_get_wtime() ! SETTING STARTING TIME OF FORM FACTOR COMPUTATION
 
-        write(20,*) 'COMPUTING FORM FACTOR'
+        write(UNIT_EXE_FILE,*) 'COMPUTING FORM FACTOR'
 
         call compute_form_factor()
 
-        write(20,*) 'FORM FACTOR COMPUTATION FOR RED-SHIFT ARRAY OF SIZE ', size(z),', VIRIAL MASS ARRAY OF SIZE ', size(M),&
+        write(UNIT_EXE_FILE,*) 'FORM FACTOR COMPUTATION FOR RED-SHIFT ARRAY OF SIZE ', size(z),', VIRIAL MASS ARRAY OF SIZE ', size(M),&
         ', AND MULTIPOLES ARRAY OF SIZE ', size(ml),' TOOK ', (omp_get_wtime()-wtime)/3.6d3, 'HOURS'
 
-        write(20,*) 'COMPUTING ANGULAR POWER SPECTRUM OF Y-tSZ CROSS-CORRELATION'
+     Else
 
-        call compute_Cl1h() ! ONE HALO TERM
-
-        call compute_Cl2h() ! TWO HALO TERM
- 
-        call compute_Cl()   ! TOTAL 
-
-        call write_Cl()     ! OF ALL COMPUTATIONS 
-
-        write(20,*) 'COMPUTATION ENDED'
-
-    Else
-
-        deallocate(mbz,M200c,M200d,r200c,r200d,dM200ddM,dM200cdM)
-
-        write(20,*) 'USING MASS DATA FILE PREVIOUSLY COMPUTED'
-
-        ! READING MASS CONVERSION FILE AND COMPUTING DERIVATIVES OF MASS CONVERSION
-!        call read_M200dc_r200dc()
-
-        write(20,*) 'MASS CONVERSION FILE READ AND DERIVATIVES OF MASS CONVERSION COMPUTED'
-
-        call compute_normalization() ! IN MATTER POWER SPECTRUM TO FIT FIDUCIAL SIGMA_8
-
-        write(20,*) 'NORMALIZATION OF MATTER POWER SPECTRUM TO MATCH SIGMA_8 (',sigma8,') WAS COMPUTED'
-
-!        call read_bMz() ! LINEAR HALO BIAS AS A FUNCTION OF MASS AND RED-SHIFT
-        call compute_bMz() ! LINEAR HALO BIAS AS A FUNCTION OF MASS AND RED-SHIFT
-
-!        call read_alpha_halo_mass_function() ! NORMALIZE HALO MASS FUNCTION TO FULLFILL CONDITION THAT MEAN BIAS OF ALL MATTER
-                                                ! AT A FIXED RED-SHIFT IS UNITY
-        call compute_alpha_halo_mass_function() ! NORMALIZE HALO MASS FUNCTION TO FULLFILL CONDITION THAT MEAN BIAS OF ALL MATTER
-                                                ! AT A FIXED RED-SHIFT IS UNITY
-
-
-!        call read_dndM() ! READING HALO MASS FUNCTION    
-        call compute_dndM() ! COMPUTING HALO MASS FUNCTION AS A FUNCTION OF MASS AND RED-SHIFT 
-
-        write(20,*) 'COMPUTING COMOVING VOLUME ELEMENT PER STERADIAN'
-
-        call compute_d2VdzdO()   ! COMPUTES COMOVING VOLUME ELEMENT PER STERADIAN  
-
-        write(20,*) 'COMPUTING CRITICAL SURFACE DENSITY'
-
-        call compute_lensing_potential(halo_definition)
-!        call read_philMz() ! READS LENSING POTENTIAL
-
-        write(20,*) 'COMPUTING ANGULAR POWER SPECTRUM OF LENSING POTENTIAL'
-
-        call compute_Clphiphi1h() ! ONE HALO TERM
-
-        call compute_Clphiphi2h() ! TWO HALO TERM
-
-        call compute_Clpsilimber()! LIMBER APPROXIMATION 
-
-        call compute_Cl()   ! TOTAL 
-
-        call write_Cl()     ! OF ALL COMPUTATIONS 
-
-        stop
+        write(UNIT_EXE_FILE,*) 'READING FORM FACTOR'
 
         call read_ylMz() ! READS FORM FACTOR
 
-        write(20,*) 'COMPUTING ANGULAR POWER SPECTRUM OF Y-tSZ CROSS-CORRELATION'
+     End If
+        
+     write(UNIT_EXE_FILE,*) 'COMPUTING ANGULAR POWER SPECTRUM OF Y-tSZ CROSS-CORRELATION'
 
-        call compute_Cl1h() ! ONE HALO TERM
+     call compute_Cl1h() ! ONE HALO TERM
 
-        call compute_Cl2h() ! TWO HALO TERM
+     call compute_Cl2h() ! TWO HALO TERM
  
-        call compute_Cl()   ! TOTAL 
+     call compute_Cl()   ! TOTAL 
 
-        call write_Cl()     ! OF ALL COMPUTATIONS 
+     call write_Cl()     ! OF ALL COMPUTATIONS 
 
-        write(20,*) 'COMPUTATION ENDED'
-
-    End If
+     write(UNIT_EXE_FILE,*) 'COMPUTATION ENDED'
 
     ! DEALLOCATING MEMORY
     deallocate (z,M,k,ml,Cl1h,Cl2h,Clphiphi1h,Clphiphi2h,Cl,Clphiphi,&
     d2VdzdO,dndM,ylMz,philMz,bMz,alpha_halo_mass_function,&
-    Clpsilimber,comoving_distance_at_z)
+    Clpsilimber,comoving_distance_at_z,mbz,M200c,M200d,r200c,r200d,dM200ddM,dM200cdM)
 
     ! CLOSE EXECUTION INFORMATION FILE
-    close(20)
+    close(UNIT_EXE_FILE)
 
 End Program tSZ
 

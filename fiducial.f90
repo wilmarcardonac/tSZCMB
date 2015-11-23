@@ -13,6 +13,7 @@ Module fiducial
     Integer*4,parameter :: number_of_l = 5  ! SIZE OF MULTIPOLE ARRAY 
     Integer*4,parameter :: lmax = 1d4        ! HIGHEST MULTIPOLE
     Integer*4,parameter :: lmin = 1d0        ! LOWEST MULTIPOLE
+    Integer*4,parameter :: UNIT_EXE_FILE = 90 ! UNIT FOR EXECUTION INFORMATION FILE
 
     Real*8,parameter :: Pi = 3.141592653589793d0
     Real*8,parameter :: c = 2.99792458d8          ! SPEED OF LIGHT IN m s-1
@@ -43,8 +44,14 @@ Module fiducial
     Real*8 :: com_dist_at_z_dec                    ! COMOVING DISTANCE AT DECOUPLING
     Real*8,parameter :: DeltaSO = 2.d2             ! PARAMETER TO DEFINE SPHERICAL OVERDENSITY
 
-    Character(len=*),parameter :: path_to_execution_information = './output/execution_information.txt'
+    Character(len=*),parameter :: path_to_execution_information = './output/execution_information.txt' ! EXECUTION INFORMATION FILE
+    Character(len=15),parameter :: halo_definition = 'virial' ! HALO DEFINITION USED IN THE COMPUTATIONS
 
-    Logical,parameter :: do_mass_conversion = .true. ! COMPUTE OR NOT MASSES FOR OTHER HALO DEFINITIONS
+    Logical,parameter :: do_mass_conversion = .true.       ! COMPUTE MASSES FOR OTHER HALO DEFINITIONS IF SET IT TRUE
+    Logical,parameter :: compute_linear_halo_bias = .true. ! COMPUTE LINEAR HALO BIAS IF SET IT TRUE
+    Logical,parameter :: compute_alpha_in_halo_mass_function = .true. ! COMPUTE CONSTANT ALPHA IN HALO MASS FUNCTION IF SET IT TRUE
+    Logical,parameter :: compute_halo_mass_function = .true. ! COMPUTE HALO MASS FUNCTION IF SET IT TRUE
+    Logical,parameter :: compute_the_lensing_potential = .true. ! COMPUTE LENSING POTENTIAL IF SET IT TRUE
+    Logical,parameter :: compute_the_form_factor = .true. ! COMPUTE FORM FACTOR IF SET IT TRUE
 
 End Module fiducial
