@@ -1,0 +1,10 @@
+output/*.dat
+output/*.pdf
+output/*.txt
+*.mod
+*.o
+*.zip
+*.tgz
+*.out
+precomputed_quantities/*
+*~
