@@ -9,6 +9,7 @@ Module fiducial
 
     Integer*4,parameter :: number_of_k = 100 !1d3 ! SIZE OF WAVEVECTOR ARRAY 
     Integer*4,parameter :: number_of_z = 10 !1d2 ! SIZE OF RED-SHIFT ARRAY 
+    Integer*4,parameter :: number_of_z_com_dist = 1000 ! SIZE OF RED-SHIFT ARRAY FOR COMOVING DISTANCE
     Integer*4,parameter :: number_of_z_limber = 1000 ! SIZE OF RED-SHIFT ARRAY FOR LIMBER APPROXIMATION 
     Integer*4,parameter :: number_of_M = 1000 !4d6 ! SIZE OF VIRIAL MASS ARRAY
     Integer*4,parameter :: number_of_l = 10 !5  ! SIZE OF MULTIPOLE ARRAY 
@@ -52,6 +53,6 @@ Module fiducial
     Logical,parameter :: compute_alpha_in_halo_mass_function = .false. !.true. ! COMPUTE CONSTANT ALPHA IN HALO MASS FUNCTION IF SET IT TRUE
     Logical,parameter :: compute_halo_mass_function = .false. !.true. ! COMPUTE HALO MASS FUNCTION IF SET IT TRUE
     Logical,parameter :: compute_the_lensing_potential = .false.! .true. ! COMPUTE LENSING POTENTIAL IF SET IT TRUE
-    Logical,parameter :: compute_the_form_factor = .false. !.true. ! COMPUTE FORM FACTOR IF SET IT TRUE
+    Logical,parameter :: compute_the_form_factor = .true. !.false. !.true. ! COMPUTE FORM FACTOR IF SET IT TRUE
 
 End Module fiducial

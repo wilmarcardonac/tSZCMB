@@ -180,7 +180,7 @@ Module functions
 
         Real*8 :: angular_diameter_distance,redshift,com_dist_z
 
-        call Interpolate_1D(com_dist_z,redshift,z,comoving_distance_at_z)
+        call Interpolate_1D(com_dist_z,redshift,z_com_dist,comoving_distance_at_z)
 
         angular_diameter_distance = com_dist_z/(1.d0 + redshift)
 
@@ -249,9 +249,9 @@ Module functions
 
         !$omp Parallel Do Shared(d2VdzdO)
 
-        Do indexz=1,number_of_z
+        Do indexz=1,number_of_z_com_dist
 
-            d2VdzdO(indexz) = comoving_volume_per_steradian(z(indexz))
+            d2VdzdO(indexz) = comoving_volume_per_steradian(z_com_dist(indexz))
 
         End Do
 
@@ -263,15 +263,22 @@ Module functions
 
         use arrays
         use fiducial
+        use omp_lib
         Implicit none
 
         Integer*4 :: indexz
 
-        Do indexz=1,number_of_z
+        !$omp Parallel Do Shared(z_com_dist,comoving_distance_at_z)
 
-            comoving_distance_at_z(indexz) = comoving_distance(z(indexz))
+        Do indexz=1,number_of_z_com_dist
+
+           z_com_dist(indexz) = 10**(log10(zmin) + real(indexz-1)*(log10(zmax) - log10(zmin))/real(number_of_z_com_dist-1))
+
+           comoving_distance_at_z(indexz) = comoving_distance(z_com_dist(indexz))
 
         End Do
+
+        !$omp End Parallel Do
 
     end subroutine compute_comoving_distance
 
@@ -356,7 +363,7 @@ Module functions
 
         Real*8 :: redshift,critical_surface_density,com_dist_z
 
-        call Interpolate_1D(com_dist_z,redshift,z,comoving_distance_at_z)
+        call Interpolate_1D(com_dist_z,redshift,z_com_dist,comoving_distance_at_z)
 
         critical_surface_density = c**2*com_dist_at_z_dec*(1.d0 + redshift)/4.d0/Pi/G/com_dist_z/(com_dist_at_z_dec - com_dist_z)
 
@@ -2427,7 +2434,7 @@ Module functions
 
         End Do
 
-        call Interpolate_1D(com_vol_per_ster_z,redshift,z,d2VdzdO)
+        call Interpolate_1D(com_vol_per_ster_z,redshift,z_com_dist,d2VdzdO)
 
         pre_Clphiphi = com_vol_per_ster_z*sum     ! Dimensionless                     
 
@@ -2547,7 +2554,7 @@ Module functions
 
         End Do
 
-        call Interpolate_1D(com_vol_per_ster_z,redshift,z,d2VdzdO)
+        call Interpolate_1D(com_vol_per_ster_z,redshift,z_com_dist,d2VdzdO)
 
         pre_Cl = com_vol_per_ster_z*sum       ! dimensionless                   
 
@@ -2898,7 +2905,7 @@ Module functions
 
         Real*8 :: C_l_phiphi_two_halo,sum,com_dist_z,com_vol_per_ster_z
         Integer*4 :: indexl,indexz
-        Integer*4,parameter :: number_of_redshift = number_of_z!*1 !1d4
+        Integer*4,parameter :: number_of_redshift = number_of_z  !1d4
         Integer*4,parameter :: intervals = number_of_redshift - 1 
         Real*8,dimension(number_of_redshift):: f,redshift
 
@@ -2911,9 +2918,9 @@ Module functions
         !$omp Parallel Do Default(Shared) Private(com_dist_z,com_vol_per_ster_z)
         Do indexz=1,number_of_redshift
 
-            call Interpolate_1D(com_dist_z,redshift(indexz),z,comoving_distance_at_z)
+            call Interpolate_1D(com_dist_z,redshift(indexz),z_com_dist,comoving_distance_at_z)
 
-            call Interpolate_1D(com_vol_per_ster_z,redshift(indexz),z,d2VdzdO)
+            call Interpolate_1D(com_vol_per_ster_z,redshift(indexz),z_com_dist,d2VdzdO)
 
             f(indexz) = pre_Cl_1(redshift(indexz),indexl)**2*com_vol_per_ster_z*&
             matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/com_dist_z,redshift(indexz))    !  Dimensionless
@@ -2968,7 +2975,7 @@ Module functions
 
         Real*8 :: pre_Cl_1,sum,redshift,dndM_M_z,bMz_M_z,philMz_M_z
         Integer*4 :: indexl,indexM
-        Integer*4,parameter :: number_of_virial_Mass = number_of_M!*2 !100000
+        Integer*4,parameter :: number_of_virial_Mass = number_of_M + 100  !100000
         Integer*4,parameter :: intervals = number_of_M - 1
         Real*8,dimension(number_of_virial_Mass) :: f,virial_Mass
         
@@ -3087,9 +3094,9 @@ Module functions
 
         Do indexz=1,number_of_redshift
 
-            call Interpolate_1D(com_dist_z,redshift(indexz),z,comoving_distance_at_z)
+            call Interpolate_1D(com_dist_z,redshift(indexz),z_com_dist,comoving_distance_at_z)
 
-            call Interpolate_1D(com_vol_per_ster_z,redshift(indexz),z,d2VdzdO)
+            call Interpolate_1D(com_vol_per_ster_z,redshift(indexz),z_com_dist,d2VdzdO)
 
             f(indexz) = pre_Cl_1(redshift(indexz),indexl)*pre_Cl_2(redshift(indexz),indexl)*com_vol_per_ster_z*&
             matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/com_dist_z,redshift(indexz)) ! Units : 1/h**3

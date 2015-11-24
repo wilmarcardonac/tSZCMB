@@ -9,7 +9,7 @@ Program tSZ
     ! DECLARATION AND INITIALIZATION OF VARIABLES
     Implicit none
     Integer*4 :: index1                                       ! COUNTER
-    Real*8 :: wtime                                           ! STORES TIME OF EXECUTION
+    Real*8 :: wtime                                      ! STORES TIME OF EXECUTION
     Character(len=15),parameter :: halo_definition = 'virial' ! HALO DEFINITION USED IN THE COMPUTATIONS
 
     com_dist_at_z_dec = comoving_distance(z_dec) ! COMPUTE COMOVING DISTANCE AT DECOUPLING
@@ -28,8 +28,9 @@ Program tSZ
     r200d(-1:number_of_M+2,1:number_of_z),Clphiphi1h(1:number_of_l),Clphiphi2h(1:number_of_l),&
     Clphiphi(1:number_of_l),alpha_halo_mass_function(1:number_of_z),dM200cdM(1:number_of_M,1:number_of_z),&
     Clpsilimber(1:number_of_l),dndM(1:number_of_M,1:number_of_z),ylMz(1:number_of_l,1:number_of_M,1:number_of_z),&
-    philMz(1:number_of_l,1:number_of_M,1:number_of_z),d2VdzdO(1:number_of_z),&
-    bMz(1:number_of_M,1:number_of_z),mbz(1:number_of_z),comoving_distance_at_z(1:number_of_z),stat = status1)
+    philMz(1:number_of_l,1:number_of_M,1:number_of_z),d2VdzdO(1:number_of_z_com_dist),&
+    bMz(1:number_of_M,1:number_of_z),mbz(1:number_of_z),comoving_distance_at_z(1:number_of_z_com_dist),&
+    z_com_dist(1:number_of_z_com_dist),stat = status1)
 
     If (status1 .eq. 0) then
        
@@ -221,7 +222,8 @@ Program tSZ
     ! DEALLOCATING MEMORY
     deallocate (z,M,k,ml,Cl1h,Cl2h,Clphiphi1h,Clphiphi2h,Cl,Clphiphi,&
     d2VdzdO,dndM,ylMz,philMz,bMz,alpha_halo_mass_function,&
-    Clpsilimber,comoving_distance_at_z,mbz,M200c,M200d,r200c,r200d,dM200ddM,dM200cdM)
+    Clpsilimber,comoving_distance_at_z,mbz,M200c,M200d,r200c,r200d,dM200ddM,dM200cdM,&
+    z_com_dist)
 
     ! CLOSE EXECUTION INFORMATION FILE
     close(UNIT_EXE_FILE)
