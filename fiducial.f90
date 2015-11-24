@@ -7,14 +7,16 @@ Module fiducial
     ! SAME COSMOLOGY AS IN PUBLISHED VERSION OF "DETECTION OF THERMAL SZ-CMB LENSING CROSS-CORRELATION IN PLANCK  
     ! NOMINAL MISSION DATA" BY HILL & SPERGEL.
 
-    Integer*4,parameter :: number_of_k = 100 !1d3 ! SIZE OF WAVEVECTOR ARRAY 
-    Integer*4,parameter :: number_of_z = 10 !1d2 ! SIZE OF RED-SHIFT ARRAY 
+    Integer*4,parameter :: number_of_k = 1000          ! SIZE OF WAVEVECTOR ARRAY 
+    Integer*4,parameter :: number_of_z = 10 !100           ! SIZE OF RED-SHIFT ARRAY 
+    Integer*4,parameter :: number_of_z_functions = 20  ! SIZE OF RED-SHIFT ARRAY FOR FUNCTIONS
     Integer*4,parameter :: number_of_z_com_dist = 1000 ! SIZE OF RED-SHIFT ARRAY FOR COMOVING DISTANCE
-    Integer*4,parameter :: number_of_z_limber = 1000 ! SIZE OF RED-SHIFT ARRAY FOR LIMBER APPROXIMATION 
-    Integer*4,parameter :: number_of_M = 1000 !4d6 ! SIZE OF VIRIAL MASS ARRAY
+    Integer*4,parameter :: number_of_z_limber = 1000   ! SIZE OF RED-SHIFT ARRAY FOR LIMBER APPROXIMATION 
+    Integer*4,parameter :: number_of_M = 1000 !4000000       ! SIZE OF VIRIAL MASS ARRAY
+    Integer*4,parameter :: number_of_M_functions = 1000 ! SIZE OF VIRIAL MASS ARRAY FOR FUNCTIONS
     Integer*4,parameter :: number_of_l = 10 !5  ! SIZE OF MULTIPOLE ARRAY 
-    Integer*4,parameter :: lmax = 1d4        ! HIGHEST MULTIPOLE
-    Integer*4,parameter :: lmin = 1d0        ! LOWEST MULTIPOLE
+    Integer*4,parameter :: lmax = 10000        ! HIGHEST MULTIPOLE
+    Integer*4,parameter :: lmin = 1        ! LOWEST MULTIPOLE
     Integer*4,parameter :: UNIT_EXE_FILE = 90 ! UNIT FOR EXECUTION INFORMATION FILE
 
     Real*8,parameter :: Pi = 3.141592653589793d0
@@ -49,10 +51,10 @@ Module fiducial
     Character(len=*),parameter :: path_to_execution_information = './output/execution_information.txt' ! EXECUTION INFORMATION FILE
 
     Logical,parameter :: do_mass_conversion = .false. !.true.       ! COMPUTE MASSES FOR OTHER HALO DEFINITIONS IF SET IT TRUE
-    Logical,parameter :: compute_linear_halo_bias = .false. !.true. ! COMPUTE LINEAR HALO BIAS IF SET IT TRUE
-    Logical,parameter :: compute_alpha_in_halo_mass_function = .false. !.true. ! COMPUTE CONSTANT ALPHA IN HALO MASS FUNCTION IF SET IT TRUE
-    Logical,parameter :: compute_halo_mass_function = .false. !.true. ! COMPUTE HALO MASS FUNCTION IF SET IT TRUE
-    Logical,parameter :: compute_the_lensing_potential = .false.! .true. ! COMPUTE LENSING POTENTIAL IF SET IT TRUE
-    Logical,parameter :: compute_the_form_factor = .true. !.false. !.true. ! COMPUTE FORM FACTOR IF SET IT TRUE
+    Logical,parameter :: compute_linear_halo_bias = .true. !.false. !.true. ! COMPUTE LINEAR HALO BIAS IF SET IT TRUE
+    Logical,parameter :: compute_alpha_in_halo_mass_function = .true.!.false. !.true. ! COMPUTE CONSTANT ALPHA IN HALO MASS FUNCTION IF SET IT TRUE
+    Logical,parameter :: compute_halo_mass_function = .true.!.false. !.true. ! COMPUTE HALO MASS FUNCTION IF SET IT TRUE
+    Logical,parameter :: compute_the_lensing_potential = .true. !.false.! .true. ! COMPUTE LENSING POTENTIAL IF SET IT TRUE
+    Logical,parameter :: compute_the_form_factor = .false. !.true. ! COMPUTE FORM FACTOR IF SET IT TRUE
 
 End Module fiducial

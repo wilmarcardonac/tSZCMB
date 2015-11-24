@@ -1215,11 +1215,11 @@ Module functions
 
         Do indexl=1,number_of_l
 
-            Do indexM=1,number_of_M
+            Do indexM=1,number_of_M_functions
 
-                Do indexz=1,number_of_z
+                Do indexz=1,number_of_z_functions
 
-                    ylMz(indexl,indexM,indexz) = form_factor(M(indexM),z(indexz),indexl)
+                    ylMz(indexl,indexM,indexz) = form_factor(M_functions(indexM),z_functions(indexz),indexl)
 
                 End Do
 
@@ -1231,17 +1231,17 @@ Module functions
 
         open(15,file='./precomputed_quantities/form_factor/form_factor.dat')
 
-        write(15,*) '# Form factor file. Number of lines is ',number_of_l*number_of_z*number_of_M
+        write(15,*) '# Form factor file. Number of lines is ',number_of_l*number_of_z_functions*number_of_M_functions
 
         write(15,*) '# index_of_l    l    index_of_M    virial_mass[solar mass]    index_of_z    red-shift    y'
 
         Do indexl=1,number_of_l
 
-            Do indexM=1,number_of_M
+            Do indexM=1,number_of_M_functions
 
-                Do indexz=1,number_of_z
+                Do indexz=1,number_of_z_functions
 
-                    write(15,'(3i10,es18.10,i5,2es18.10)') indexl,ml(indexl),indexM,M(indexM),indexz,z(indexz),&
+                    write(15,'(3i10,es18.10,i5,2es18.10)') indexl,ml(indexl),indexM,M_functions(indexM),indexz,z_functions(indexz),&
                     ylMz(indexl,indexM,indexz)
 
                 End Do
@@ -1269,7 +1269,7 @@ Module functions
 
         read(15,*)
 
-        Do index=1,number_of_l*number_of_z*number_of_M
+        Do index=1,number_of_l*number_of_z_functions*number_of_M_functions
 
             read(15,'(3i10,es18.10,i5,2es18.10)') il,ll,iM,MM,iz,zz,tylMz
 
@@ -1470,7 +1470,7 @@ Module functions
         
         Else If (halo_definition .eq. 'virial') then
 
-            write(15,*) '# Lensing potential file. Number of lines is ',number_of_l*number_of_M*number_of_z
+            write(15,*) '# Lensing potential file. Number of lines is ',number_of_l*number_of_M_functions*number_of_z_functions
 
             write(15,*) '#  index_of_l    l   index_of_M    virial_mass[solar mass]    index_of_z    red-shift    phi'
 
@@ -1478,14 +1478,14 @@ Module functions
 
             Do indexl=1,number_of_l
 
-                Do indexM=1,number_of_M
+                Do indexM=1,number_of_M_functions
 
-                    Do indexz=1,number_of_z
+                    Do indexz=1,number_of_z_functions
 
-                        philMz(indexl,indexM,indexz) = lensing_potential(M(indexM),z(indexz),indexl,'virial')
+                        philMz(indexl,indexM,indexz) = lensing_potential(M_functions(indexM),z_functions(indexz),indexl,'virial')
 
-                        write(15,'(3i10,es18.10,i5,2es18.10)') indexl,ml(indexl),indexM,M(indexM),indexz,z(indexz),&
-                        philMz(indexl,indexM,indexz)
+                        write(15,'(3i10,es18.10,i5,2es18.10)') indexl,ml(indexl),indexM,M_functions(indexM),indexz,&
+                             z_functions(indexz),philMz(indexl,indexM,indexz)
 
                     End Do
 
@@ -1516,7 +1516,7 @@ Module functions
 
         read(15,*)
 
-        Do q=1,number_of_l*number_of_M*number_of_z
+        Do q=1,number_of_l*number_of_M_functions*number_of_z_functions
 
             read(15,'(3i10,es18.10,i5,2es18.10)') il,ll,iM,MM,iz,zz,tphilMz
      
@@ -2184,23 +2184,40 @@ Module functions
 
         Real*8 :: sum
         Integer*4 :: indexM,indexz
-        Integer*4,parameter :: intervals = number_of_M - 1
-        Real*8,dimension(number_of_M) :: f
+        Integer*4,parameter :: intervals = number_of_M_functions - 1
+        Real*8,dimension(number_of_M_functions) :: f
+        Real*8,dimension(1:number_of_M_functions,1:number_of_z_functions) :: dM200ddM_M_z
+
+        !$omp Parallel Do Shared(dM200ddM_M_z)
+
+        Do indexz=1,number_of_z_functions 
+
+           Do indexM=1,number_of_M_functions
+
+              call Interpolate_2D(dM200ddM_M_z(indexM,indexz),M_functions(indexM),z_functions(indexz),&
+                   M(1:number_of_M),z(1:number_of_z),dM200ddM(1:number_of_M,1:number_of_z))
+
+           End Do
+
+        End Do
+
+        !$omp End Parallel Do
 
         open(15,file='./precomputed_quantities/alpha_halo_mass_function.dat')
 
-        write(15,*) '# Alpha halo mass function (as function of red-shift). Number of lines is ',number_of_z
+        write(15,*) '# Alpha halo mass function (as function of red-shift). Number of lines is ',number_of_z_functions
 
         write(15,*) '# index_of_z    red-shift    dndM '
 
-        Do indexz=1,number_of_z
+        Do indexz=1,number_of_z_functions
 
-            !$omp Parallel Do Shared(f,indexz)
+           !$omp Parallel Do Shared(f,indexz)
 
-           Do indexM=1,number_of_M
+           Do indexM=1,number_of_M_functions
 
-                f(indexM) = nonnormalised_halo_mass_function(M(indexM),z(indexz))*bMz(indexM,indexz)*&
-                M(indexM)/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0*dM200ddM(indexM,indexz)
+              f(indexM) = nonnormalised_halo_mass_function(M_functions(indexM),z_functions(indexz))*bMz(indexM,indexz)*&
+                   M_functions(indexM)/mean_density(z_functions(indexz))*(1.d0 + z_functions(indexz))**3.d0*&
+                   dM200ddM_M_z(indexM,indexz) 
 
            End Do
 
@@ -2210,13 +2227,13 @@ Module functions
 
            Do indexM=1,intervals
 
-               sum = (M(indexM+1)-M(indexM))/2.d0*( f(indexM) + f(indexM+1) ) + sum
+               sum = (M_functions(indexM+1)-M_functions(indexM))/2.d0*( f(indexM) + f(indexM+1) ) + sum
 
            End Do
 
            alpha_halo_mass_function(indexz) = 1.d0/sum    ! dimensionless
 
-           write(15,'(i5,2es18.10)') indexz, z(indexz), alpha_halo_mass_function(indexz)
+           write(15,'(i5,2es18.10)') indexz, z_functions(indexz), alpha_halo_mass_function(indexz)
 
         End Do
 
@@ -2239,7 +2256,7 @@ Module functions
 
         read(15,*)
 
-        Do index=1,number_of_z
+        Do index=1,number_of_z_functions
 
             read(15,'(i5,2es18.10)') iz,zz,ts2
 
@@ -2258,22 +2275,27 @@ Module functions
         Implicit none
 
         Integer*4 :: indexz,indexM
+        Real*8 :: dM200ddM_M_z
 
         open(15,file='./precomputed_quantities/dndM/dndM.dat')
 
-        write(15,*) '# Halo mass function (as function of virial mass and red-shift). Number of lines is ',number_of_z*number_of_M
+        write(15,*) '# Halo mass function (as function of virial mass and red-shift). Number of lines is ',&
+             number_of_z_functions*number_of_M_functions
 
         write(15,*) '#  index_of_M    virial_mass[solar mass]    index_of_z    red-shift    dndM '
 
-        !$omp Parallel Do Shared(dndM)
+        !$omp Parallel Do Shared(dndM,dM200ddM_M_z)
 
-        Do indexM=1,number_of_M
+        Do indexM=1,number_of_M_functions
 
-            Do indexz=1,number_of_z
+            Do indexz=1,number_of_z_functions
 
-                dndM(indexM,indexz) = halo_mass_function(M(indexM),z(indexz))*dM200ddM(indexM,indexz)
+               call Interpolate_2D(dM200ddM_M_z,M_functions(indexM),z_functions(indexz),M(1:number_of_M),z(1:number_of_z),&
+                    dM200ddM(1:number_of_M,1:number_of_z))
 
-                write(15,'(i10,es18.10,i5,2es18.10)') indexM, M(indexM), indexz, z(indexz), dndM(indexM,indexz)
+                dndM(indexM,indexz) = halo_mass_function(M_functions(indexM),z_functions(indexz))*dM200ddM(indexM,indexz)
+
+                write(15,'(i10,es18.10,i5,2es18.10)') indexM, M_functions(indexM), indexz, z_functions(indexz), dndM(indexM,indexz)
 
             End Do
 
@@ -2366,7 +2388,7 @@ Module functions
 
         read(15,*)
 
-        Do index=1,number_of_M*number_of_z
+        Do index=1,number_of_M_functions*number_of_z_functions
 
             read(15,'(i10,es18.10,i5,2es18.10)') iM,MM,iz,zz,tdndM
 
@@ -2416,11 +2438,11 @@ Module functions
 
             virial_Mass(indexM) = 10**(log10(Mmin) + real(indexM-1)*(log10(Mmax) - log10(Mmin))/real(number_of_virial_Mass-1))
 
-            call Interpolate_2D(dndM_M_z,virial_Mass(indexM),redshift,M(1:number_of_M),z(1:number_of_z),&
-            dndM(1:number_of_M,1:number_of_z))
+            call Interpolate_2D(dndM_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
+                 z_functions(1:number_of_z_functions),dndM(1:number_of_M_functions,1:number_of_z_functions))
 
-            call Interpolate_2D(philMz_M_z,virial_Mass(indexM),redshift,M(1:number_of_M),z(1:number_of_z),&
-            philMz(indexl,1:number_of_M,1:number_of_z))
+            call Interpolate_2D(philMz_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
+                 z_functions(1:number_of_z_functions),philMz(indexl,1:number_of_M_functions,1:number_of_z_functions))
 
             f(indexM) = dndM_M_z*philMz_M_z**2 ! Units : 1/solar mass/Mpc**3
 
@@ -2523,14 +2545,14 @@ Module functions
 
             virial_Mass(indexM) = 10**(log10(Mmin) + real(indexM-1)*(log10(Mmax) - log10(Mmin))/real(number_of_virial_Mass-1))
 
-            call Interpolate_2D(dndM_M_z,virial_Mass(indexM),redshift,M(1:number_of_M),z(1:number_of_z),&
-            dndM(1:number_of_M,1:number_of_z))
+            call Interpolate_2D(dndM_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
+                 z_functions(1:number_of_z_functions),dndM(1:number_of_M_functions,1:number_of_z_functions))
 
-            call Interpolate_2D(philMz_M_z,virial_Mass(indexM),redshift,M(1:number_of_M),z(1:number_of_z),&
-            philMz(indexl,1:number_of_M,1:number_of_z))
+            call Interpolate_2D(philMz_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
+                 z_functions(1:number_of_z_functions),philMz(indexl,1:number_of_M_functions,1:number_of_z_functions))
 
-            call Interpolate_2D(ylMz_M_z,virial_Mass(indexM),redshift,M(1:number_of_M),z(1:number_of_z),&
-            ylMz(indexl,1:number_of_M,1:number_of_z))
+            call Interpolate_2D(ylMz_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
+                 z_functions(1:number_of_z_functions),ylMz(indexl,1:number_of_M_functions,1:number_of_z_functions))
 
             f(indexM) = dndM_M_z*ylMz_M_z*philMz_M_z ! Units : 1/solar mass/Mpc**3
 
@@ -2665,19 +2687,19 @@ Module functions
 
         open(15,file='./precomputed_quantities/bMz/bMz.dat')
 
-        write(15,*) '# Linear bias file. Number of lines is ',number_of_M*number_of_z
+        write(15,*) '# Linear bias file. Number of lines is ',number_of_M_functions*number_of_z_functions
 
         write(15,*) '# index_of_M    SO_virial_mass[solar mass]   index_of_z    red-shift  b '
 
         !$omp Parallel Do Shared(bMz)
 
-        Do indexM=1,number_of_M
+        Do indexM=1,number_of_M_functions
 
-            Do indexz=1,number_of_z
+            Do indexz=1,number_of_z_functions
 
-                bMz(indexM,indexz) = linear_halo_bias(M(indexM),z(indexz))
+                bMz(indexM,indexz) = linear_halo_bias(M_functions(indexM),z_functions(indexz))
 
-                write(15,'(i10,es18.10,i5,2es18.10)') indexM,M(indexM),indexz,z(indexz),bMz(indexM,indexz)
+                write(15,'(i10,es18.10,i5,2es18.10)') indexM,M_functions(indexM),indexz,z_functions(indexz),bMz(indexM,indexz)
 
             End Do
 
@@ -2701,11 +2723,11 @@ Module functions
 
         write(15,*) '# red-shift        mean bias all matter'
 
-        Do indexz=1,number_of_z
+        Do indexz=1,number_of_z_functions
 
             mbz(indexz) = pre_mbz(indexz)
 
-            write(15,'(2es18.10)') z(indexz),mbz(indexz)
+            write(15,'(2es18.10)') z_functions(indexz),mbz(indexz)
 
         End Do
 
@@ -2722,12 +2744,13 @@ Module functions
 
         Real*8 :: pre_mbz,sum
         Integer*4 :: indexM,indexz
-        Integer*4,parameter :: intervals = number_of_M - 1
-        Real*8,dimension(number_of_M) :: f
+        Integer*4,parameter :: intervals = number_of_M_functions - 1
+        Real*8,dimension(number_of_M_functions) :: f
 
-        Do indexM=1,number_of_M
+        Do indexM=1,number_of_M_functions
 
-            f(indexM) = dndM(indexM,indexz)*bMz(indexM,indexz)*M(indexM)/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0
+            f(indexM) = dndM(indexM,indexz)*bMz(indexM,indexz)*M_functions(indexM)/&
+                 mean_density(z_functions(indexz))*(1.d0 + z_functions(indexz))**3.d0
 
         End Do
 
@@ -2745,7 +2768,7 @@ Module functions
 
         Do indexM=1,intervals
 
-            sum = (M(indexM+1)-M(indexM))/2.d0*( f(indexM) + f(indexM+1) ) + sum
+            sum = (M_functions(indexM+1)-M_functions(indexM))/2.d0*( f(indexM) + f(indexM+1) ) + sum
 
         End Do
 
@@ -2768,7 +2791,7 @@ Module functions
 
         read(15,*)
 
-        Do q=1,number_of_M*number_of_z
+        Do q=1,number_of_M_functions*number_of_z_functions
 
             read(15,'(i10,es18.10,i5,2es18.10)') iM,MM,iz,zz,tbMz
 
@@ -2905,7 +2928,7 @@ Module functions
 
         Real*8 :: C_l_phiphi_two_halo,sum,com_dist_z,com_vol_per_ster_z
         Integer*4 :: indexl,indexz
-        Integer*4,parameter :: number_of_redshift = number_of_z  !1d4
+        Integer*4,parameter :: number_of_redshift = number_of_z_functions  !1d4
         Integer*4,parameter :: intervals = number_of_redshift - 1 
         Real*8,dimension(number_of_redshift):: f,redshift
 
@@ -2975,7 +2998,7 @@ Module functions
 
         Real*8 :: pre_Cl_1,sum,redshift,dndM_M_z,bMz_M_z,philMz_M_z
         Integer*4 :: indexl,indexM
-        Integer*4,parameter :: number_of_virial_Mass = number_of_M + 100  !100000
+        Integer*4,parameter :: number_of_virial_Mass = number_of_M_functions  !100000
         Integer*4,parameter :: intervals = number_of_M - 1
         Real*8,dimension(number_of_virial_Mass) :: f,virial_Mass
         
@@ -2983,14 +3006,14 @@ Module functions
 
             virial_Mass(indexM) = 10**(log10(Mmin) + real(indexM-1)*(log10(Mmax) - log10(Mmin))/real(number_of_virial_Mass-1))
 
-            call Interpolate_2D(dndM_M_z,virial_Mass(indexM),redshift,M(1:number_of_M),z(1:number_of_z),&
-            dndM(1:number_of_M,1:number_of_z))
+            call Interpolate_2D(dndM_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
+                 z_functions(1:number_of_z_functions),dndM(1:number_of_M_functions,1:number_of_z_functions))
 
-            call Interpolate_2D(bMz_M_z,virial_Mass(indexM),redshift,M(1:number_of_M),z(1:number_of_z),&
-            bMz(1:number_of_M,1:number_of_z))
+            call Interpolate_2D(bMz_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
+                 z_functions(1:number_of_z_functions),bMz(1:number_of_M_functions,1:number_of_z_functions))
 
-            call Interpolate_2D(philMz_M_z,virial_Mass(indexM),redshift,M(1:number_of_M),z(1:number_of_z),&
-            philMz(indexl,1:number_of_M,1:number_of_z))
+            call Interpolate_2D(philMz_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
+                 z_functions(1:number_of_z_functions),philMz(indexl,1:number_of_M_functions,1:number_of_z_functions))
 
             f(indexM) = dndM_M_z*bMz_M_z*philMz_M_z 
 
@@ -3035,14 +3058,14 @@ Module functions
 
             virial_Mass(indexM) = 10**(log10(Mmin) + real(indexM-1)*(log10(Mmax) - log10(Mmin))/real(number_of_virial_Mass-1))
 
-            call Interpolate_2D(dndM_M_z,virial_Mass(indexM),redshift,M(1:number_of_M),z(1:number_of_z),&
-            dndM(1:number_of_M,1:number_of_z))
+            call Interpolate_2D(dndM_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
+                 z_functions(1:number_of_z_functions),dndM(1:number_of_M_functions,1:number_of_z_functions))
 
-            call Interpolate_2D(bMz_M_z,virial_Mass(indexM),redshift,M(1:number_of_M),z(1:number_of_z),&
-            bMz(1:number_of_M,1:number_of_z))
+            call Interpolate_2D(bMz_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
+                 z_functions(1:number_of_z_functions),bMz(1:number_of_M_functions,1:number_of_z_functions))
 
-            call Interpolate_2D(ylMz_M_z,virial_Mass(indexM),redshift,M(1:number_of_M),z(1:number_of_z),&
-            ylMz(indexl,1:number_of_M,1:number_of_z))
+            call Interpolate_2D(ylMz_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
+                 z_functions(1:number_of_z_functions),ylMz(indexl,1:number_of_M_functions,1:number_of_z_functions))
 
             f(indexM) = dndM_M_z*bMz_M_z*ylMz_M_z 
 
