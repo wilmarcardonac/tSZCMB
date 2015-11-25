@@ -8,9 +8,11 @@ Program tSZ
 
     ! DECLARATION AND INITIALIZATION OF VARIABLES
     Implicit none
-    Integer*4 :: index1                                       ! COUNTER
-    Real*8 :: wtime                                  ! STORES TIME OF EXECUTION
+    Integer*4 :: index1,index2                                       ! COUNTER
+    Real*8 :: wtime,dndM_M_z                            ! STORES TIME OF EXECUTION
     Character(len=15),parameter :: halo_definition = 'virial' ! HALO DEFINITION USED IN THE COMPUTATIONS
+    Real*8,dimension(10) :: zdebug,Mdebug
+    Real*8,dimension(10,10) :: M200d_M_z,bMz_M_z
 
     com_dist_at_z_dec = comoving_distance(z_dec) ! COMPUTE COMOVING DISTANCE AT DECOUPLING
 
@@ -116,6 +118,44 @@ Program tSZ
 
      End If
 
+
+     Do index1 = 1, 10 ! FILLS RED-SHIFT ARRAY.     
+
+        zdebug(index1) = 10**(log10(zmin) + real(index1-1)*(log10(zmax) - log10(zmin))/real(10-1))
+
+     End Do
+    
+     Do index1 = 1, 10 ! FILLS VIRIAL MASS ARRAY. UNITS: Solar mass    
+        
+        Mdebug(index1) = 10**(log10(Mmin) + real(index1-1)*(log10(Mmax) - log10(Mmin))/real(10-1))
+        
+     End Do
+
+     print *, r_delta_d_from_M_virial(Mdebug(10),zdebug(10),DeltaSO)
+
+     stop
+
+     Do index1=1,10
+
+        Do index2=1,10
+
+           call Interpolate_2D(M200d_M_z(index1,index2),Mdebug(index1),zdebug(index2),M(1:number_of_M),&
+                z(1:number_of_z),M200d(1:number_of_M,1:number_of_z))
+
+           print *, Mdebug(index1), M_delta_d_from_M_virial(zdebug(index2),&
+                r_delta_d_from_M_virial(Mdebug(index1),zdebug(index2),DeltaSO),DeltaSO),&
+                zdebug(index2),(M200d_M_z(index1,index2)-M_delta_d_from_M_virial(zdebug(index2),&
+                r_delta_d_from_M_virial(Mdebug(index1),zdebug(index2),DeltaSO),DeltaSO))/M_delta_d_from_M_virial(zdebug(index2),&
+                r_delta_d_from_M_virial(Mdebug(index1),zdebug(index2),DeltaSO),DeltaSO)*100.d0,&
+                r_delta_d_from_M_virial(Mdebug(index1),zdebug(index2),DeltaSO)
+
+        End Do
+
+     End Do
+     
+     stop
+
+
      call compute_normalization() ! IN MATTER POWER SPECTRUM TO FIT FIDUCIAL SIGMA_8
 
      write(UNIT_EXE_FILE,*) 'NORMALIZATION OF MATTER POWER SPECTRUM TO MATCH SIGMA_8 (',sigma8,') WAS COMPUTED'
@@ -134,6 +174,22 @@ Program tSZ
 
      End If
 
+     Do index1=1,10
+
+        Do index2=1,10
+
+            call Interpolate_2D(bMz_M_z(index1,index2),Mdebug(index1),zdebug(index2),M_functions(1:number_of_M_functions),&
+                 z_functions(1:number_of_z_functions),bMz(1:number_of_M_functions,1:number_of_z_functions))
+
+            print *, Mdebug(index1),zdebug(index2),(bMz_M_z(index1,index2)- linear_halo_bias(Mdebug(index1),zdebug(index2)))
+
+        End Do
+
+     End Do
+     
+     stop
+
+
      If (compute_alpha_in_halo_mass_function) then
 
         write(UNIT_EXE_FILE,*) 'COMPUTING NORMALIZATION OF HALO MASS FUNCTION'
@@ -149,7 +205,7 @@ Program tSZ
                                              ! AT A FIXED RED-SHIFT IS UNITY
 
      End If
-        
+     
      If (compute_halo_mass_function) then
 
         write(UNIT_EXE_FILE,*) 'COMPUTING HALO MASS FUNCTION'
@@ -163,6 +219,15 @@ Program tSZ
         call read_dndM() ! READING HALO MASS FUNCTION    
 
      End If
+
+     stop
+
+     call Interpolate_2D(dndM_M_z,(M(10)+M(100))/2.d0,(z(10)+z(100))/2.d0,M_functions(1:number_of_M_functions),&
+          z_functions(1:number_of_z_functions),dndM(1:number_of_M_functions,1:number_of_z_functions))
+
+     print *, dndM_M_z, halo_mass_function((M(10)+M(100))/2.d0,(z(10)+z(100))/2.d0)
+
+     stop
 
      write(UNIT_EXE_FILE,*) 'COMPUTING COMOVING VOLUME ELEMENT PER STERADIAN'
 
