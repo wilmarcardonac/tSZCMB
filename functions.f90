@@ -772,19 +772,25 @@ Module functions
 
                 exit
 
-            else if (abs(f1) .lt. abs(f2)) then
+            Else If (abs(f1) .lt. abs(f2)) then
 
                 r1 = r1 + step*(r1-r2)
 
                 f1 = integral_r_delta_d_minus_total_matter(M,z,r1,delta)
 
-            else if (abs(f1) .gt. abs(f2)) then
+            Else If (abs(f1) .gt. abs(f2)) then
 
                 r2 = r2 + step*(r2-r1)
 
                 f2 = integral_r_delta_d_minus_total_matter(M,z,r2,delta)
 
-            end if
+            Else
+
+               print *, 'NOT ROOT FOUND'
+
+               stop
+
+            End if
 
         End Do
 
