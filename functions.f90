@@ -764,6 +764,8 @@ Module functions
 
         f2 = integral_r_delta_d_minus_total_matter(M,z,r2,delta)
 
+        root = .false.
+
         Do p = 1, iter
 
             If (f1*f2 .lt. 0.d0) then
@@ -783,12 +785,6 @@ Module functions
                 r2 = r2 + step*(r2-r1)
 
                 f2 = integral_r_delta_d_minus_total_matter(M,z,r2,delta)
-
-            Else
-
-               print *, 'NOT ROOT FOUND'
-
-               stop
 
             End if
 
@@ -858,7 +854,7 @@ Module functions
 
         else 
 
-            print *,'Maximum number of iterations achieved without finding root for function '
+           print *,'MAXIMUM NUMBER OF ITERATIONS ACHIEVED WITHOUT FINDING ROOT'
 
             stop 
 
