@@ -8,15 +8,26 @@ Program tSZ
 
     ! DECLARATION AND INITIALIZATION OF VARIABLES
     Implicit none
-    Integer*4 :: index1,index2                                       ! COUNTER
-    Real*8 :: wtime,dndM_M_z                            ! STORES TIME OF EXECUTION
+    Integer*4 :: index1!,index2,index3                                       ! COUNTER
+    Real*8 :: wtime!,hola                          ! STORES TIME OF EXECUTION
     Character(len=15),parameter :: halo_definition = 'virial' ! HALO DEFINITION USED IN THE COMPUTATIONS
-    Real*8,dimension(10) :: zdebug,Mdebug
-    Real*8,dimension(10,10) :: M200d_M_z,bMz_M_z
+    Integer*4,parameter :: hola1=10
+    Integer*4,parameter :: hola2=100
+    Real*8,dimension(hola1) :: zdebug
+    Real*8,dimension(hola2) :: Mdebug
+!    Real*8,dimension(hola2,hola1) :: dndM_M_z
 
     com_dist_at_z_dec = comoving_distance(z_dec) ! COMPUTE COMOVING DISTANCE AT DECOUPLING
 
     open(UNIT_EXE_FILE,file=path_to_execution_information)     ! OPEN FILE TO STORE EXECUTION INFORMATION 
+
+    If ((number_of_M .lt. 100) .or. (number_of_M_functions .lt. 100)) then
+
+       write(UNIT_EXE_FILE,*) 'MASS ARRAYS TOO SMALL. THEY MUST BE AT LEAST SIZE 100'
+
+       stop
+
+    End If
 
     ! ALLOCATING MEMORY FOR : RED-SHIFT, VIRIAL MASS, MULTIPOLES, WAVEVECTOR, ONE- AND TWO-HALO Y-tSZ CROSS CORRELATION AND THEIR SUM, 
     ! MEAN DENSITY MASS, CRITICAL DENSITY MASS, CRITICAL DENSITY RADIUS, DERIVATIVE OF MEAN DENSITY MASS w.r.t VIRIAL MASS, 
@@ -31,11 +42,11 @@ Program tSZ
     Clphiphi(1:number_of_l),alpha_halo_mass_function(1:number_of_z_functions),dM200cdM(1:number_of_M,1:number_of_z),&
     Clpsilimber(1:number_of_l),dndM(1:number_of_M_functions,1:number_of_z_functions),&
     ylMz(1:number_of_l,1:number_of_M_functions,1:number_of_z_functions),&
-    philMz(1:number_of_l,1:number_of_M_functions,1:number_of_z_functions),d2VdzdO(1:number_of_z_com_dist),&
-    bMz(1:number_of_M_functions,1:number_of_z_functions),mbz(1:number_of_z_functions),&
-    comoving_distance_at_z(1:number_of_z_com_dist),&
-    z_com_dist(1:number_of_z_com_dist),z_functions(1:number_of_z_functions),&
-    M_functions(1:number_of_M_functions),stat = status1)
+    philMz(1:number_of_l,1:number_of_M_functions,1:number_of_z_functions),d2VdzdO(1:number_of_z_functions),&
+    bMz(1:number_of_M,1:number_of_z),mbz(1:number_of_z_functions),&
+    comoving_distance_at_z(1:number_of_z_functions),z_functions(1:number_of_z_functions),Scrit(1:number_of_z_functions),&
+    M_functions(1:number_of_M_functions),angular_diameter_distance_at_z(1:number_of_z_functions),&
+    dM200ddM_M_z(1:number_of_M_functions,1:number_of_z_functions),stat = status1)
 
     If (status1 .eq. 0) then
        
@@ -68,18 +79,6 @@ Program tSZ
 
     End Do
 
-    Do index1 = 1, number_of_z_functions ! FILLS RED-SHIFT ARRAY.     
-
-        z_functions(index1) = 10**(log10(zmin) + real(index1-1)*(log10(zmax) - log10(zmin))/real(number_of_z_functions-1))
-
-    End Do
-    
-    Do index1 = 1, number_of_M_functions ! FILLS VIRIAL MASS ARRAY. UNITS: Solar mass    
-
-        M_functions(index1) = 10**(log10(Mmin) + real(index1-1)*(log10(Mmax) - log10(Mmin))/real(number_of_M_functions-1))
-
-    End Do
-
     Do index1 = 1, number_of_l ! FILLS MULTIPOLE ARRAY.    
 
         ml(index1) = int(10**(log10(dble(lmin)) + real(index1-1)*(log10(dble(lmax)) - &
@@ -87,9 +86,40 @@ Program tSZ
 
     End Do
 
+    If (compute_functions) then 
+
+       continue
+
+    Else
+
+       Do index1 = 1, number_of_z_functions ! FILLS RED-SHIFT ARRAY.     
+
+          z_functions(index1) = 10**(log10(zmin) + real(index1-1)*(log10(zmax) - log10(zmin))/real(number_of_z_functions-1))
+
+       End Do
+    
+       Do index1 = 1, number_of_M_functions ! FILLS VIRIAL MASS ARRAY. UNITS: Solar mass    
+
+          M_functions(index1) = 10**(log10(Mmin) + real(index1-1)*(log10(Mmax) - log10(Mmin))/real(number_of_M_functions-1))
+
+       End Do
+
+       Do index1 = 1, number_of_l_functions ! FILLS MULTIPOLE ARRAY.    
+
+          ml_functions(index1) = int(10**(log10(dble(lmin)) + real(index1-1)*(log10(dble(lmax)) - &
+               log10(dble(lmin)))/real(number_of_l_functions-1)),4)
+
+       End Do
+
+    End If 
+
     ! COMPUTATION STARTS
 
     call compute_comoving_distance() ! COMPUTE COMOVING DISTANCE ARRAY
+
+    call compute_angular_diameter_distance() ! COMPUTE ANGULAR DIAMETER DISTANCE ARRAY
+
+    call compute_critical_surface_density()
 
     If (do_mass_conversion) then ! COMPUTE MASSES
 
@@ -118,43 +148,19 @@ Program tSZ
 
      End If
 
+     !!!!!!!!!!!!!!!!!!!!!!!!!DEBUGGING 
+     Do index1 = 1, hola1 ! FILLS RED-SHIFT ARRAY.     
 
-     Do index1 = 1, 10 ! FILLS RED-SHIFT ARRAY.     
-
-        zdebug(index1) = 10**(log10(zmin) + real(index1-1)*(log10(zmax) - log10(zmin))/real(10-1))
+        zdebug(index1) = 10**(log10(zmin) + real(index1-1)*(log10(zmax) - log10(zmin))/real(hola1-1))
 
      End Do
     
-     Do index1 = 1, 10 ! FILLS VIRIAL MASS ARRAY. UNITS: Solar mass    
+     Do index1 = 1, hola2 ! FILLS VIRIAL MASS ARRAY. UNITS: Solar mass    
         
-        Mdebug(index1) = 10**(log10(Mmin) + real(index1-1)*(log10(Mmax) - log10(Mmin))/real(10-1))
+        Mdebug(index1) = 10**(log10(Mmin) + real(index1-1)*(log10(Mmax) - log10(Mmin))/real(hola2-1))
         
      End Do
-
-     print *, r_delta_d_from_M_virial(Mdebug(10),zdebug(10),DeltaSO)
-
-     stop
-
-     Do index1=1,10
-
-        Do index2=1,10
-
-           call Interpolate_2D(M200d_M_z(index1,index2),Mdebug(index1),zdebug(index2),M(1:number_of_M),&
-                z(1:number_of_z),M200d(1:number_of_M,1:number_of_z))
-
-           print *, Mdebug(index1), M_delta_d_from_M_virial(zdebug(index2),&
-                r_delta_d_from_M_virial(Mdebug(index1),zdebug(index2),DeltaSO),DeltaSO),&
-                zdebug(index2),(M200d_M_z(index1,index2)-M_delta_d_from_M_virial(zdebug(index2),&
-                r_delta_d_from_M_virial(Mdebug(index1),zdebug(index2),DeltaSO),DeltaSO))/M_delta_d_from_M_virial(zdebug(index2),&
-                r_delta_d_from_M_virial(Mdebug(index1),zdebug(index2),DeltaSO),DeltaSO)*100.d0,&
-                r_delta_d_from_M_virial(Mdebug(index1),zdebug(index2),DeltaSO)
-
-        End Do
-
-     End Do
-     
-     stop
-
+     !!END DEBUGGING
 
      call compute_normalization() ! IN MATTER POWER SPECTRUM TO FIT FIDUCIAL SIGMA_8
 
@@ -172,23 +178,34 @@ Program tSZ
 
         call read_bMz() ! LINEAR HALO BIAS AS A FUNCTION OF MASS AND RED-SHIFT
 
+        If (compute_functions) then
+
+           continue
+
+        Else
+
+           allocate(bMz_interpolation(1:number_of_M_functions,1:number_of_z_functions),&
+                stat=status2)
+
+           If (status2 .eq. 0) then
+
+              call Interpolate_bMz()
+
+              deallocate(bMz)
+
+           Else
+
+              write(UNIT_EXE_FILE,*) 'PROBLEM ALLOCATING MEMORY FOR "bMz_interpolation" '
+
+              stop
+
+           End If
+
+        End If
+
      End If
 
-     Do index1=1,10
-
-        Do index2=1,10
-
-            call Interpolate_2D(bMz_M_z(index1,index2),Mdebug(index1),zdebug(index2),M_functions(1:number_of_M_functions),&
-                 z_functions(1:number_of_z_functions),bMz(1:number_of_M_functions,1:number_of_z_functions))
-
-            print *, Mdebug(index1),zdebug(index2),(bMz_M_z(index1,index2)- linear_halo_bias(Mdebug(index1),zdebug(index2)))
-
-        End Do
-
-     End Do
-     
-     stop
-
+     !call compute_dM200ddM_M_z()
 
      If (compute_alpha_in_halo_mass_function) then
 
@@ -206,6 +223,8 @@ Program tSZ
 
      End If
      
+     call Interpolate_1D(alpha_halo_redshift_3,3.d0,z,alpha_halo_mass_function)
+
      If (compute_halo_mass_function) then
 
         write(UNIT_EXE_FILE,*) 'COMPUTING HALO MASS FUNCTION'
@@ -218,17 +237,35 @@ Program tSZ
 
         call read_dndM() ! READING HALO MASS FUNCTION    
 
+        If (compute_functions) then
+
+           continue
+
+        Else
+
+           allocate(dndM_interpolation(1:number_of_M_functions,1:number_of_z_functions),&
+                stat=status2)
+
+           If (status2 .eq. 0) then
+
+              call Interpolate_dndM()
+
+              deallocate(dndM)
+
+           Else
+
+              write(UNIT_EXE_FILE,*) 'PROBLEM ALLOCATING MEMORY FOR "dndM_interpolation" '
+
+              stop
+
+           End If
+
+        End If
+
      End If
 
      stop
-
-     call Interpolate_2D(dndM_M_z,(M(10)+M(100))/2.d0,(z(10)+z(100))/2.d0,M_functions(1:number_of_M_functions),&
-          z_functions(1:number_of_z_functions),dndM(1:number_of_M_functions,1:number_of_z_functions))
-
-     print *, dndM_M_z, halo_mass_function((M(10)+M(100))/2.d0,(z(10)+z(100))/2.d0)
-
-     stop
-
+     
      write(UNIT_EXE_FILE,*) 'COMPUTING COMOVING VOLUME ELEMENT PER STERADIAN'
 
      call compute_d2VdzdO()   ! COMPUTES COMOVING VOLUME ELEMENT PER STERADIAN  
@@ -238,7 +275,7 @@ Program tSZ
         wtime = omp_get_wtime() ! SETTING STARTING TIME OF LENSING POTENTIAL COMPUTATION
 
         write(UNIT_EXE_FILE,*) 'COMPUTING LENSING POTENTIAL'
-
+        
         call compute_lensing_potential(halo_definition)
 
         write(UNIT_EXE_FILE,*) 'LENSING POTENTIAL COMPUTATION FOR RED-SHIFT ARRAY OF SIZE ', size(z),&
@@ -251,11 +288,63 @@ Program tSZ
 
         call read_philMz() ! READS LENSING POTENTIAL
 
+        If (compute_functions) then
+
+           continue
+
+        Else
+
+           allocate(philMz_interpolation(1:number_of_l,1:number_of_M_functions,1:number_of_z_functions),&
+                stat=status2)
+
+           If (status2 .eq. 0) then
+
+              call Interpolate_philMz()
+
+              deallocate(philMz)
+
+           Else
+
+              write(UNIT_EXE_FILE,*) 'PROBLEM ALLOCATING MEMORY FOR "philMz_interpolation" '
+
+              stop
+
+           End If
+
+        End If
+
      End If
+
+!     Do index3=1,number_of_l
+
+!        Do index1=1,hola2
+
+!           Do index2=1,hola1
+
+!              call Interpolate_2D(dndM_M_z(index1,index2),Mdebug(index1),zdebug(index2),M_functions(1:number_of_M_functions),&
+!                   z_functions(1:number_of_z_functions),philMz(index3,1:number_of_M_functions,1:number_of_z_functions))
+
+!              hola = (dndM_M_z(index1,index2)- halo_mass_function(Mdebug(index1),zdebug(index2)))/&
+!                   halo_mass_function(Mdebug(index1),zdebug(index2))*100.d0
+
+!              If (hola .gt. 1.d-5) then
+
+!                 print *, Mdebug(index1),zdebug(index2),(dndM_M_z(index1,index2)- lensing_potential(Mdebug(index1),zdebug(index2),&
+!                      index3,halo_definition))
+
+!              End If
+
+!           End Do
+
+!        End Do
+
+!     End Do
+     
+!     stop
 
      write(UNIT_EXE_FILE,*) 'COMPUTING ANGULAR POWER SPECTRUM OF LENSING POTENTIAL'
 
-     !call compute_Clphiphi1h() ! ONE HALO TERM
+     call compute_Clphiphi1h() ! ONE HALO TERM
 
      call compute_Clphiphi2h() ! TWO HALO TERM
 
@@ -285,6 +374,31 @@ Program tSZ
 
         call read_ylMz() ! READS FORM FACTOR
 
+        If (compute_functions) then
+
+           continue
+
+        Else
+
+           allocate(ylMz_interpolation(1:number_of_l,1:number_of_M_functions,1:number_of_z_functions),&
+                stat=status2)
+
+           If (status2 .eq. 0) then
+
+              call Interpolate_ylMz()
+
+              deallocate(ylMz)
+
+           Else
+
+              write(UNIT_EXE_FILE,*) 'PROBLEM ALLOCATING MEMORY FOR "ylMz_interpolation" '
+
+              stop
+
+           End If
+
+        End If
+
      End If
         
      write(UNIT_EXE_FILE,*) 'COMPUTING ANGULAR POWER SPECTRUM OF Y-tSZ CROSS-CORRELATION'
@@ -303,7 +417,7 @@ Program tSZ
     deallocate (z,M,k,ml,Cl1h,Cl2h,Clphiphi1h,Clphiphi2h,Cl,Clphiphi,&
     d2VdzdO,dndM,ylMz,philMz,bMz,alpha_halo_mass_function,&
     Clpsilimber,comoving_distance_at_z,mbz,M200c,M200d,r200c,r200d,dM200ddM,dM200cdM,&
-    z_com_dist,z_functions,M_functions)
+    z_functions,M_functions,Scrit,dM200ddM_M_z)
 
     ! CLOSE EXECUTION INFORMATION FILE
     close(UNIT_EXE_FILE)
