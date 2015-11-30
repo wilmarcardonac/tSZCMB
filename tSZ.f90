@@ -9,7 +9,7 @@ Program tSZ
     ! DECLARATION AND INITIALIZATION OF VARIABLES
     Implicit none
     Integer*4 :: index1!,index2,index3                                       ! COUNTER
-    Real*8 :: wtime!,hola                          ! STORES TIME OF EXECUTION
+    Real*8 :: wtime,z_step!,hola                          ! STORES TIME OF EXECUTION
     Character(len=15),parameter :: halo_definition = 'virial' ! HALO DEFINITION USED IN THE COMPUTATIONS
     Integer*4,parameter :: hola1=10
     Integer*4,parameter :: hola2=100
@@ -66,13 +66,37 @@ Program tSZ
 
     End Do
 
+    z(1) = zmin
 
-    Do index1 = 1, number_of_z ! FILLS RED-SHIFT ARRAY.     
+    z_step = 1.d-4
+    
+    Do index1 = 2, number_of_z ! FILLS RED-SHIFT ARRAY.     
 
-        z(index1) = 10**(log10(zmin) + real(index1-1)*(log10(zmax) - log10(zmin))/real(number_of_z-1))
+       If (z(index1) .eq. 1.d-2) then
+          
+          z_step = 1.d-3
+
+       Else If (z(index1) .eq. 1.d-1) then 
+          
+          z_step = 1.d-2
+
+       Else If ( z(index1) .eq. 1.d0) then
+
+          z_step = 1.d-1
+
+       End If
+
+       z(index1) = z(index1-1) + z_step
+
+        !z(index1) = 10**(log10(zmin) + real(index1-1)*(log10(zmax) - log10(zmin))/real(number_of_z-1))
 
     End Do
-    
+
+    z(number_of_z) = zmax
+
+    print *, z
+
+    stop
     Do index1 = -1, number_of_M+2 ! FILLS VIRIAL MASS ARRAY. UNITS: Solar mass    
 
         M(index1) = 10**(log10(Mmin) + real(index1-1)*(log10(Mmax) - log10(Mmin))/real(number_of_M-1))
@@ -264,8 +288,6 @@ Program tSZ
 
      End If
 
-     stop
-     
      write(UNIT_EXE_FILE,*) 'COMPUTING COMOVING VOLUME ELEMENT PER STERADIAN'
 
      call compute_d2VdzdO()   ! COMPUTES COMOVING VOLUME ELEMENT PER STERADIAN  
@@ -353,8 +375,6 @@ Program tSZ
      call compute_Cl()   ! TOTAL 
 
      call write_Cl()     ! OF ALL COMPUTATIONS 
-
-     stop
 
      If (compute_the_form_factor) then
 

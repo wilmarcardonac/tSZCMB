@@ -8,7 +8,7 @@ Module fiducial
     ! NOMINAL MISSION DATA" BY HILL & SPERGEL.
 
     Integer*4,parameter :: number_of_k = 1000          ! SIZE OF WAVEVECTOR ARRAY 
-    Integer*4,parameter :: number_of_z = 100           ! SIZE OF RED-SHIFT ARRAY 
+    Integer*4,parameter :: number_of_z = 320           ! SIZE OF RED-SHIFT ARRAY 
     Integer*4,parameter :: number_of_z_functions = 1000  ! SIZE OF RED-SHIFT ARRAY FOR FUNCTIONS
     Integer*4,parameter :: number_of_z_limber = 1000   ! SIZE OF RED-SHIFT ARRAY FOR LIMBER APPROXIMATION 
     Integer*4,parameter :: number_of_M = 7000 !4000000       ! SIZE OF VIRIAL MASS ARRAY
@@ -47,16 +47,16 @@ Module fiducial
     Real*8 :: Normalization                        ! NORMALIZATION CONSTANT FOR MATTER POWER SPECTRUM (EQUATION (A7) IN EISENSTEIN & HU PAPER)
     Real*8 :: com_dist_at_z_dec                    ! COMOVING DISTANCE AT DECOUPLING
     Real*8,parameter :: DeltaSO = 2.d2             ! PARAMETER TO DEFINE SPHERICAL OVERDENSITY
-    Real*8 :: alpha_halo_redshit_3                 ! CONSTANT ALPHA IN HALO MASS FUNCTION AT RED-SHIFT 3 (INTERPOLATION)
+    Real*8 :: alpha_halo_redshift_3                 ! CONSTANT ALPHA IN HALO MASS FUNCTION AT RED-SHIFT 3 (INTERPOLATION)
 
     Character(len=*),parameter :: path_to_execution_information = './output/execution_information.txt' ! EXECUTION INFORMATION FILE
 
     Logical,parameter :: do_mass_conversion = .false. !.true.       ! COMPUTE MASSES FOR OTHER HALO DEFINITIONS IF SET IT TRUE
-    Logical,parameter :: compute_functions = .true.                 ! COMPUTE FUNCTIONS HAVING 'number_of_z' AND 'number_of_M' SIZE OF ARRAYS, OTHERWISE INTERPOLATE
+    Logical,parameter :: compute_functions = .false.!.true.                 ! COMPUTE FUNCTIONS HAVING 'number_of_z' AND 'number_of_M' SIZE OF ARRAYS, OTHERWISE INTERPOLATE
     Logical,parameter :: compute_linear_halo_bias = .false. !.true. ! COMPUTE LINEAR HALO BIAS IF SET IT TRUE
     Logical,parameter :: compute_alpha_in_halo_mass_function = .false. !.true. ! COMPUTE CONSTANT ALPHA IN HALO MASS FUNCTION IF SET IT TRUE
-    Logical,parameter :: compute_halo_mass_function = .true. !.false. !.true. ! COMPUTE HALO MASS FUNCTION IF SET IT TRUE
-    Logical,parameter :: compute_the_lensing_potential = .true. !.false.! .true. ! COMPUTE LENSING POTENTIAL IF SET IT TRUE
+    Logical,parameter :: compute_halo_mass_function = .false. !.true. ! COMPUTE HALO MASS FUNCTION IF SET IT TRUE
+    Logical,parameter :: compute_the_lensing_potential = .false.! .true. ! COMPUTE LENSING POTENTIAL IF SET IT TRUE
     Logical,parameter :: compute_the_form_factor = .true. !.false. !.true. ! COMPUTE FORM FACTOR IF SET IT TRUE
 
 End Module fiducial

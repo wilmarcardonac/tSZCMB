@@ -1056,8 +1056,8 @@ Module functions
         use arrays                ! power spectrum" by Battaglia et al. All the masses and distances in this work are given relative to h.
         Implicit none             ! Units of ICM_electron_pressure : solar mass/(Mpc*s**2)        
 
-        Real*8 :: x,A_p,alpha_pm,alpha_pz,P_0,A_xc,alpha_xcm,virial_Mass,redshift
-        Real*8 :: alpha_xcz,x_c,A_beta,r,ICM_electron_pressure,M200c_M_z,r200c_M_z
+        Real*8 :: x,A_p,alpha_pm,alpha_pz,P_0,A_xc,alpha_xcm!,virial_Mass,redshift
+        Real*8 :: alpha_xcz,x_c,A_beta,r,ICM_electron_pressure!,M200c_M_z,r200c_M_z
         Real*8 :: alpha_betam,alpha_betaz,beta,gamma,alpha,P_th,P_e,P200,P_fit
         Integer*4 :: indexM,indexz
 
@@ -1154,7 +1154,7 @@ Module functions
         use arrays
         Implicit none
 
-        Real*8 :: l_s,x_y_min,x_y_max,form_factor,y,prefactor,stepsize,x1,x2,f1,f2,virial_Mass,redshift,M200c_M_z,r200c_M_z
+        Real*8 :: l_s,x_y_min,x_y_max,form_factor,y,prefactor,stepsize,x1,x2,f1,f2!,virial_Mass,redshift,M200c_M_z,r200c_M_z
         Integer*4,parameter :: number_of_x = 1d4
         Integer*4,parameter :: intervals = number_of_x - 1 !  
         Integer*4 :: indexx,indexl,indexM,indexz
@@ -2200,7 +2200,7 @@ Module functions
         Implicit none                 
 
         Real*8 :: halo_mass_function,R,sigma,nu,beta,phi,eta,gamma,M200d_M_z
-        Real*8 :: f_nu,g_sigma,alpha_halo_mass_function_z        
+        Real*8 :: f_nu,g_sigma!,alpha_halo_mass_function_z        
         Real*8,parameter :: delta_c = 1.686d0    ! page 880 in "The large-scale ..."
         Real*8,parameter :: beta0 = 0.589d0
         Real*8,parameter :: phi0 = -0.729d0
@@ -2497,7 +2497,7 @@ Module functions
 
               Do indexz=1,number_of_z
 
-                 dndM(indexM,indexz) = halo_mass_function(M(indexM),z(indexz))*dM200ddM(indexM,indexz)
+                 dndM(indexM,indexz) = halo_mass_function(indexM,indexz)*dM200ddM(indexM,indexz)
 
                  write(15,'(i10,es18.10,i5,2es18.10)') indexM, M(indexM), indexz, z(indexz), dndM(indexM,indexz)
 
@@ -2682,7 +2682,7 @@ Module functions
             !call Interpolate_2D(philMz_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
               !   z_functions(1:number_of_z_functions),philMz(indexl,1:number_of_M_functions,1:number_of_z_functions))
 
-            f(indexM) = dndM_interpolation(indexM,indexz)*philMz_interpolation(indexM,indexz)**2 ! Units : 1/solar mass/Mpc**3
+            f(indexM) = dndM_interpolation(indexM,indexz)*philMz_interpolation(indexl,indexM,indexz)**2 ! Units : 1/solar mass/Mpc**3
 
         End Do
 
@@ -2785,16 +2785,17 @@ Module functions
 
 !            virial_Mass(indexM) = 10**(log10(Mmin) + real(indexM-1)*(log10(Mmax) - log10(Mmin))/real(number_of_virial_Mass-1))
 
-            call Interpolate_2D(dndM_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
-                 z_functions(1:number_of_z_functions),dndM(1:number_of_M_functions,1:number_of_z_functions))
+!            call Interpolate_2D(dndM_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
+ !                z_functions(1:number_of_z_functions),dndM(1:number_of_M_functions,1:number_of_z_functions))
 
-            call Interpolate_2D(philMz_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
-                 z_functions(1:number_of_z_functions),philMz(indexl,1:number_of_M_functions,1:number_of_z_functions))
+  !          call Interpolate_2D(philMz_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
+   !              z_functions(1:number_of_z_functions),philMz(indexl,1:number_of_M_functions,1:number_of_z_functions))
 
-            call Interpolate_2D(ylMz_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
-                 z_functions(1:number_of_z_functions),ylMz(indexl,1:number_of_M_functions,1:number_of_z_functions))
+    !        call Interpolate_2D(ylMz_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
+     !            z_functions(1:number_of_z_functions),ylMz(indexl,1:number_of_M_functions,1:number_of_z_functions))
 
-            f(indexM) = dndM_interpolation(indexM,indexz)*ylMz_interpolations(indexl,indexM,indexz)*philMz_interpolation(indexl,indexM,indexz) ! Units : 1/solar mass/Mpc**3
+            f(indexM) = dndM_interpolation(indexM,indexz)*ylMz_interpolation(indexl,indexM,indexz)*&
+                 philMz_interpolation(indexl,indexM,indexz) ! Units : 1/solar mass/Mpc**3
 
         End Do
 
@@ -3326,7 +3327,8 @@ Module functions
      !       call Interpolate_2D(philMz_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
       !           z_functions(1:number_of_z_functions),philMz(indexl,1:number_of_M_functions,1:number_of_z_functions))
 
-            f(indexM) = dndM_interpolation(indexM,indexz)*bMz_interpolation(indexM,indexz)*philMz_interpolation(indexl,indexM,indexz) 
+            f(indexM) = dndM_interpolation(indexM,indexz)*bMz_interpolation(indexM,indexz)*&
+                 philMz_interpolation(indexl,indexM,indexz) 
 
         End Do
 
@@ -3378,7 +3380,8 @@ Module functions
      !       call Interpolate_2D(ylMz_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
       !           z_functions(1:number_of_z_functions),ylMz(indexl,1:number_of_M_functions,1:number_of_z_functions))
 
-            f(indexM) = dndM_interpolation(indexM,indexz)*bMz_interpolation(indexM,indexz)*ylMz_interpolation(indexM,indexz)
+            f(indexM) = dndM_interpolation(indexM,indexz)*bMz_interpolation(indexM,indexz)*&
+                 ylMz_interpolation(indexl,indexM,indexz)
 
         End Do
 
