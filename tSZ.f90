@@ -9,7 +9,7 @@ Program tSZ
     ! DECLARATION AND INITIALIZATION OF VARIABLES
     Implicit none
     Integer*4 :: index1!,index2,index3                                       ! COUNTER
-    Real*8 :: wtime,z_step!,hola                          ! STORES TIME OF EXECUTION
+    Real*8 :: wtime!,hola                          ! STORES TIME OF EXECUTION
     Character(len=15),parameter :: halo_definition = 'virial' ! HALO DEFINITION USED IN THE COMPUTATIONS
     Integer*4,parameter :: hola1=10
     Integer*4,parameter :: hola2=100
@@ -66,37 +66,30 @@ Program tSZ
 
     End Do
 
-    z(1) = zmin
+    Do  index1 = 1,number_of_z+1  ! FILLS RED-SHIFT ARRAY.     
 
-    z_step = 1.d-4
-    
-    Do index1 = 2, number_of_z ! FILLS RED-SHIFT ARRAY.     
-
-       If (z(index1) .eq. 1.d-2) then
+       If ( index1 .le. 50 ) then
           
-          z_step = 1.d-3
+          z(index1) = zmin + dble(index1-1)*1.d-4
 
-       Else If (z(index1) .eq. 1.d-1) then 
+       Else If ( index1 .le. 140 ) then 
           
-          z_step = 1.d-2
+          z(index1) = z(50) + dble(index1-50)*1.d-3
 
-       Else If ( z(index1) .eq. 1.d0) then
+       Else If ( index1 .le. 230 ) then
 
-          z_step = 1.d-1
+          z(index1) = z(140) + dble(index1-140)*1.d-2
+
+       Else If ( index1 .le. 320) then
+
+          z(index1) = z(230) + dble(index1-230)*1.d-1
 
        End If
-
-       z(index1) = z(index1-1) + z_step
 
         !z(index1) = 10**(log10(zmin) + real(index1-1)*(log10(zmax) - log10(zmin))/real(number_of_z-1))
 
     End Do
 
-    z(number_of_z) = zmax
-
-    print *, z
-
-    stop
     Do index1 = -1, number_of_M+2 ! FILLS VIRIAL MASS ARRAY. UNITS: Solar mass    
 
         M(index1) = 10**(log10(Mmin) + real(index1-1)*(log10(Mmax) - log10(Mmin))/real(number_of_M-1))
@@ -171,7 +164,7 @@ Program tSZ
         write(UNIT_EXE_FILE,*) 'MASS CONVERSION FILE READ AND DERIVATIVES OF MASS CONVERSION COMPUTED'
 
      End If
-
+     stop
      !!!!!!!!!!!!!!!!!!!!!!!!!DEBUGGING 
      Do index1 = 1, hola1 ! FILLS RED-SHIFT ARRAY.     
 
