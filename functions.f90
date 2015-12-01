@@ -138,7 +138,7 @@ Module functions
         use omp_lib
         Implicit none
 
-        Integer*4,parameter :: number_of_x = 1d5
+        Integer*4,parameter :: number_of_x = 100000
         Integer*4,parameter :: intervals = number_of_x - 1
         Integer*4 :: m
         Real*8 :: comoving_distance, z
@@ -201,7 +201,7 @@ Module functions
         use omp_lib
         Implicit none
 
-        Integer*4,parameter :: number_of_x = 1d5
+        Integer*4,parameter :: number_of_x = 100000
         Integer*4,parameter :: intervals = number_of_x - 1
         Integer*4 :: m
         Real*8,dimension(number_of_x) :: x,f
@@ -524,7 +524,7 @@ Module functions
         Implicit none
 
         Integer*4 :: indexM,indexz
-        Integer*4,parameter :: indexr = 1d2
+        Integer*4,parameter :: indexr = 100
 
         open(15,file='./output/c200_at_z.dat')
 
@@ -665,14 +665,14 @@ Module functions
         Implicit none
 
         Real*8 :: r_delta_c_from_M_virial,M,z,delta,r1,r2,step,rini,f1,f2,rmid,dr,fmid
-        Integer*4,parameter :: iter = 10000
-        Real*8,parameter :: racc = 1.d-25
+        Integer*4,parameter :: iter = 1000000000
+        Real*8,parameter :: racc = 1.d-10
         Integer*4 :: p
         logical :: root
 
         rini = (3.d0*M/4.d0/Pi/critical_density(z)/delta)**(1.d0/3.d0) ! Units : Mpc
 
-        step = 1.6d0
+        step = 1.6d-2
 
         r1 = 1.d0*rini  ! Units : Mpc
         
@@ -828,14 +828,14 @@ Module functions
         Implicit none
 
         Real*8 :: r_delta_d_from_M_virial,M,z,delta,r1,r2,step,rini,f1,f2,rmid,dr,fmid
-        Integer*4,parameter :: iter = 10000
-        Real*8,parameter :: racc = 1.d-25
+        Integer*4,parameter :: iter = 1000000000
+        Real*8,parameter :: racc = 1.d-10
         Integer*4 :: p
         logical :: root 
 
         rini = (3.d0*M/4.d0/Pi/mean_density(z)*(1.d0+z)**3.d0/delta)**(1.d0/3.d0) ! Units : Mpc/h
         
-        step = 1.6d0
+        step = 1.6d-2
 
         r1 = 1.d0*rini ! Units : Mpc/h
 
@@ -1155,12 +1155,12 @@ Module functions
         Implicit none
 
         Real*8 :: l_s,x_y_min,x_y_max,form_factor,y,prefactor,stepsize,x1,x2,f1,f2!,virial_Mass,redshift,M200c_M_z,r200c_M_z
-        Integer*4,parameter :: number_of_x = 1d4
+        Integer*4,parameter :: number_of_x = 10000
         Integer*4,parameter :: intervals = number_of_x - 1 !  
         Integer*4 :: indexx,indexl,indexM,indexz
         Real*8,dimension(number_of_x) :: x,f
         Real*8,parameter :: betafactor = 1.060d0!1.037d0
-        Integer*4,parameter :: max_iterations = 1d9
+        Integer*4,parameter :: max_iterations = 1000000000
         logical :: logscale
 
 !        call Interpolate_2D(M200c_M_z,virial_Mass,redshift,M(1:number_of_M),z(1:number_of_z),M200c(1:number_of_M,1:number_of_z))
@@ -1884,13 +1884,13 @@ Module functions
 
         Real*8 :: sum,x1,x2,f1,f2
         Integer*4 :: indexk
-        Integer*4,parameter :: number_of_k_logscale = 1d3
+        Integer*4,parameter :: number_of_k_logscale = 1000
         Integer*4,parameter :: intervals = number_of_k_logscale - 1 
         Real*8,dimension(number_of_k_logscale) :: f,k
         Real*8,parameter :: R = 8.d0/h ! Units : Mpc
         Real*8,parameter :: kmaxlogscale = 1.d-1
         Real*8,parameter :: stepsize = 1.d-3
-        Integer*4,parameter :: max_iterations = 1d9
+        Integer*4,parameter :: max_iterations = 1000000000
 
         ! Wavevector array. Units : 1/Mpc
         Do indexk = 1, number_of_k_logscale  
@@ -2023,20 +2023,22 @@ Module functions
 
         Real*8 :: sigma_squared,R,sum,prefactor,Mass,x1,x2,f1,f2,redshift
         Integer*4 :: indexk
-        Integer*4,parameter :: number_of_k_logscale = 1d2
+        Integer*4,parameter :: number_of_k_logscale = 100
         Integer*4,parameter :: intervals = number_of_k_logscale - 1 
         Real*8,dimension(number_of_k) :: f,kf
-        Real*8,parameter :: stepsize = 1.d-2
-        Integer*4,parameter :: max_iterations = 1d9 
+        Real*8 :: stepsize 
+        Integer*4,parameter :: max_iterations = 1000000000 
 
         prefactor = 1.d0/2.d0/Pi**2
 
         R = (3.d0*Mass/4.d0/Pi/mean_density(redshift)*(1.d0 + redshift)**3.d0)**(1.d0/3.d0) ! Units : Mpc. (1+z)**3 factor to use comoving coordinates
 
+        stepsize = (kmax - 1.d0/R)*1.d-3
+
         ! Wavevector array. Units : 1/Mpc
         Do indexk = 1, number_of_k_logscale  
   
-            kf(indexk) = 10**(log10(kmin) + real(indexk-1)*(log10(1/R) - log10(kmin))/real(number_of_k_logscale-1))
+            kf(indexk) = 10**(log10(kmin) + real(indexk-1)*(log10(1.d0/R) - log10(kmin))/real(number_of_k_logscale-1))
 
         End Do
 
@@ -2099,7 +2101,7 @@ Module functions
             End If
 
         End Do
-
+        
         sigma_squared = prefactor*sum/h**3
 
     end function sigma_squared
@@ -2111,15 +2113,17 @@ Module functions
 
         Real*8 :: dsigma_squared_dR,R,sum,prefactor,Mass,x1,x2,f1,f2,redshift
         Integer*4 :: indexk
-        Integer*4,parameter :: number_of_k_logscale = 1d2
+        Integer*4,parameter :: number_of_k_logscale = 100
         Integer*4,parameter :: intervals = number_of_k_logscale - 1 
         Real*8,dimension(number_of_k_logscale) :: f,kf
-        Real*8,parameter :: stepsize = 1.d-2
-        Integer*4,parameter :: max_iterations = 1d9 
+        Real*8 :: stepsize 
+        Integer*4,parameter :: max_iterations = 1000000000
 
         prefactor = 1.d0/Pi**2
 
         R = (3.d0*Mass/4.d0/Pi/mean_density(redshift)*(1.d0 + redshift)**3.d0)**(1.d0/3.d0) ! Units : Mpc. (1+z)**3 factor to use comoving coordinates
+
+        stepsize = (kmax - 1.d-1/R)*1.d-3
 
         ! Wavevector array. Units : 1/Mpc
         Do indexk = 1, number_of_k_logscale    
@@ -2666,23 +2670,14 @@ Module functions
         use arrays
         Implicit none
 
-        Real*8 :: pre_Clphiphi,sum!,dndM_M_z,philMz_M_z
+        Real*8 :: pre_Clphiphi,sum
         Integer*4 :: indexl,i,indexM,indexz
-        Integer*4,parameter :: number_of_virial_Mass = number_of_M_functions !1d5
-        Integer*4,parameter :: intervals = number_of_virial_Mass - 1 
-        Real*8,dimension(number_of_virial_Mass) :: f!,virial_Mass
+        Integer*4,parameter :: intervals = number_of_M - 1 
+        Real*8,dimension(number_of_M) :: f
 
-        Do indexM = 1, number_of_virial_Mass    
+        Do indexM = 1, number_of_M
 
-            !virial_Mass(indexM) = 10**(log10(Mmin) + real(indexM-1)*(log10(Mmax) - log10(Mmin))/real(number_of_virial_Mass-1))
-
-            !call Interpolate_2D(dndM_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
-             !    z_functions(1:number_of_z_functions),dndM(1:number_of_M_functions,1:number_of_z_functions))
-
-            !call Interpolate_2D(philMz_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
-              !   z_functions(1:number_of_z_functions),philMz(indexl,1:number_of_M_functions,1:number_of_z_functions))
-
-            f(indexM) = dndM_interpolation(indexM,indexz)*philMz_interpolation(indexl,indexM,indexz)**2 ! Units : 1/solar mass/Mpc**3
+            f(indexM) = dndM(indexM,indexz)*philMz(indexl,indexM,indexz)**2 ! Units : 1/solar mass/Mpc**3
 
         End Do
 
@@ -2690,7 +2685,7 @@ Module functions
 
         Do i=1,intervals
 
-            sum = (M_functions(i+1)- M_functions(i))/2.d0*( f(i) + f(i+1) ) + sum   ! Units : 1/Mpc**3
+            sum = (M(i+1)- M(i))/2.d0*( f(i) + f(i+1) ) + sum   ! Units : 1/Mpc**3
 
         End Do
 
@@ -2702,7 +2697,7 @@ Module functions
 
         use fiducial
         use arrays
-        use omp_lib
+        !use omp_lib
         Implicit none
 
         Real*8 :: C_l_phiphi_one_halo,sum
@@ -2711,7 +2706,7 @@ Module functions
         Integer*4,parameter :: intervals = number_of_redshift - 1
         Real*8,dimension(number_of_redshift):: f
 
-        !$omp Parallel Do Shared(f)
+        !!$omp Parallel Do Shared(f)
 
         Do indexz=1,number_of_redshift
 
@@ -2719,7 +2714,7 @@ Module functions
 
         End Do
 
-        !$omp End Parallel Do
+        !!$omp End Parallel Do
 
         !    open(16,file='./output/clphiphi.dat')
 
@@ -3308,27 +3303,14 @@ Module functions
         use arrays
         Implicit none
 
-        Real*8 :: pre_Cl_1,sum!,redshift,dndM_M_z,bMz_M_z,philMz_M_z
+        Real*8 :: pre_Cl_1,sum
         Integer*4 :: indexl,indexM,indexz
-        Integer*4,parameter :: number_of_virial_Mass = number_of_M_functions  !100000
         Integer*4,parameter :: intervals = number_of_M - 1
-        Real*8,dimension(number_of_virial_Mass) :: f!,virial_Mass
+        Real*8,dimension(number_of_M) :: f
         
-        Do indexM = 1, number_of_virial_Mass    
+        Do indexM = 1, number_of_M    
 
-!            virial_Mass(indexM) = 10**(log10(Mmin) + real(indexM-1)*(log10(Mmax) - log10(Mmin))/real(number_of_virial_Mass-1))
-
- !           call Interpolate_2D(dndM_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
-  !               z_functions(1:number_of_z_functions),dndM(1:number_of_M_functions,1:number_of_z_functions))
-
-   !         call Interpolate_2D(bMz_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
-    !             z_functions(1:number_of_z_functions),bMz(1:number_of_M_functions,1:number_of_z_functions))
-
-     !       call Interpolate_2D(philMz_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
-      !           z_functions(1:number_of_z_functions),philMz(indexl,1:number_of_M_functions,1:number_of_z_functions))
-
-            f(indexM) = dndM_interpolation(indexM,indexz)*bMz_interpolation(indexM,indexz)*&
-                 philMz_interpolation(indexl,indexM,indexz) 
+            f(indexM) = dndM(indexM,indexz)*bMz(indexM,indexz)*philMz(indexl,indexM,indexz) 
 
         End Do
 
@@ -3346,7 +3328,7 @@ Module functions
 
         Do indexM=1,intervals
 
-            sum = (M_functions(indexM+1)-M_functions(indexM))/2.d0*( f(indexM) + f(indexM+1) ) + sum
+            sum = (M(indexM+1)-M(indexM))/2.d0*( f(indexM) + f(indexM+1) ) + sum
 
         End Do
 

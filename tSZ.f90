@@ -11,10 +11,10 @@ Program tSZ
     Integer*4 :: index1!,index2,index3                                       ! COUNTER
     Real*8 :: wtime!,hola                          ! STORES TIME OF EXECUTION
     Character(len=15),parameter :: halo_definition = 'virial' ! HALO DEFINITION USED IN THE COMPUTATIONS
-    Integer*4,parameter :: hola1=10
-    Integer*4,parameter :: hola2=100
-    Real*8,dimension(hola1) :: zdebug
-    Real*8,dimension(hola2) :: Mdebug
+    !Integer*4,parameter :: hola1=10
+    !Integer*4,parameter :: hola2=100
+    !Real*8,dimension(hola1) :: zdebug
+    !Real*8,dimension(hola2) :: Mdebug
 !    Real*8,dimension(hola2,hola1) :: dndM_M_z
 
     com_dist_at_z_dec = comoving_distance(z_dec) ! COMPUTE COMOVING DISTANCE AT DECOUPLING
@@ -164,19 +164,19 @@ Program tSZ
         write(UNIT_EXE_FILE,*) 'MASS CONVERSION FILE READ AND DERIVATIVES OF MASS CONVERSION COMPUTED'
 
      End If
-     stop
+     
      !!!!!!!!!!!!!!!!!!!!!!!!!DEBUGGING 
-     Do index1 = 1, hola1 ! FILLS RED-SHIFT ARRAY.     
+     !Do index1 = 1, hola1 ! FILLS RED-SHIFT ARRAY.     
 
-        zdebug(index1) = 10**(log10(zmin) + real(index1-1)*(log10(zmax) - log10(zmin))/real(hola1-1))
+     !   zdebug(index1) = 10**(log10(zmin) + real(index1-1)*(log10(zmax) - log10(zmin))/real(hola1-1))
 
-     End Do
+     !End Do
     
-     Do index1 = 1, hola2 ! FILLS VIRIAL MASS ARRAY. UNITS: Solar mass    
+     !Do index1 = 1, hola2 ! FILLS VIRIAL MASS ARRAY. UNITS: Solar mass    
         
-        Mdebug(index1) = 10**(log10(Mmin) + real(index1-1)*(log10(Mmax) - log10(Mmin))/real(hola2-1))
+     !   Mdebug(index1) = 10**(log10(Mmin) + real(index1-1)*(log10(Mmax) - log10(Mmin))/real(hola2-1))
         
-     End Do
+     !End Do
      !!END DEBUGGING
 
      call compute_normalization() ! IN MATTER POWER SPECTRUM TO FIT FIDUCIAL SIGMA_8
