@@ -11,7 +11,9 @@ Module fiducial
     Integer*4,parameter :: number_of_z = 320           ! SIZE OF RED-SHIFT ARRAY 
     Integer*4,parameter :: number_of_z_functions = 1000  ! SIZE OF RED-SHIFT ARRAY FOR FUNCTIONS
     Integer*4,parameter :: number_of_z_limber = 1000   ! SIZE OF RED-SHIFT ARRAY FOR LIMBER APPROXIMATION 
-    Integer*4,parameter :: number_of_M = 500        ! SIZE OF VIRIAL MASS ARRAY
+    Integer*4,parameter :: number_of_M_log = 500        ! SIZE OF VIRIAL MASS ARRAY
+    Integer*4,parameter :: number_of_M_linear = 332 
+    Integer*4,parameter :: number_of_M = 500 !number_of_M_log + number_of_M_linear
     Integer*4,parameter :: number_of_M_functions = 1000 ! SIZE OF VIRIAL MASS ARRAY FOR FUNCTIONS
     Integer*4,parameter :: number_of_l = 5  ! SIZE OF MULTIPOLE ARRAY 
     Integer*4,parameter :: number_of_l_functions = 100 ! SIZE OF MULTIPOLE ARRAY FOR INTERPOLATING FUNCTIONS
@@ -48,10 +50,11 @@ Module fiducial
     Real*8 :: com_dist_at_z_dec                    ! COMOVING DISTANCE AT DECOUPLING
     Real*8,parameter :: DeltaSO = 2.d2             ! PARAMETER TO DEFINE SPHERICAL OVERDENSITY
     Real*8 :: alpha_halo_redshift_3                 ! CONSTANT ALPHA IN HALO MASS FUNCTION AT RED-SHIFT 3 (INTERPOLATION)
+    Real*8 :: d_alpha_halo_redshift_3               ! DERIVATIVE OF CONSTANT ALPHA IN HALO MASS FUNCTION AT RED-SHIFT 3 (INTERPOLATION)
 
     Character(len=*),parameter :: path_to_execution_information = './output/execution_information.txt' ! EXECUTION INFORMATION FILE
 
-    Logical,parameter :: do_mass_conversion = .true.       ! COMPUTE MASSES FOR OTHER HALO DEFINITIONS IF SET IT TRUE
+    Logical,parameter :: do_mass_conversion = .false.!.true.       ! COMPUTE MASSES FOR OTHER HALO DEFINITIONS IF SET IT TRUE
     Logical,parameter :: compute_functions = .true.                 ! COMPUTE FUNCTIONS HAVING 'number_of_z' AND 'number_of_M' SIZE OF ARRAYS, OTHERWISE INTERPOLATE
     Logical,parameter :: compute_linear_halo_bias = .true. ! COMPUTE LINEAR HALO BIAS IF SET IT TRUE
     Logical,parameter :: compute_alpha_in_halo_mass_function = .true. ! COMPUTE CONSTANT ALPHA IN HALO MASS FUNCTION IF SET IT TRUE

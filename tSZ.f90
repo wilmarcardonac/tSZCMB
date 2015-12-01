@@ -35,10 +35,10 @@ Program tSZ
     ! DERIVATIVE OF CRITICAL MASS DENSITY w.r.t VIRIAL MASS, ANGULAR POWER SPECTRUM OF LENSING POTENTIAL IN THE LIMBER APPROXIMATION, 
     ! HALO MASS FUNCTION, FORM FACTOR, LENSING POTENTIAL, COMOVING VOLUME, LINEAR BIAS, MEAN BIAS OF ALL MATTER, CRITICAL SURFACE,
     ! SIGMA SQUARE FOR MEAN DENSITY MASS, DERIVATIVE OF SIGMA SQUARE FOR MEAN DENSITY MASS
-    allocate (z(1:number_of_z), M(-1:number_of_M+2), ml(1:number_of_l),k(1:number_of_k),&
-    Cl1h(1:number_of_l),Cl2h(1:number_of_l),Cl(1:number_of_l),M200d(-1:number_of_M+2,1:number_of_z),&
-    M200c(-1:number_of_M+2,1:number_of_z),r200c(-1:number_of_M+2,1:number_of_z),dM200ddM(1:number_of_M,1:number_of_z),&
-    r200d(-1:number_of_M+2,1:number_of_z),Clphiphi1h(1:number_of_l),Clphiphi2h(1:number_of_l),&
+    allocate (z(1:number_of_z), M(1:number_of_M), ml(1:number_of_l),k(1:number_of_k),&
+    Cl1h(1:number_of_l),Cl2h(1:number_of_l),Cl(1:number_of_l),M200d(1:number_of_M,1:number_of_z),&
+    M200c(1:number_of_M,1:number_of_z),r200c(1:number_of_M,1:number_of_z),dM200ddM(1:number_of_M,1:number_of_z),&
+    r200d(1:number_of_M,1:number_of_z),Clphiphi1h(1:number_of_l),Clphiphi2h(1:number_of_l),&
     Clphiphi(1:number_of_l),alpha_halo_mass_function(1:number_of_z_functions),dM200cdM(1:number_of_M,1:number_of_z),&
     Clpsilimber(1:number_of_l),dndM(1:number_of_M_functions,1:number_of_z_functions),&
     ylMz(1:number_of_l,1:number_of_M_functions,1:number_of_z_functions),&
@@ -90,11 +90,89 @@ Program tSZ
 
     End Do
 
-    Do index1 = -1, number_of_M+2 ! FILLS VIRIAL MASS ARRAY. UNITS: Solar mass    
+    Do index1 = 1, number_of_M ! FILLS VIRIAL MASS ARRAY. UNITS: Solar mass    
+       
+!       If (index1 .le. number_of_M_log) then
 
-        M(index1) = 10**(log10(Mmin) + real(index1-1)*(log10(Mmax) - log10(Mmin))/real(number_of_M-1))
+       M(index1) = 10**(log10(Mmin) + real(index1-1)*(log10(Mmax) - log10(Mmin))/real(number_of_M-1))
+
+!       Else
+
+!       If ( index1 .le. 90 ) then
+          
+ !         M(index1) = 1.d5 + dble(index1 - 1)*1.d4
+
+  !     Else If ( index1 .le. 180 ) then 
+          
+   !       M(index1) = M(90) + dble(index1 - 90)*1.d5
+
+    !   Else If ( index1 .le. 270 ) then
+
+     !     M(index1) = M(180) + dble(index1 - 180)*1.d6
+
+      ! Else If ( index1 .le. 360 ) then
+
+       !   M(index1) = M(270) + dble(index1 - 270)*1.d7
+
+       !Else If ( index1 .le. 450 ) then
+
+!          M(index1) = M(360) + dble(index1 - 360)*1.d8
+
+ !      Else If ( index1 .le. 540 ) then
+
+  !        M(index1) = M(450) + dble(index1 - 450)*1.d9
+
+   !    Else If ( index1 .le. 630 ) then
+
+    !      M(index1) = M(540) + dble(index1 - 540)*1.d10
+
+     !  Else If ( index1 .le. 720 ) then
+
+      !    M(index1) = M(630) + dble(index1 - 630)*1.d11
+
+!       Else If ( index1 .le. 810 ) then
+
+ !         M(index1) = M(720) + dble(index1 - 720)*1.d12
+
+  !     Else If ( index1 .le. 900 ) then
+
+   !       M(index1) = M(810) + dble(index1 - 810)*1.d13
+
+    !   Else 
+
+     !     M(index1) = M(900) + dble(index1 - 900)*1.d14
+
+!       Else 
+
+!          M(index1) = M(number_of_M_log+270) + dble(index1 - number_of_M_log - 270)*1.d14
+
+      ! End If
+
+    !End If
 
     End Do
+
+!    print *, M_delta_d_from_M_virial(3.d0,r_delta_d_from_M_virial(M(10),3.d0,DeltaSO),DeltaSO)
+
+!    stop
+
+!    Do index1 = -1, number_of_M+2 ! FILLS VIRIAL MASS ARRAY. UNITS: Solar mass    
+
+!       M(index1) = M(index1)/h
+
+!       If (M(index1) .lt. M(index1-1)) then
+
+!          print *, 'FOUND', index1
+
+!          stop
+
+!       End If
+
+!    End Do
+
+!    print *, M(-1),M(0),M(1),Mmin,M(number_of_M),Mmax
+
+    !stop
 
     Do index1 = 1, number_of_l ! FILLS MULTIPOLE ARRAY.    
 
@@ -103,32 +181,32 @@ Program tSZ
 
     End Do
 
-    If (compute_functions) then 
+!    If (compute_functions) then 
 
-       continue
+!       continue
 
-    Else
+!    Else
 
-       Do index1 = 1, number_of_z_functions ! FILLS RED-SHIFT ARRAY.     
+!       Do index1 = 1, number_of_z_functions ! FILLS RED-SHIFT ARRAY.     
 
-          z_functions(index1) = 10**(log10(zmin) + real(index1-1)*(log10(zmax) - log10(zmin))/real(number_of_z_functions-1))
+!          z_functions(index1) = 10**(log10(zmin) + real(index1-1)*(log10(zmax) - log10(zmin))/real(number_of_z_functions-1))
 
-       End Do
+!       End Do
     
-       Do index1 = 1, number_of_M_functions ! FILLS VIRIAL MASS ARRAY. UNITS: Solar mass    
+!       Do index1 = 1, number_of_M_functions ! FILLS VIRIAL MASS ARRAY. UNITS: Solar mass    
 
-          M_functions(index1) = 10**(log10(Mmin) + real(index1-1)*(log10(Mmax) - log10(Mmin))/real(number_of_M_functions-1))
+!          M_functions(index1) = 10**(log10(Mmin) + real(index1-1)*(log10(Mmax) - log10(Mmin))/real(number_of_M_functions-1))
 
-       End Do
+!       End Do
 
-       Do index1 = 1, number_of_l_functions ! FILLS MULTIPOLE ARRAY.    
+!       Do index1 = 1, number_of_l_functions ! FILLS MULTIPOLE ARRAY.    
 
-          ml_functions(index1) = int(10**(log10(dble(lmin)) + real(index1-1)*(log10(dble(lmax)) - &
-               log10(dble(lmin)))/real(number_of_l_functions-1)),4)
+!          ml_functions(index1) = int(10**(log10(dble(lmin)) + real(index1-1)*(log10(dble(lmax)) - &
+!               log10(dble(lmin)))/real(number_of_l_functions-1)),4)
 
-       End Do
+!       End Do
 
-    End If 
+!    End If 
 
     ! COMPUTATION STARTS
 
@@ -151,7 +229,9 @@ Program tSZ
         write(UNIT_EXE_FILE,*) 'MASS CONVERSION FOR RED-SHIFT ARRAY OF SIZE ', size(z),' AND VIRIAL MASS ARRAY OF SIZE ', size(M),&
         'TOOK ', (omp_get_wtime()-wtime)/3.6d3, 'HOURS'
         
-        call read_M200dc_r200dc() ! READING MASS CONVERSION FILE AND COMPUTING DERIVATIVES OF MASS CONVERSION
+        !call read_M200dc_r200dc() ! READING MASS CONVERSION FILE AND COMPUTING DERIVATIVES OF MASS CONVERSION
+
+        call compute_dMdc_dM_and_dMdd_dM()
 
         write(UNIT_EXE_FILE,*) 'MASS CONVERSION FILE READ AND DERIVATIVES OF MASS CONVERSION COMPUTED'
 
@@ -161,10 +241,15 @@ Program tSZ
 
         call read_M200dc_r200dc() ! READING MASS CONVERSION FILE AND COMPUTING DERIVATIVES OF MASS CONVERSION
 
+        call compute_dMdc_dM_and_dMdd_dM()
+
         write(UNIT_EXE_FILE,*) 'MASS CONVERSION FILE READ AND DERIVATIVES OF MASS CONVERSION COMPUTED'
 
      End If
-     
+
+     print *, (3.d0*M200d(400,320)/4.d0/Pi/mean_density(z(320))*(1.d0 + z(320))**3.d0)**(1.d0/3.d0)!sigma_squared(M200d(400,320),z(320))
+
+     stop
      !!!!!!!!!!!!!!!!!!!!!!!!!DEBUGGING 
      !Do index1 = 1, hola1 ! FILLS RED-SHIFT ARRAY.     
 
@@ -240,7 +325,7 @@ Program tSZ
 
      End If
      
-     call Interpolate_1D(alpha_halo_redshift_3,3.d0,z,alpha_halo_mass_function)
+     call Interpolate_1D(alpha_halo_redshift_3,d_alpha_halo_redshift_3,3.d0,z,alpha_halo_mass_function)
 
      If (compute_halo_mass_function) then
 
@@ -280,6 +365,10 @@ Program tSZ
         End If
 
      End If
+
+     call compute_mean_bias_matter()
+
+     stop
 
      write(UNIT_EXE_FILE,*) 'COMPUTING COMOVING VOLUME ELEMENT PER STERADIAN'
 
@@ -357,9 +446,13 @@ Program tSZ
      
 !     stop
 
+!     print *, pre_Clphiphi(320,3)
+
+!     stop
+
      write(UNIT_EXE_FILE,*) 'COMPUTING ANGULAR POWER SPECTRUM OF LENSING POTENTIAL'
 
-     call compute_Clphiphi1h() ! ONE HALO TERM
+!     call compute_Clphiphi1h() ! ONE HALO TERM
 
      call compute_Clphiphi2h() ! TWO HALO TERM
 
@@ -368,6 +461,8 @@ Program tSZ
      call compute_Cl()   ! TOTAL 
 
      call write_Cl()     ! OF ALL COMPUTATIONS 
+
+     stop
 
      If (compute_the_form_factor) then
 

@@ -4,14 +4,14 @@ Module functions
      
     contains
 
-    Subroutine Interpolate_1D(function_value,point_x,array_x,array_y)
+    Subroutine Interpolate_1D(function_value,derivative_at_x,point_x,array_x,array_y)
       
         use fgsl
         Implicit none
 
         Integer(fgsl_int) :: status
         Integer(fgsl_size_t) :: t
-        real(fgsl_double) :: point_x, function_value, array_x(:), array_y(:)
+        real(fgsl_double) :: point_x, function_value, derivative_at_x, array_x(:), array_y(:)
         type(fgsl_interp_accel) :: acc
         type(fgsl_spline) :: spline
 
@@ -24,6 +24,8 @@ Module functions
         status = fgsl_spline_init(spline,array_x,array_y,t)
 
         function_value = fgsl_spline_eval(spline,point_x,acc)
+
+        derivative_at_x = fgsl_spline_eval_deriv(spline,point_x,acc)
 
         call fgsl_spline_free(spline)
 
@@ -629,6 +631,28 @@ Module functions
 
     end function integral_r_delta_minus_total_matter
 
+    subroutine compute_dMdc_dM_and_dMdd_dM()
+
+        use fiducial
+        use arrays
+        Implicit none
+
+        Integer*4 :: indexM,indexz
+
+        Do indexz=1,number_of_z
+
+           Do indexM=1,number_of_M
+
+                 dM200ddM(indexM,indexz) = dMdd_dM(indexM,indexz)
+
+                 dM200cdM(indexM,indexz) = dMdc_dM(indexM,indexz)
+ 
+           End Do
+
+        End Do
+
+    end subroutine compute_dMdc_dM_and_dMdd_dM
+
     function dMdc_dM(indexM,indexz)
 
         use fiducial
@@ -636,11 +660,14 @@ Module functions
         Implicit none
 
         Integer*4 :: indexM,indexz
-        Real*8 :: dMdc_dM
-        Real*8,parameter :: dM = 10**((log10(Mmax) - log10(Mmin))/real(number_of_M-1))
+        Real*8 :: dMdc_dM,M200c_at_M_z
 
-        dMdc_dM  = (-M200c(indexM+2,indexz) + 8.d0*M200c(indexM+1,indexz) - 8.d0*M200c(indexM-1,indexz) +&
-        M200c(indexM-2,indexz))/12.d0/dM
+!        Real*8,parameter :: dM = 10**((log10(Mmax) - log10(Mmin))/real(number_of_M-1))
+
+!        dMdc_dM  = (-M200c(indexM+2,indexz) + 8.d0*M200c(indexM+1,indexz) - 8.d0*M200c(indexM-1,indexz) +&
+!        M200c(indexM-2,indexz))/12.d0/dM
+
+        call Interpolate_1D(M200c_at_M_z,dMdc_dM,M(indexM),M(:),M200c(:,indexz))
 
     end function dMdc_dM
 
@@ -651,11 +678,13 @@ Module functions
         Implicit none
 
         Integer*4 :: indexM,indexz
-        Real*8 :: dMdd_dM
-        Real*8,parameter :: dM = 10**((log10(Mmax) - log10(Mmin))/real(number_of_M-1))
+        Real*8 :: dMdd_dM,M200d_at_M_z
+!        Real*8,parameter :: dM = 10**((log10(Mmax) - log10(Mmin))/real(number_of_M-1))
 
-        dMdd_dM = (-M200d(indexM+2,indexz) + 8.d0*M200d(indexM+1,indexz) - 8.d0*M200d(indexM-1,indexz) +&
-        M200d(indexM-2,indexz))/12.d0/dM
+!        dMdd_dM = (-M200d(indexM+2,indexz) + 8.d0*M200d(indexM+1,indexz) - 8.d0*M200d(indexM-1,indexz) +&
+!             M200d(indexM-2,indexz))/12.d0/dM
+
+        call Interpolate_1D(M200d_at_M_z,dMdd_dM,M(indexM),M(:),M200d(:,indexz))
 
     end function dMdd_dM
 
@@ -772,7 +801,9 @@ Module functions
 
         else 
 
-            r_delta_c_from_M_virial = -1.d10
+           print *, 'NO ROOT FOUND IN "r_delta_c_from_M_virial" '
+
+           stop !r_delta_c_from_M_virial = -1.d10
 
         End If
 
@@ -935,7 +966,9 @@ Module functions
 
         else 
 
-           r_delta_d_from_M_virial = -1.d10
+           print *,'NO ROOT FOUND IN "r_delta_d_from_M_virial" '
+
+           stop!r_delta_d_from_M_virial = -1.d10
 
         End If
 
@@ -960,7 +993,7 @@ Module functions
         Implicit none
 
         Integer*4 :: indexz,indexM
-        Real*8,dimension(-1:number_of_M+2,number_of_z) :: rdc,rdd
+        Real*8,dimension(1:number_of_M,number_of_z) :: rdc,rdd
         Real*8 :: delta
 
         rdc(:,:) = 0.d0
@@ -969,7 +1002,7 @@ Module functions
 
         open(15,file='./precomputed_quantities/M_delta_c_d.dat')
 
-        write(15,*) '# Mass conversion file. The number of masses is ',number_of_z*(number_of_M+4)
+        write(15,*) '# Mass conversion file. The number of masses is ',number_of_z*number_of_M
 
         write(15,*) '# index_of_red-shift    red-shift    index_of_M    virial_mass_M[solar mass]    r_delta_c[Mpc]'    
 
@@ -979,7 +1012,7 @@ Module functions
 
         Do indexz = 1,number_of_z
 
-            Do indexM = -1,number_of_M+2
+            Do indexM = 1,number_of_M
 
                 rdc(indexM,indexz) = r_delta_c_from_M_virial(M(indexM),z(indexz),delta)
 
@@ -993,7 +1026,7 @@ Module functions
 
         Do indexz = 1,number_of_z
 
-            Do indexM = -1,number_of_M+2
+            Do indexM = 1,number_of_M
 
                 write(15,'(i5,es18.10,i10,5es18.10)') indexz, z(indexz), indexM, M(indexM), rdc(indexM,indexz), &
                 M_delta_c_from_M_virial(z(indexz),rdc(indexM,indexz),delta), &
@@ -1024,7 +1057,7 @@ Module functions
 
         read(15,*)
 
-        Do index=1,number_of_z*(number_of_M+4)
+        Do index=1,number_of_z*number_of_M
 
             read(15,'(i5,es18.10,i10,5es18.10)') iz,zz,iM,MM,tr200c,tM200c,tr200d,tM200d
 
@@ -1035,14 +1068,6 @@ Module functions
             r200d(iM,iz) = tr200d
 
             M200d(iM,iz) = tM200d
-
-            If ((iM .ge. 1) .and. (iM .le. number_of_M) ) then
-
-                dM200ddM(iM,iz) = dMdd_dM(iM,iz)
-
-                dM200cdM(iM,iz) = dMdc_dM(iM,iz)
- 
-            End If
 
         End Do
 
@@ -2681,6 +2706,18 @@ Module functions
 
         End Do
 
+        open(15,file='./output/preclphiphi.dat')
+
+        write(15,*) '# Virial_ Mass[solar mass]  f_in_preclphiphi',z(indexz),ml(indexl)
+
+!        Do indexM=1,number_of_M
+
+!            write(15,'(2es18.10)') M(indexM), f(indexM)
+
+!        End Do
+
+!        close(15)
+
         sum = 0.d0
 
         Do i=1,intervals
@@ -2997,11 +3034,11 @@ Module functions
 
         write(15,*) '# red-shift        mean bias all matter'
 
-        Do indexz=1,number_of_z_functions
+        Do indexz=1,number_of_z
 
             mbz(indexz) = pre_mbz(indexz)
 
-            write(15,'(2es18.10)') z_functions(indexz),mbz(indexz)
+            write(15,'(2es18.10)') z(indexz),mbz(indexz)
 
         End Do
 
@@ -3018,13 +3055,13 @@ Module functions
 
         Real*8 :: pre_mbz,sum
         Integer*4 :: indexM,indexz
-        Integer*4,parameter :: intervals = number_of_M_functions - 1
-        Real*8,dimension(number_of_M_functions) :: f
+        Integer*4,parameter :: intervals = number_of_M - 1
+        Real*8,dimension(number_of_M) :: f
 
-        Do indexM=1,number_of_M_functions
+        Do indexM=1,number_of_M
 
-            f(indexM) = dndM(indexM,indexz)*bMz(indexM,indexz)*M_functions(indexM)/&
-                 mean_density(z_functions(indexz))*(1.d0 + z_functions(indexz))**3.d0
+            f(indexM) = dndM(indexM,indexz)*bMz(indexM,indexz)*M(indexM)/&
+                 mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0
 
         End Do
 
@@ -3042,7 +3079,7 @@ Module functions
 
         Do indexM=1,intervals
 
-            sum = (M_functions(indexM+1)-M_functions(indexM))/2.d0*( f(indexM) + f(indexM+1) ) + sum
+            sum = (M(indexM+1)-M(indexM))/2.d0*( f(indexM) + f(indexM+1) ) + sum
 
         End Do
 
@@ -3223,12 +3260,12 @@ Module functions
 
         use fiducial    ! Equation (2.11) in 1312.4525. Dimensionless
         use arrays
-        use omp_lib
+!        use omp_lib
         Implicit none
 
         Real*8 :: C_l_phiphi_two_halo,sum
         Integer*4 :: indexl,indexz
-        Integer*4,parameter :: number_of_redshift = number_of_z_functions  !1d4
+        Integer*4,parameter :: number_of_redshift = number_of_z!_functions  !1d4
         Integer*4,parameter :: intervals = number_of_redshift - 1 
         Real*8,dimension(number_of_redshift):: f!,redshift
 
@@ -3238,14 +3275,14 @@ Module functions
 
 !        End Do
 
-        !$omp Parallel Do Default(Shared)
+!        !$omp Parallel Do Default(Shared)
         Do indexz=1,number_of_redshift
 
             f(indexz) = pre_Cl_1(indexz,indexl)**2*d2VdzdO(indexz)*&
-            matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance_at_z(indexz),z_functions(indexz))    !  Dimensionless
+            matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance_at_z(indexz),z(indexz))    !  Dimensionless
 
         End Do
-        !$omp End Parallel Do
+!        !$omp End Parallel Do
 
         !    open(16,file='./output/clphiphi.dat')
 
@@ -3261,7 +3298,7 @@ Module functions
 
         Do indexz=1,intervals
 
-            sum = (z_functions(indexz+1)-z_functions(indexz))/2.d0*( f(indexz) + f(indexz+1) ) + sum
+            sum = (z(indexz+1)-z(indexz))/2.d0*( f(indexz) + f(indexz+1) ) + sum
 
         End Do
 
@@ -3277,13 +3314,13 @@ Module functions
 
         Integer*4 :: indexl
 
-        If (compute_functions) then
+!        If (compute_functions) then
 
-           print *, 'TWO HALO TERM FOR ANGULAR POWER SPECTRUM OF LENSING POTENTIAL COMPUTED ONLY WITH INTERPOLATING FUNCTIONS'
+!           print *, 'TWO HALO TERM FOR ANGULAR POWER SPECTRUM OF LENSING POTENTIAL COMPUTED ONLY WITH INTERPOLATING FUNCTIONS'
 
-           stop
+!           stop
 
-        Else
+!        Else
 
            Do indexl=1,number_of_l
 
@@ -3291,7 +3328,7 @@ Module functions
 
            End Do
 
-        End If
+!        End If
 
 
     end subroutine compute_Clphiphi2h
@@ -3476,13 +3513,13 @@ Module functions
 
         Integer*4 :: indexl
 
-        If (compute_functions) then
+!        If (compute_functions) then
 
-           print *,'CL ARE COMPUTED WHEN INTERPOLATING FUNCTIONS USED'
+!           print *,'CL ARE COMPUTED WHEN INTERPOLATING FUNCTIONS USED'
 
-           stop
+!           stop
 
-        Else
+!        Else
 
            Do indexl=1,number_of_l
 
@@ -3492,7 +3529,7 @@ Module functions
 
            End Do
 
-        End If
+ !       End If
 
     end subroutine compute_Cl
 
