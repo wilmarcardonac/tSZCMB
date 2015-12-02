@@ -275,80 +275,6 @@ Module functions
 
     end subroutine compute_d2VdzdO
 
-    subroutine compute_comoving_distance()    !    It fills in the vector with comoving distance
-
-        use arrays
-        use fiducial
-        use omp_lib
-        Implicit none
-
-        Integer*4 :: indexz
-
-        If (compute_functions) then
-
-           !$omp Parallel Do Shared(comoving_distance_at_z,z)
-
-           Do indexz=1,number_of_z
-
-              comoving_distance_at_z(indexz) = comoving_distance(z(indexz))
-
-           End Do
-
-           !$omp End Parallel Do
-
-        Else
-        
-           !$omp Parallel Do Shared(comoving_distance_at_z,z_functions)
-
-           Do indexz=1,number_of_z_functions
-
-              comoving_distance_at_z(indexz) = comoving_distance(z_functions(indexz))
-
-           End Do
-
-           !$omp End Parallel Do
-
-        End If
-
-    end subroutine compute_comoving_distance
-
-    subroutine compute_angular_diameter_distance()    !    It fills in the vector with comoving distance
-
-        use arrays
-        use fiducial
-        use omp_lib
-        Implicit none
-
-        Integer*4 :: indexz
-
-        If (compute_functions) then
-
-           !$omp Parallel Do Shared(angular_diameter_distance_at_z,z)
-
-           Do indexz=1,number_of_z
-
-              angular_diameter_distance_at_z(indexz) = comoving_distance(z(indexz))/(1.d0 + z(indexz))
-
-           End Do
-
-           !$omp End Parallel Do
-
-        Else
-
-           !$omp Parallel Do Shared(angular_diameter_distance_at_z,z_functions)
-
-           Do indexz=1,number_of_z_functions
-
-              angular_diameter_distance_at_z(indexz) = comoving_distance(z_functions(indexz))/(1.d0 + z_functions(indexz))
-
-           End Do
-
-           !$omp End Parallel Do
-
-        End If
-
-    end subroutine compute_angular_diameter_distance
-
     function Omega_m(z)    !    Matter density parameter as seen by an observer at red-shift z
 
         use fiducial
@@ -437,42 +363,42 @@ Module functions
 
     end function critical_surface_density
 
-    subroutine compute_critical_surface_density()    !    It fills in the vector with critical surface density
+!    subroutine compute_critical_surface_density()    !    It fills in the vector with critical surface density
 
-        use arrays
-        use fiducial
-        use omp_lib
-        Implicit none
+!        use arrays
+!        use fiducial
+!        use omp_lib
+!        Implicit none
 
-        Integer*4 :: indexz 
+!        Integer*4 :: indexz 
 
-        If (compute_functions) then
+!        If (compute_functions) then
 
-           !$omp Parallel Do Shared(Scrit,z)
+!           !$omp Parallel Do Shared(Scrit,z)
 
-           Do indexz=1,number_of_z
+!           Do indexz=1,number_of_z
 
-              Scrit(indexz) = critical_surface_density(z(indexz))
+ !             Scrit(indexz) = critical_surface_density(z(indexz))
 
-           End Do
+  !         End Do
 
-           !$omp End Parallel Do
+   !        !$omp End Parallel Do
 
-        Else
+    !    Else
 
-           !$omp Parallel Do Shared(Scrit,z_functions)
+     !      !$omp Parallel Do Shared(Scrit,z_functions)
 
-           Do indexz=1,number_of_z_functions
+      !     Do indexz=1,number_of_z_functions
 
-              Scrit(indexz) = critical_surface_density(z_functions(indexz))
+       !       Scrit(indexz) = critical_surface_density(z_functions(indexz))
 
-           End Do
+        !   End Do
 
-           !$omp End Parallel Do
+         !  !$omp End Parallel Do
 
-        End If
+!        End If
 
-    end subroutine
+ !   end subroutine
 
     function concentration_mass_critical(M,z)    ! Concentration-mass relation for critical density halo definition. It computes equation (4) in
 
@@ -1848,96 +1774,96 @@ Module functions
 
     end function Delta_squared_non_normalised
 
-    subroutine compute_normalization() ! Compute normalisation constant in the linear matter power spectrum to agree 
+!    subroutine compute_normalization() ! Compute normalisation constant in the linear matter power spectrum to agree 
 
-        use fiducial                   ! with \sigma_8 in fiducial model 
-        Implicit none
+ !       use fiducial                   ! with \sigma_8 in fiducial model 
+  !      Implicit none
 
-        Real*8 :: sum,x1,x2,f1,f2
-        Integer*4 :: indexk
-        Integer*4,parameter :: number_of_k_logscale = 1000
-        Integer*4,parameter :: intervals = number_of_k_logscale - 1 
-        Real*8,dimension(number_of_k_logscale) :: f,k
-        Real*8,parameter :: R = 8.d0/h ! Units : Mpc
-        Real*8,parameter :: kmaxlogscale = 1.d-1
-        Real*8,parameter :: stepsize = 1.d-3
-        Integer*4,parameter :: max_iterations = 1000000000
+   !     Real*8 :: sum,x1,x2,f1,f2
+    !    Integer*4 :: indexk
+     !   Integer*4,parameter :: number_of_k_logscale = 1000
+      !  Integer*4,parameter :: intervals = number_of_k_logscale - 1 
+       ! Real*8,dimension(number_of_k_logscale) :: f,k
+!        Real*8,parameter :: R = 8.d0/h ! Units : Mpc
+ !       Real*8,parameter :: kmaxlogscale = 1.d-1
+  !      Real*8,parameter :: stepsize = 1.d-3
+   !     Integer*4,parameter :: max_iterations = 1000000000
 
         ! Wavevector array. Units : 1/Mpc
-        Do indexk = 1, number_of_k_logscale  
+    !    Do indexk = 1, number_of_k_logscale  
   
-            k(indexk) = 10**(log10(kmin) + real(indexk-1)*(log10(kmaxlogscale) - log10(kmin))/real(number_of_k_logscale-1))
+     !       k(indexk) = 10**(log10(kmin) + real(indexk-1)*(log10(kmaxlogscale) - log10(kmin))/real(number_of_k_logscale-1))
 
-        End Do
+      !  End Do
 
-        !$omp Parallel Do Shared(f)
+       ! !$omp Parallel Do Shared(f)
 
-        Do indexk=1,number_of_k_logscale
+        !Do indexk=1,number_of_k_logscale
 
-            f(indexk) = Delta_squared_non_normalised(k(indexk))*(3.d0*(sin(k(indexk)*R)-&
-            k(indexk)*R*cos(k(indexk)*R))/k(indexk)**3/R**3)**2/k(indexk)
+!            f(indexk) = Delta_squared_non_normalised(k(indexk))*(3.d0*(sin(k(indexk)*R)-&
+ !           k(indexk)*R*cos(k(indexk)*R))/k(indexk)**3/R**3)**2/k(indexk)
 
-        End Do
+  !      End Do
 
-        !$omp End Parallel Do
+   !     !$omp End Parallel Do
 
-        sum = 0.d0
+    !    sum = 0.d0
 
-        Do indexk=1,intervals
+     !   Do indexk=1,intervals
 
-            sum = (k(indexk+1) - k(indexk))/2.d0*( f(indexk) + f(indexk+1) ) + sum 
+      !      sum = (k(indexk+1) - k(indexk))/2.d0*( f(indexk) + f(indexk+1) ) + sum 
 
-        End Do
+       ! End Do
 
-        x1 = k(number_of_k_logscale)
+!        x1 = k(number_of_k_logscale)
 
-        f1 = f(number_of_k_logscale)
+ !       f1 = f(number_of_k_logscale)
 
-        x2 = x1 + stepsize
+  !      x2 = x1 + stepsize
 
-        f2 = Delta_squared_non_normalised(x2)*(3.d0*(sin(x2*R)- x2*R*cos(x2*R))/x2**3/R**3)**2/x2
+   !     f2 = Delta_squared_non_normalised(x2)*(3.d0*(sin(x2*R)- x2*R*cos(x2*R))/x2**3/R**3)**2/x2
 
-        sum = (x2-x1)/2.d0*( f1 + f2 )+ sum
+    !    sum = (x2-x1)/2.d0*( f1 + f2 )+ sum
         
-        Do indexk=1,max_iterations
+     !   Do indexk=1,max_iterations
 
-            x1 = x2
+      !      x1 = x2
 
-            f1 = f2
+       !     f1 = f2
 
-            If (x2 .gt. kmax) then
+        !    If (x2 .gt. kmax) then
 
-                x2 = kmax
+!                x2 = kmax
 
-                f2 = Delta_squared_non_normalised(x2)*(3.d0*(sin(x2*R)- x2*R*cos(x2*R))/x2**3/R**3)**2/x2
+ !               f2 = Delta_squared_non_normalised(x2)*(3.d0*(sin(x2*R)- x2*R*cos(x2*R))/x2**3/R**3)**2/x2
 
-            Else If (x2 .eq. kmax) then
+  !          Else If (x2 .eq. kmax) then
 
-                exit
+   !             exit
 
-            Else
+    !        Else
 
-                x2 = x1 + stepsize
+     !           x2 = x1 + stepsize
 
-                f2 = Delta_squared_non_normalised(x2)*(3.d0*(sin(x2*R)- x2*R*cos(x2*R))/x2**3/R**3)**2/x2
+      !          f2 = Delta_squared_non_normalised(x2)*(3.d0*(sin(x2*R)- x2*R*cos(x2*R))/x2**3/R**3)**2/x2
             
-            End IF
+       !     End IF
 
-            sum = (x2-x1)/2.d0*( f1 + f2 )+ sum
+        !    sum = (x2-x1)/2.d0*( f1 + f2 )+ sum
             
-            If (indexk .eq. max_iterations) then
+         !   If (indexk .eq. max_iterations) then
 
-                print *,'Maximum number of iterations in integral of Normalization achieved.'
+!                print *,'Maximum number of iterations in integral of Normalization achieved.'
 
-                stop
+ !               stop
 
-            End If
+  !          End If
 
-        End Do
+   !     End Do
 
-        Normalization = sigma8**2/sum    !    
+    !    Normalization = sigma8**2/sum    !    
 
-    end subroutine compute_normalization
+!    end subroutine compute_normalization
 
     function matter_power_spectrum(k,z)    !    P(k,z) in Equation (3.15) of A. Lewis and A. Challinor, Physics Reports 429 (2006) 1-65
 
@@ -2004,7 +1930,7 @@ Module functions
 
         R = (3.d0*Mass/4.d0/Pi/mean_density(redshift)*(1.d0 + redshift)**3.d0)**(1.d0/3.d0) ! Units : Mpc. (1+z)**3 factor to use comoving coordinates
 
-        stepsize = (kmax - 1.d0/R)*1.d-3
+        stepsize = (kmax - 1.d0/R)*1.d-7
 
         ! Wavevector array. Units : 1/Mpc
         Do indexk = 1, number_of_k_logscale  
@@ -2905,7 +2831,7 @@ Module functions
 
         Real*8 :: linear_halo_bias_2,sigma,nu
         Real*8,parameter :: y = log10(DeltaSO)
-        Real*8,parameter :: A = 1.d0 + 2.4d-1*y*dexp(-(4.d0/y)**4)
+        Real*8,parameter :: A = 1.d0 + 2.4d-1*y*exp(-(4.d0/y)**4)
         Real*8,parameter :: aa = 4.4d-1*y - 8.8d-1
         Real*8,parameter :: B = 1.83d-1
         Real*8,parameter :: bb = 1.5d0 

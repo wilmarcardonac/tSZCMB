@@ -6,11 +6,12 @@ Program tSZ
     use mod_roots
     use omp_lib
     use fgsl
+    use integrator
 
     ! DECLARATION AND INITIALIZATION OF VARIABLES
     Implicit none
     Integer*4 :: index1!,index2,index3                                       ! COUNTER
-    Real*8 :: wtime!,hola                          ! STORES TIME OF EXECUTION
+    Real*8 :: wtime,hola                          ! STORES TIME OF EXECUTION
     Character(len=15),parameter :: halo_definition = 'virial' ! HALO DEFINITION USED IN THE COMPUTATIONS
     !Integer*4,parameter :: hola1=10
     !Integer*4,parameter :: hola2=100
@@ -18,7 +19,7 @@ Program tSZ
     !Real*8,dimension(hola2) :: Mdebug
 !    Real*8,dimension(hola2,hola1) :: dndM_M_z
 
-    com_dist_at_z_dec = comoving_distance(z_dec) ! COMPUTE COMOVING DISTANCE AT DECOUPLING
+    call comoving_distance_at_redshift(z_dec,com_dist_at_z_dec) ! COMPUTE COMOVING DISTANCE AT DECOUPLING
 
     open(UNIT_EXE_FILE,file=path_to_execution_information)     ! OPEN FILE TO STORE EXECUTION INFORMATION 
 
@@ -152,11 +153,7 @@ Program tSZ
     !End If
 
     End Do
-
-!    print *, M_delta_d_from_M_virial(3.d0,r_delta_d_from_M_virial(M(10),3.d0,DeltaSO),DeltaSO)
-
-!    stop
-
+    
 !    Do index1 = -1, number_of_M+2 ! FILLS VIRIAL MASS ARRAY. UNITS: Solar mass    
 
 !       M(index1) = M(index1)/h
@@ -211,11 +208,7 @@ Program tSZ
 
     ! COMPUTATION STARTS
 
-    call compute_comoving_distance() ! COMPUTE COMOVING DISTANCE ARRAY
-
-    call compute_angular_diameter_distance() ! COMPUTE ANGULAR DIAMETER DISTANCE ARRAY
-
-    call compute_critical_surface_density()
+    call compute_comoving_and_angular_diameter_distance() ! COMPUTE COMOVING DISTANCE, ANGULAR DIAMETER DISTANCE AND CRITICAL SURFACE DENSITY
 
     If (do_mass_conversion) then ! COMPUTE MASSES
 
@@ -230,9 +223,9 @@ Program tSZ
         write(UNIT_EXE_FILE,*) 'MASS CONVERSION FOR RED-SHIFT ARRAY OF SIZE ', size(z),' AND VIRIAL MASS ARRAY OF SIZE ', size(M),&
         'TOOK ', (omp_get_wtime()-wtime)/3.6d3, 'HOURS'
         
-        !call read_M200dc_r200dc() ! READING MASS CONVERSION FILE AND COMPUTING DERIVATIVES OF MASS CONVERSION
+        call read_M200dc_r200dc() ! READING MASS CONVERSION FILE 
 
-        call compute_dMdc_dM_and_dMdd_dM()
+        call compute_dMdc_dM_and_dMdd_dM() ! COMPUTING DERIVATIVES OF MASS CONVERSION
 
         write(UNIT_EXE_FILE,*) 'MASS CONVERSION FILE READ AND DERIVATIVES OF MASS CONVERSION COMPUTED'
 
@@ -240,32 +233,15 @@ Program tSZ
 
         write(UNIT_EXE_FILE,*) 'USING MASS DATA FILE PREVIOUSLY COMPUTED'
 
-        call read_M200dc_r200dc() ! READING MASS CONVERSION FILE AND COMPUTING DERIVATIVES OF MASS CONVERSION
+        call read_M200dc_r200dc() ! READING MASS CONVERSION FILE 
 
-        call compute_dMdc_dM_and_dMdd_dM()
+        call compute_dMdc_dM_and_dMdd_dM() ! COMPUTING DERIVATIVES OF MASS CONVERSION
 
         write(UNIT_EXE_FILE,*) 'MASS CONVERSION FILE READ AND DERIVATIVES OF MASS CONVERSION COMPUTED'
 
      End If
 
-     print *, (3.d0*M200d(400,320)/4.d0/Pi/mean_density(z(320))*(1.d0 + z(320))**3.d0)**(1.d0/3.d0)!sigma_squared(M200d(400,320),z(320))
-
-     stop
-     !!!!!!!!!!!!!!!!!!!!!!!!!DEBUGGING 
-     !Do index1 = 1, hola1 ! FILLS RED-SHIFT ARRAY.     
-
-     !   zdebug(index1) = 10**(log10(zmin) + real(index1-1)*(log10(zmax) - log10(zmin))/real(hola1-1))
-
-     !End Do
-    
-     !Do index1 = 1, hola2 ! FILLS VIRIAL MASS ARRAY. UNITS: Solar mass    
-        
-     !   Mdebug(index1) = 10**(log10(Mmin) + real(index1-1)*(log10(Mmax) - log10(Mmin))/real(hola2-1))
-        
-     !End Do
-     !!END DEBUGGING
-
-     call compute_normalization() ! IN MATTER POWER SPECTRUM TO FIT FIDUCIAL SIGMA_8
+     call compute_normalization(Normalization) ! IN MATTER POWER SPECTRUM TO FIT FIDUCIAL SIGMA_8
 
      write(UNIT_EXE_FILE,*) 'NORMALIZATION OF MATTER POWER SPECTRUM TO MATCH SIGMA_8 (',sigma8,') WAS COMPUTED'
 

@@ -10,7 +10,7 @@ LDIR	= #/home/wilmar/additional-software/Healpix_3.00/lib
 F_FL   	= -O3 -Wall -I$(INCDIR) -I$(IDIR) -DGFORTRAN -fno-second-underscore -fopenmp -fPIC -g
 LIB_FL 	= -L$(LIBDIR)  -lfgsl #-lgsl #-llapack -lblas #-L$(LDIR) -L$(FITSDIR) -lhealpix -lchealpix -lhpxgif -l$(LIBFITS) -Wl,-R$(FITSDIR)
 #####################
-OBJ   = arrays.o fiducial.o functions.o mod_roots.o tSZ.o 
+OBJ   = arrays.o fiducial.o functions.o mod_roots.o integrator.o tSZ.o 
 
 def:	$(OBJ) $(OBJNR) $(OBJODE)
 	$(LC) $(F_FL) $(OBJ) $(OBJNR) $(OBJODE) -o $(EXE)  $(LIB_FL)
@@ -29,4 +29,4 @@ clean :
 
 ### put dependencies here ###
 
-tSZ.o :	arrays.o fiducial.o functions.o mod_roots.o
+tSZ.o :	arrays.o fiducial.o functions.o mod_roots.o integrator.o
