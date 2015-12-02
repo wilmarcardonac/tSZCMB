@@ -3,6 +3,7 @@ Program tSZ
     use fiducial   ! CONTAINS PARAMETERS 
     use arrays     ! CONTAINS ARRAYS 
     use functions  ! CONTAINS ALL THE FUNCTIONS
+    use mod_roots
     use omp_lib
     use fgsl
 

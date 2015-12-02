@@ -688,126 +688,126 @@ Module functions
 
     end function dMdd_dM
 
-    function r_delta_c_from_M_virial(M,z,delta)    !    Units of M : solar mass. Units of r_delta_c_from_M_virial : Mpc
+!    function r_delta_c_from_M_virial(M,z,delta)    !    Units of M : solar mass. Units of r_delta_c_from_M_virial : Mpc
 
-        use fiducial
-        Implicit none
+!        use fiducial
+!        Implicit none
 
-        Real*8 :: r_delta_c_from_M_virial,M,z,delta,r1,r2,step,rini,f1,f2,rmid,dr,fmid
-        Integer*4,parameter :: iter = 1000000000
-        Real*8,parameter :: racc = 1.d-10
-        Integer*4 :: p
-        logical :: root
+!        Real*8 :: r_delta_c_from_M_virial,M,z,delta,r1,r2,step,rini,f1,f2,rmid,dr,fmid
+!        Integer*4,parameter :: iter = 1000000000
+!        Real*8,parameter :: racc = 1.d-10
+ !       Integer*4 :: p
+  !      logical :: root
 
-        rini = (3.d0*M/4.d0/Pi/critical_density(z)/delta)**(1.d0/3.d0) ! Units : Mpc
+   !     rini = (3.d0*M/4.d0/Pi/critical_density(z)/delta)**(1.d0/3.d0) ! Units : Mpc
 
-        step = 1.6d-2
+    !    step = 1.6d-2
 
-        r1 = 1.d0*rini  ! Units : Mpc
+     !   r1 = 1.d0*rini  ! Units : Mpc
         
-        r2 = 1.1d0*rini ! Units : Mpc
+      !  r2 = 1.1d0*rini ! Units : Mpc
 
-        f1 = integral_r_delta_minus_total_matter(M,z,r1,delta) ! Units : solar mass
+       ! f1 = integral_r_delta_minus_total_matter(M,z,r1,delta) ! Units : solar mass
 
-        f2 = integral_r_delta_minus_total_matter(M,z,r2,delta) ! Units : solar mass
+!        f2 = integral_r_delta_minus_total_matter(M,z,r2,delta) ! Units : solar mass
 
-        root = .false. 
+ !       root = .false. 
 
-        Do p = 1, iter
+  !      Do p = 1, iter
 
-            If (f1*f2 .lt. 0.d0) then
+   !         If (f1*f2 .lt. 0.d0) then
 
-                root = .true.
+    !            root = .true.
 
-                exit
+     !           exit
 
-            else if (abs(f1) .lt. abs(f2)) then
+      !      else if (abs(f1) .lt. abs(f2)) then
 
-                r1 = r1 + step*(r1-r2)
+       !         r1 = r1 + step*(r1-r2)
 
-                f1 = integral_r_delta_minus_total_matter(M,z,r1,delta)
+        !        f1 = integral_r_delta_minus_total_matter(M,z,r1,delta)
 
-            else if (abs(f1) .gt. abs(f2)) then
+         !   else if (abs(f1) .gt. abs(f2)) then
 
-                r2 = r2 + step*(r2-r1)
+          !      r2 = r2 + step*(r2-r1)
 
-                f2 = integral_r_delta_minus_total_matter(M,z,r2,delta)
+           !     f2 = integral_r_delta_minus_total_matter(M,z,r2,delta)
 
-            end if
+            !end if
 
-        End Do
+!        End Do
 
-        If (root) then
+ !       If (root) then
 
-            Do p=1,iter
+  !          Do p=1,iter
 
-                If (f1 .lt. 0.d0) then 
+   !             If (f1 .lt. 0.d0) then 
 
-                    dr = r2 - r1
+    !                dr = r2 - r1
 
-                    rmid = r1 + dr/2.d0
+     !               rmid = r1 + dr/2.d0
 
-                    fmid = integral_r_delta_minus_total_matter(M,z,rmid,delta)    
+      !              fmid = integral_r_delta_minus_total_matter(M,z,rmid,delta)    
 
-                    If (fmid .lt. 0.d0) then 
+       !             If (fmid .lt. 0.d0) then 
 
-                        f1 = fmid
+        !                f1 = fmid
 
-                        r1 = rmid
+         !               r1 = rmid
 
-                    else if ((fmid .eq. 0.d0) .or. (abs(dr) .lt. racc)) then
+          !          else if ((fmid .eq. 0.d0) .or. (abs(dr) .lt. racc)) then
 
-                        exit
+           !             exit
 
-                    else 
+            !        else 
 
-                        f2 = fmid
+             !           f2 = fmid
 
-                        r2 = rmid
+              !          r2 = rmid
 
-                    end if
+               !     end if
 
-                else if (f2 .lt. 0.d0) then
+                !else if (f2 .lt. 0.d0) then
 
-                    dr = r1 - r2
+!                    dr = r1 - r2
 
-                    rmid = r2 + dr/2.d0
+ !                   rmid = r2 + dr/2.d0
 
-                    fmid = integral_r_delta_minus_total_matter(M,z,rmid,delta)    
+  !                  fmid = integral_r_delta_minus_total_matter(M,z,rmid,delta)    
 
-                    If (fmid .lt. 0.d0) then 
+   !                 If (fmid .lt. 0.d0) then 
 
-                        f2 = fmid
+    !                    f2 = fmid
 
-                        r2 = rmid
+     !                   r2 = rmid
 
-                    else if ((fmid .eq. 0.d0) .or. (abs(dr) .lt. racc)) then
+      !              else if ((fmid .eq. 0.d0) .or. (abs(dr) .lt. racc)) then
 
-                        exit
+       !                 exit
 
-                    else
+        !            else
 
-                        f1 = fmid
+         !               f1 = fmid
 
-                        r1 = rmid
+          !              r1 = rmid
 
-                    end if
+           !         end if
 
-                End if
+            !    End if
 
-            End Do
+!            End Do
 
-            r_delta_c_from_M_virial = rmid
+ !           r_delta_c_from_M_virial = rmid
 
-        else 
+  !      else 
 
-           print *, 'NO ROOT FOUND IN "r_delta_c_from_M_virial" '
+   !        print *, 'NO ROOT FOUND IN "r_delta_c_from_M_virial" '
 
-           stop !r_delta_c_from_M_virial = -1.d10
+    !       stop !r_delta_c_from_M_virial = -1.d10
 
-        End If
+     !   End If
 
-    end function r_delta_c_from_M_virial
+!    end function r_delta_c_from_M_virial
 
     function M_delta_c_from_M_virial(z,rdc,delta)    !    Units of M and M_delta_c_from_M_virial: solar mass
 
@@ -853,126 +853,126 @@ Module functions
 
     end function integral_r_delta_d_minus_total_matter
 
-    function r_delta_d_from_M_virial(M,z,delta)    !    Units of M : solar mass. Units of r_delta_d_from_M_virial : Mpc
+!    function r_delta_d_from_M_virial(M,z,delta)    !    Units of M : solar mass. Units of r_delta_d_from_M_virial : Mpc
 
-        use fiducial
-        Implicit none
+ !       use fiducial
+  !      Implicit none
 
-        Real*8 :: r_delta_d_from_M_virial,M,z,delta,r1,r2,step,rini,f1,f2,rmid,dr,fmid
-        Integer*4,parameter :: iter = 1000000000
-        Real*8,parameter :: racc = 1.d-10
-        Integer*4 :: p
-        logical :: root 
+   !     Real*8 :: r_delta_d_from_M_virial,M,z,delta,r1,r2,step,rini,f1,f2,rmid,dr,fmid
+    !    Integer*4,parameter :: iter = 1000000000
+     !   Real*8,parameter :: racc = 1.d-10
+      !  Integer*4 :: p
+       ! logical :: root 
 
-        rini = (3.d0*M/4.d0/Pi/mean_density(z)*(1.d0+z)**3.d0/delta)**(1.d0/3.d0) ! Units : Mpc/h
+!        rini = (3.d0*M/4.d0/Pi/mean_density(z)*(1.d0+z)**3.d0/delta)**(1.d0/3.d0) ! Units : Mpc/h
         
-        step = 1.6d-2
+ !       step = 1.6d-2
 
-        r1 = 1.d0*rini ! Units : Mpc/h
+  !      r1 = 1.d0*rini ! Units : Mpc/h
 
-        r2 = 1.1d0*rini ! Units : Mpc/h
+   !     r2 = 1.1d0*rini ! Units : Mpc/h
 
-        f1 = integral_r_delta_d_minus_total_matter(M,z,r1,delta)
+    !    f1 = integral_r_delta_d_minus_total_matter(M,z,r1,delta)
 
-        f2 = integral_r_delta_d_minus_total_matter(M,z,r2,delta)
+     !   f2 = integral_r_delta_d_minus_total_matter(M,z,r2,delta)
 
-        root = .false.
+      !  root = .false.
 
-        Do p = 1, iter
+       ! Do p = 1, iter
 
-            If (f1*f2 .lt. 0.d0) then
+        !    If (f1*f2 .lt. 0.d0) then
 
-                root = .true.
+!                root = .true.
 
-                exit
+ !               exit
 
-            Else If (abs(f1) .lt. abs(f2)) then
+  !          Else If (abs(f1) .lt. abs(f2)) then
 
-                r1 = r1 + step*(r1-r2)
+   !             r1 = r1 + step*(r1-r2)
 
-                f1 = integral_r_delta_d_minus_total_matter(M,z,r1,delta)
+    !            f1 = integral_r_delta_d_minus_total_matter(M,z,r1,delta)
 
-            Else If (abs(f1) .gt. abs(f2)) then
+     !       Else If (abs(f1) .gt. abs(f2)) then
 
-                r2 = r2 + step*(r2-r1)
+      !          r2 = r2 + step*(r2-r1)
 
-                f2 = integral_r_delta_d_minus_total_matter(M,z,r2,delta)
+       !         f2 = integral_r_delta_d_minus_total_matter(M,z,r2,delta)
 
-            End if
+        !    End if
 
-        End Do
+!        End Do
 
-        If (root) then
+ !       If (root) then
 
-            Do p=1,iter
+  !          Do p=1,iter
 
-                If (f1 .lt. 0.d0) then 
+   !             If (f1 .lt. 0.d0) then 
 
-                    dr = r2 - r1
+    !                dr = r2 - r1
 
-                    rmid = r1 + dr/2.d0
+     !               rmid = r1 + dr/2.d0
 
-                    fmid = integral_r_delta_d_minus_total_matter(M,z,rmid,delta)    
+      !              fmid = integral_r_delta_d_minus_total_matter(M,z,rmid,delta)    
 
-                    If (fmid .lt. 0.d0) then 
+       !             If (fmid .lt. 0.d0) then 
 
-                        f1 = fmid
+        !                f1 = fmid
 
-                        r1 = rmid
+         !               r1 = rmid
 
-                    else if ((fmid .eq. 0.d0) .or. (abs(dr) .lt. racc)) then
+          !          else if ((fmid .eq. 0.d0) .or. (abs(dr) .lt. racc)) then
 
-                        exit
+           !             exit
 
-                    else 
+!                    else 
 
-                        f2 = fmid
+ !                       f2 = fmid
 
-                        r2 = rmid
+  !                      r2 = rmid
 
-                    end if
+   !                 end if
 
-                else if (f2 .lt. 0.d0) then
+    !            else if (f2 .lt. 0.d0) then
 
-                    dr = r1 - r2
+     !               dr = r1 - r2
 
-                    rmid = r2 + dr/2.d0
+      !              rmid = r2 + dr/2.d0
 
-                    fmid = integral_r_delta_d_minus_total_matter(M,z,rmid,delta)    
+       !             fmid = integral_r_delta_d_minus_total_matter(M,z,rmid,delta)    
 
-                    If (fmid .lt. 0.d0) then 
+        !            If (fmid .lt. 0.d0) then 
 
-                        f2 = fmid
+         !               f2 = fmid
 
-                        r2 = rmid
+          !              r2 = rmid
 
-                    else if ((fmid .eq. 0.d0) .or. (abs(dr) .lt. racc)) then
+           !         else if ((fmid .eq. 0.d0) .or. (abs(dr) .lt. racc)) then
 
-                        exit
+            !            exit
 
-                    else
+             !       else
 
-                        f1 = fmid
+              !          f1 = fmid
 
-                        r1 = rmid
+               !         r1 = rmid
 
-                    end if
+!                    end if
 
-                End if
+ !               End if
 
-            End Do
+  !          End Do
 
-            r_delta_d_from_M_virial = rmid
+   !         r_delta_d_from_M_virial = rmid
 
-        else 
+    !    else 
 
-           print *,'NO ROOT FOUND IN "r_delta_d_from_M_virial" '
+     !      print *,'NO ROOT FOUND IN "r_delta_d_from_M_virial" '
 
-           stop!r_delta_d_from_M_virial = -1.d10
+      !     stop!r_delta_d_from_M_virial = -1.d10
 
-        End If
+       ! End If
 
-    end function r_delta_d_from_M_virial
+!    end function r_delta_d_from_M_virial
 
     function M_delta_d_from_M_virial(z,rdd,delta)    !    Units of M and M_delta_d_from_M_virial: solar mass
 
@@ -985,60 +985,6 @@ Module functions
         
     end function M_delta_d_from_M_virial
 
-    subroutine compute_M_delta_c_from_M_and_z(delta)
-
-        use fiducial
-        use arrays
-        use omp_lib
-        Implicit none
-
-        Integer*4 :: indexz,indexM
-        Real*8,dimension(1:number_of_M,number_of_z) :: rdc,rdd
-        Real*8 :: delta
-
-        rdc(:,:) = 0.d0
-
-        rdd(:,:) = 0.d0
-
-        open(15,file='./precomputed_quantities/M_delta_c_d.dat')
-
-        write(15,*) '# Mass conversion file. The number of masses is ',number_of_z*number_of_M
-
-        write(15,*) '# index_of_red-shift    red-shift    index_of_M    virial_mass_M[solar mass]    r_delta_c[Mpc]'    
-
-        write(15,*) '# M_delta_c[solar mass]    r_delta_d[Mpc]    M_delta_d[solar mass] '
-
-        !$omp Parallel Do Shared(rdc,rdd)
-
-        Do indexz = 1,number_of_z
-
-            Do indexM = 1,number_of_M
-
-                rdc(indexM,indexz) = r_delta_c_from_M_virial(M(indexM),z(indexz),delta)
-
-                rdd(indexM,indexz) = r_delta_d_from_M_virial(M(indexM),z(indexz),delta)
-
-            End Do
-
-        End Do
-
-        !$omp End Parallel Do
-
-        Do indexz = 1,number_of_z
-
-            Do indexM = 1,number_of_M
-
-                write(15,'(i5,es18.10,i10,5es18.10)') indexz, z(indexz), indexM, M(indexM), rdc(indexM,indexz), &
-                M_delta_c_from_M_virial(z(indexz),rdc(indexM,indexz),delta), &
-                rdd(indexM,indexz),M_delta_d_from_M_virial(z(indexz),rdd(indexM,indexz),delta)
-
-            End Do
-
-        End Do
-
-        close(15)
-
-    end subroutine compute_M_delta_c_from_M_and_z
 
     subroutine read_M200dc_r200dc()
 
@@ -2243,7 +2189,7 @@ Module functions
 
 !            call Interpolate_2D(M200d_M_z,virial_Mass,3.d0,M(1:number_of_M),z(1:number_of_z),M200d(1:number_of_M,1:number_of_z))
 
-           M200d_M_z = M_delta_d_from_M_virial(3.d0,r_delta_d_from_M_virial(M(virial_Mass_index),3.d0,DeltaSO),DeltaSO)
+!           M200d_M_z = M_delta_d_from_M_virial(3.d0,r_delta_d_from_M_virial(M(virial_Mass_index),3.d0,DeltaSO),DeltaSO)
 
            R = (3.d0*M200d_M_z/4.d0/Pi/mean_density(3.d0)*&
             (1.d0 + 3.d0 )**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
@@ -2323,7 +2269,7 @@ Module functions
            
            !R = (3.d0*M200d_M_z/4.d0/Pi/mean_density(3.d0)*( 1.d0 + 3.d0 )**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
 
-           M200d_M_z = M_delta_d_from_M_virial(3.d0,r_delta_d_from_M_virial(M(virial_Mass_index),3.d0,DeltaSO),DeltaSO)
+!           M200d_M_z = M_delta_d_from_M_virial(3.d0,r_delta_d_from_M_virial(M(virial_Mass_index),3.d0,DeltaSO),DeltaSO)
 
            R = (3.d0*M200d_M_z/4.d0/Pi/mean_density(3.d0)*( 1.d0 + 3.d0 )**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
 
@@ -3556,4 +3502,6 @@ Module functions
 
     end subroutine write_Cl
 
+
 End module functions
+
