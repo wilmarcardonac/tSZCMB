@@ -48,7 +48,9 @@ Program tSZ
     bMz(1:number_of_M,1:number_of_z),mbz(1:number_of_z_functions),&
     comoving_distance_at_z(1:number_of_z_functions),z_functions(1:number_of_z_functions),Scrit(1:number_of_z_functions),&
     M_functions(1:number_of_M_functions),angular_diameter_distance_at_z(1:number_of_z_functions),&
-    dM200ddM_M_z(1:number_of_M_functions,1:number_of_z_functions),stat = status1)
+    dM200ddM_M_z(1:number_of_M_functions,1:number_of_z_functions),&
+    sigma_square_M200d(1:number_of_M_functions,1:number_of_z_functions),&
+    dsigma_square_M200d(1:number_of_M_functions,1:number_of_z_functions),stat = status1)
 
     If (status1 .eq. 0) then
        
@@ -245,6 +247,16 @@ Program tSZ
 
      write(UNIT_EXE_FILE,*) 'NORMALIZATION OF MATTER POWER SPECTRUM TO MATCH SIGMA_8 (',sigma8,') WAS COMPUTED'
 
+     If (compute_sigma_square) then
+
+        call compute_sigma_square_M200d()
+
+     Else
+
+        call read_sigma_square_M200d()
+
+     End If
+
      If (compute_linear_halo_bias) then
 
         write(UNIT_EXE_FILE,*) 'COMPUTING LINEAR HALO BIAS'
@@ -257,30 +269,30 @@ Program tSZ
 
         call read_bMz() ! LINEAR HALO BIAS AS A FUNCTION OF MASS AND RED-SHIFT
 
-        If (compute_functions) then
+        !If (compute_functions) then
 
-           continue
+        !   continue
 
-        Else
+        !Else
 
-           allocate(bMz_interpolation(1:number_of_M_functions,1:number_of_z_functions),&
-                stat=status2)
+           !allocate(bMz_interpolation(1:number_of_M_functions,1:number_of_z_functions),&
+            !    stat=status2)
 
-           If (status2 .eq. 0) then
+           !If (status2 .eq. 0) then
 
-              call Interpolate_bMz()
+           !   call Interpolate_bMz()
 
-              deallocate(bMz)
+           !   deallocate(bMz)
 
-           Else
+           !Else
 
-              write(UNIT_EXE_FILE,*) 'PROBLEM ALLOCATING MEMORY FOR "bMz_interpolation" '
+         !     write(UNIT_EXE_FILE,*) 'PROBLEM ALLOCATING MEMORY FOR "bMz_interpolation" '
 
-              stop
+          !    stop
 
-           End If
+          ! End If
 
-        End If
+        !End If
 
      End If
 

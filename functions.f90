@@ -2174,82 +2174,6 @@ Module functions
 
     end function halo_mass_function
 
-    function nonnormalised_halo_mass_function(virial_Mass_index,redshift_index)    ! Equation (8) in "The large-scale bias of dark matter halos: 
-
-        use fiducial    ! numerical calibration and model tests" without \alpha constant. This function corresponds to Equation (C2) in
-        use arrays    ! "Toward a halo mass function for precision cosmology: the limits of universality" by Jeremy Tinker et al. Parameters taken 
-        Implicit none    ! from first line of table 4. Units : 1/(solar mass*Mpc**3)
-
-        Real*8 :: nonnormalised_halo_mass_function,R,sigma,nu,beta,phi,eta,gamma,M200d_M_z
-        Real*8 :: f_nu,g_sigma
-        Real*8,parameter :: delta_c = 1.686d0    ! page 880 in "The large-scale ..."
-        Real*8,parameter :: beta0 = 0.589d0
-        Real*8,parameter :: phi0 = -0.729d0
-        Real*8,parameter :: eta0 = -0.243d0
-        Real*8,parameter :: gamma0 = 0.864d0
-        Integer*4 :: virial_Mass_index,redshift_index
-
-        If (z(redshift_index) .gt. 3.d0) then
-
-           !call Interpolate_2D(M200d_M_z,virial_Mass,3.d0,M(1:number_of_M),z(1:number_of_z),M200d(1:number_of_M,1:number_of_z))
-           
-           !R = (3.d0*M200d_M_z/4.d0/Pi/mean_density(3.d0)*( 1.d0 + 3.d0 )**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
-
-!           M200d_M_z = M_delta_d_from_M_virial(3.d0,r_delta_d_from_M_virial(M(virial_Mass_index),3.d0,DeltaSO),DeltaSO)
-
-           R = (3.d0*M200d_M_z/4.d0/Pi/mean_density(3.d0)*( 1.d0 + 3.d0 )**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
-
-           sigma = sqrt(sigma_squared(M200d_M_z,3.d0))    ! Units : dimensionless
-
-           nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
-
-           beta = beta0*( 1.d0 + 3.d0 )**(0.20d0) 
-
-           phi = phi0*( 1.d0 + 3.d0 )**(-0.08d0)
-            
-           eta = eta0*( 1.d0 + 3.d0 )**(0.27d0)
-
-           gamma = gamma0*( 1.d0 + 3.d0 )**(-0.01d0)
-
-           f_nu = (1.d0 + (beta*nu)**(-2.d0*phi))*nu**(2.d0*eta)*dexp(-gamma*nu**2/2.d0)
-
-           g_sigma = nu*f_nu            ! Equation (C2) in "Toward a ... universality"
-
-           nonnormalised_halo_mass_function = -mean_density(3.d0)/(1.d0 + 3.d0 )**3.d0/2.d0/M200d_M_z**2&
-            *R/3.d0/sigma**2*dsigma_squared_dR(M200d_M_z,3.d0)*g_sigma
-
-        Else
-
-!            call Interpolate_2D(M200d_M_z,virial_Mass,redshift,M(1:number_of_M),z(1:number_of_z),M200d(1:number_of_M,1:number_of_z))
-
-!            R = (3.d0*M200d_M_z/4.d0/Pi/mean_density(redshift)*(1.d0 + redshift )**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
-           R = (3.d0*M200d(virial_Mass_index,redshift_index)/4.d0/Pi/mean_density(z(redshift_index))*(1.d0 + &
-                z(redshift_index) )**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
-
-!            sigma = sqrt(sigma_squared(M200d_M_z,redshift))    ! Units : dimensionless
-           sigma = sqrt(sigma_squared(M200d(virial_Mass_index,redshift_index),z(redshift_index)))    ! Units : dimensionless
-
-           nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
-
-           beta = beta0*( 1.d0 + z(redshift_index) )**(0.20d0) 
-
-           phi = phi0*( 1.d0 + z(redshift_index) )**(-0.08d0)
-
-           eta = eta0*( 1.d0 + z(redshift_index) )**(0.27d0)
-            
-           gamma = gamma0*( 1.d0 + z(redshift_index) )**(-0.01d0)
-
-           f_nu = (1.d0 + (beta*nu)**(-2.d0*phi))*nu**(2.d0*eta)*dexp(-gamma*nu**2/2.d0)
-
-           g_sigma = nu*f_nu            ! Equation (C2) in "Toward a ... universality"
-
-           nonnormalised_halo_mass_function = -mean_density(z(redshift_index))/(1.d0 + z(redshift_index))**3.d0/&
-                2.d0/M200d(virial_Mass_index,redshift_index)**2*&
-                R/3.d0/sigma**2*dsigma_squared_dR(M200d(virial_Mass_index,redshift_index),z(redshift_index))*g_sigma
-
-        End If
-
-    end function nonnormalised_halo_mass_function
 
     subroutine compute_dM200ddM_M_z()
 
@@ -2287,65 +2211,6 @@ Module functions
 
     end subroutine compute_dM200ddM_M_z
 
-    subroutine compute_alpha_halo_mass_function()    ! It computes \alpha constant in halo mass function (Equation (8)) of "The large-scale 
-
-        use fiducial    ! bias of dark matter halos: numerical calibration and model tests" for the red-shift array
-        use omp_lib
-        use arrays
-        Implicit none
-
-        Real*8 :: sum
-        Integer*4 :: indexM,indexz
-        Integer*4,parameter :: intervals = number_of_M - 1
-        Real*8,dimension(number_of_M) :: f
-
-        open(15,file='./precomputed_quantities/alpha_halo_mass_function.dat')
-
-        write(15,*) '# Alpha halo mass function (as function of red-shift). Number of lines is ',number_of_z
-
-        write(15,*) '# index_of_z    red-shift    dndM '
-
-        If (compute_functions) then
-
-           Do indexz=1,number_of_z
-
-              !$omp Parallel Do Shared(f,indexz)
-
-              Do indexM=1,number_of_M
-
-                 f(indexM) = nonnormalised_halo_mass_function(indexM,indexz)*bMz(indexM,indexz)*&
-                      M(indexM)/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0*&
-                      dM200ddM(indexM,indexz) 
-                 
-              End Do
-
-              !$omp End Parallel Do
-
-              sum = 0.d0
-
-              Do indexM=1,intervals
-
-                 sum = (M(indexM+1)-M(indexM))/2.d0*( f(indexM) + f(indexM+1) ) + sum
-
-              End Do
-
-              alpha_halo_mass_function(indexz) = 1.d0/sum    ! dimensionless
-
-              write(15,'(i5,2es18.10)') indexz, z(indexz), alpha_halo_mass_function(indexz)
-
-           End Do
-
-        Else
-
-           print *,'COMPUTE ALPHA HALO MASS FUNCTIONS ROUTINE WORKS ONLY FOR M AND Z ARRAYS OF SIZE ', number_of_M, number_of_z
-
-           stop
-
-        End If
-
-        close(15)
-
-    end subroutine compute_alpha_halo_mass_function
 
     subroutine read_alpha_halo_mass_function()
 
@@ -2420,71 +2285,35 @@ Module functions
 
     end subroutine compute_dndM
 
-!    subroutine compute_sigma_square_M200d()    ! It fills sigma square array in and writes it out to a text file
 
-!        use arrays
-!        use fiducial
-!        Implicit none
+    subroutine read_sigma_square_M200d()
 
-!        Integer*4 :: indexz,indexM
+        use arrays
+        use fiducial
+        Implicit none
 
-!        open(15,file='./precomputed_quantities/sigma_square_M200d.dat')
+        Integer*4 :: index,iM,iz
+        Real*8 :: MM,zz,ts2,tds2
 
-!        write(15,*) '# Sigma square function (as function of M200d mass and red-shift). Number of lines is ',number_of_z*number_of_M
+        open(15,file='./precomputed_quantities/sigma_square_M200d.dat')
 
-!        write(15,*) '# index_of_M    M200d[solar mass]    index_of_z    red-shift    sigma_square   dsigma_square '
+        read(15,*)
 
-!        !$omp Parallel Do Shared(sigma_square_M200d,dsigma_square_M200d)
+        read(15,*)
 
-!        Do indexM=1,number_of_M
+        Do index=1,number_of_M*number_of_z
 
-!            Do indexz=1,number_of_z
+            read(15,'(i10,es18.10,i5,3es18.10)') iM,MM,iz,zz,ts2,tds2
 
-!                sigma_square_M200d(indexM,indexz) = sigma_squared(M200d(indexM,indexz),z(indexz))
+            sigma_square_M200d(iM,iz) = ts2
 
-!                dsigma_square_M200d(indexM,indexz) = dsigma_squared_dR(M200d(indexM,indexz),z(indexz))
+            dsigma_square_M200d(iM,iz) = tds2 
 
-!                write(15,'(i10,es18.10,i5,3es18.10)') indexM,M200d(indexM,indexz),indexz,z(indexz),&
-!                sigma_square_M200d(indexM,indexz),dsigma_square_M200d(indexM,indexz)
+        End Do
 
-!            End Do
+        close(15)
 
-!        End Do
-
-!        !$omp End Parallel Do
-
-!        close(15)
-
-!    end subroutine compute_sigma_square_M200d
-
-!    subroutine read_sigma_square_M200d()
-
-!        use arrays
-!        use fiducial
-!        Implicit none
-
-!        Integer*4 :: index,iM,iz
-!        Real*8 :: MM,zz,ts2,tds2
-
-!        open(15,file='./precomputed_quantities/sigma_square_M200d.dat')
-
-!        read(15,*)
-
-!        read(15,*)
-
-!        Do index=1,number_of_M*number_of_z
-
-!            read(15,'(i10,es18.10,i5,3es18.10)') iM,MM,iz,zz,ts2,tds2
-
-!            sigma_square_M200d(iM,iz) = ts2
-
-!            dsigma_square_M200d(iM,iz) = tds2 
-
-!        End Do
-
-!        close(15)
-
-!    end subroutine read_sigma_square_M200d
+    end subroutine read_sigma_square_M200d
 
     subroutine read_dndM()
 
@@ -2796,40 +2625,40 @@ Module functions
 
     end subroutine compute_Cl1h
 
-    function linear_halo_bias(virial_Mass,redshift)    ! From table 2 and equation (6) of "The large-scale bias of dark matter halos:  
+!    function linear_halo_bias(virial_Mass,redshift)    ! From table 2 and equation (6) of "The large-scale bias of dark matter halos:  
 
-        use arrays    ! numerical calibration and model tests". It computes the linear halo bias. (See paper for details about parameters). 
-        use fiducial  ! Mass given must be M_{200d}. Dimensionless. 
-        Implicit none    
+ !       use arrays    ! numerical calibration and model tests". It computes the linear halo bias. (See paper for details about parameters). 
+  !      use fiducial  ! Mass given must be M_{200d}. Dimensionless. 
+   !     Implicit none    
 
-        Real*8 :: linear_halo_bias,sigma,nu,virial_Mass,redshift,M200d_M_z
-        Real*8,parameter :: y = log10(DeltaSO)
-        Real*8,parameter :: A = 1.d0 + 2.4d-1*y*dexp(-(4.d0/y)**4)
-        Real*8,parameter :: aa = 4.4d-1*y - 8.8d-1
-        Real*8,parameter :: B = 1.83d-1
-        Real*8,parameter :: bb = 1.5d0 
-        Real*8,parameter :: CC = 1.9d-2 + 1.07d-1*y + 1.9d-1*dexp(-(4.d0/y)**4)
-        Real*8,parameter :: ccc = 2.4d0
-        Real*8,parameter :: delta_c = 1.686d0
+    !    Real*8 :: linear_halo_bias,sigma,nu,virial_Mass,redshift,M200d_M_z
+     !   Real*8,parameter :: y = log10(DeltaSO)
+      !  Real*8,parameter :: A = 1.d0 + 2.4d-1*y*dexp(-(4.d0/y)**4)
+       ! Real*8,parameter :: aa = 4.4d-1*y - 8.8d-1
+       ! Real*8,parameter :: B = 1.83d-1
+       ! Real*8,parameter :: bb = 1.5d0 
+       ! Real*8,parameter :: CC = 1.9d-2 + 1.07d-1*y + 1.9d-1*dexp(-(4.d0/y)**4)
+       ! Real*8,parameter :: ccc = 2.4d0
+       ! Real*8,parameter :: delta_c = 1.686d0
         
-        call Interpolate_2D(M200d_M_z,virial_Mass,redshift,M(1:number_of_M),z(1:number_of_z),M200d(1:number_of_M,1:number_of_z))
+       ! call Interpolate_2D(M200d_M_z,virial_Mass,redshift,M(1:number_of_M),z(1:number_of_z),M200d(1:number_of_M,1:number_of_z))
 
-        sigma = sqrt(sigma_squared(M200d_M_z,redshift))    ! M must be the SO mass M_{200d} 
+       ! sigma = sqrt(sigma_squared(M200d_M_z,redshift))    ! M must be the SO mass M_{200d} 
 !        sigma = sqrt(sigma_square_M200d(indexM,indexz))    ! M must be the SO mass M_{200d} 
 
-        nu = delta_c/sigma
+       ! nu = delta_c/sigma
 
-        linear_halo_bias = 1.d0 - A*nu**aa/(nu**aa + delta_c**aa) + B*nu**b + CC*nu**ccc
+       ! linear_halo_bias = 1.d0 - A*nu**aa/(nu**aa + delta_c**aa) + B*nu**b + CC*nu**ccc
 
-    end function linear_halo_bias
+    !end function linear_halo_bias
 
-    function linear_halo_bias_2(indexM_virial,index_redshift)    ! From table 2 and equation (6) of "The large-scale bias of dark matter halos:  
+    function linear_halo_bias(indexM_virial,index_redshift)    ! From table 2 and equation (6) of "The large-scale bias of dark matter halos:  
 
         use arrays    ! numerical calibration and model tests". It computes the linear halo bias. (See paper for details about parameters). 
         use fiducial  ! Mass given must be M_{200d}. Dimensionless. 
         Implicit none    
 
-        Real*8 :: linear_halo_bias_2,sigma,nu
+        Real*8 :: linear_halo_bias,sigma,nu
         Real*8,parameter :: y = log10(DeltaSO)
         Real*8,parameter :: A = 1.d0 + 2.4d-1*y*exp(-(4.d0/y)**4)
         Real*8,parameter :: aa = 4.4d-1*y - 8.8d-1
@@ -2840,57 +2669,59 @@ Module functions
         Real*8,parameter :: delta_c = 1.686d0
         Integer*4 :: indexM_virial,index_redshift
         
-        sigma = sqrt(sigma_squared(M200d(indexM_virial,index_redshift),z(index_redshift)))    ! M must be the SO mass M_{200d} 
+!        sigma = sqrt(sigma_squared(M200d(indexM_virial,index_redshift),z(index_redshift)))    ! M must be the SO mass M_{200d} 
+        sigma = sqrt(sigma_square_M200d(indexM_virial,index_redshift))    ! M must be the SO mass M_{200d} 
 
         nu = delta_c/sigma
 
-        linear_halo_bias_2 = 1.d0 - A*nu**aa/(nu**aa + delta_c**aa) + B*nu**b + CC*nu**ccc
+        linear_halo_bias = 1.d0 - A*nu**aa/(nu**aa + delta_c**aa) + B*nu**b + CC*nu**ccc
 
-    end function linear_halo_bias_2
+    end function linear_halo_bias
 
     subroutine compute_bMz()
 
-        use arrays
-        use fiducial
-        use omp_lib
-        Implicit none
+      use arrays
+      use fiducial
+      !use omp_lib
 
-        Integer*4 :: indexz,indexM
+      Implicit none
 
-        open(15,file='./precomputed_quantities/bMz/bMz.dat')
+      Integer*4 :: indexz,indexM
 
-        write(15,*) '# Linear bias file. Number of lines is ',number_of_M*number_of_z
+      open(15,file='./precomputed_quantities/bMz/bMz.dat')
 
-        write(15,*) '# index_of_M    SO_virial_mass[solar mass]   index_of_z    red-shift  b '
+      write(15,*) '# Linear bias file. Number of lines is ',number_of_M*number_of_z
 
-        If (compute_functions) then
+      write(15,*) '# index_of_M    SO_virial_mass[solar mass]   index_of_z    red-shift  b '
 
-        !$omp Parallel Do Shared(bMz,M,z)
+      If (compute_functions) then
 
-        Do indexM=1,number_of_M
+      !  !$omp Parallel Do Shared(bMz,M,z)
+
+         Do indexM=1,number_of_M
 
             Do indexz=1,number_of_z
 
 !                bMz(indexM,indexz) = linear_halo_bias(M(indexM),z(indexz))
-                bMz(indexM,indexz) = linear_halo_bias_2(indexM,indexz)
+               bMz(indexM,indexz) = linear_halo_bias(indexM,indexz)
 
-                write(15,'(i10,es18.10,i5,2es18.10)') indexM,M(indexM),indexz,z(indexz),bMz(indexM,indexz)
+               write(15,'(i10,es18.10,i5,2es18.10)') indexM,M(indexM),indexz,z(indexz),bMz(indexM,indexz)
 
             End Do
 
-        End Do
+         End Do
 
-        !$omp End Parallel Do
+        !!$omp End Parallel Do
 
-        Else
+      Else
 
-           print *, 'LINEAR HALO BIAS COMPUTED IS ONLY COMPUTED FOR M AND Z ARRAYS OF SIZE ',number_of_M, number_of_z
+         print *, 'LINEAR HALO BIAS COMPUTED IS ONLY COMPUTED FOR M AND Z ARRAYS OF SIZE ',number_of_M, number_of_z
 
-           stop
+         stop
 
-        End  If
+      End  If
 
-        close(15)
+      close(15)
 
     end subroutine compute_bMz
 
