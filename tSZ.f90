@@ -11,7 +11,7 @@ Program tSZ
     ! DECLARATION AND INITIALIZATION OF VARIABLES
     Implicit none
     Integer*4 :: index1!,index2,index3                                       ! COUNTER
-    Real*8 :: wtime,hola                          ! STORES TIME OF EXECUTION
+    Real*8 :: wtime!,hola                          ! STORES TIME OF EXECUTION
     Character(len=15),parameter :: halo_definition = 'virial' ! HALO DEFINITION USED IN THE COMPUTATIONS
     !Integer*4,parameter :: hola1=10
     !Integer*4,parameter :: hola2=100
@@ -256,7 +256,7 @@ Program tSZ
         call read_sigma_square_M200d()
 
      End If
-
+     
      If (compute_linear_halo_bias) then
 
         write(UNIT_EXE_FILE,*) 'COMPUTING LINEAR HALO BIAS'
@@ -328,32 +328,34 @@ Program tSZ
 
         call read_dndM() ! READING HALO MASS FUNCTION    
 
-        If (compute_functions) then
+!        If (compute_functions) then
 
-           continue
+ !          continue
 
-        Else
+  !      Else
 
-           allocate(dndM_interpolation(1:number_of_M_functions,1:number_of_z_functions),&
-                stat=status2)
+   !        allocate(dndM_interpolation(1:number_of_M_functions,1:number_of_z_functions),&
+    !            stat=status2)
 
-           If (status2 .eq. 0) then
+     !      If (status2 .eq. 0) then
 
-              call Interpolate_dndM()
+      !        call Interpolate_dndM()
 
-              deallocate(dndM)
+       !       deallocate(dndM)
 
-           Else
+        !   Else
 
-              write(UNIT_EXE_FILE,*) 'PROBLEM ALLOCATING MEMORY FOR "dndM_interpolation" '
+         !     write(UNIT_EXE_FILE,*) 'PROBLEM ALLOCATING MEMORY FOR "dndM_interpolation" '
 
-              stop
+          !    stop
 
-           End If
+           !End If
 
-        End If
+     !End If
 
      End If
+
+     stop
 
      call compute_mean_bias_matter()
 

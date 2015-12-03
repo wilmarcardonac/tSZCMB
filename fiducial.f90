@@ -56,8 +56,8 @@ Module fiducial
 
     Logical,parameter :: do_mass_conversion = .false. !.true.       ! COMPUTE MASSES FOR OTHER HALO DEFINITIONS IF SET IT TRUE
     Logical,parameter :: compute_functions = .true.                 ! COMPUTE FUNCTIONS HAVING 'number_of_z' AND 'number_of_M' SIZE OF ARRAYS, OTHERWISE INTERPOLATE
-    Logical,parameter :: compute_sigma_square = .true.              ! COMPUTE SIGMA SQUARE AND ITS DERIVATIVE IF SET IT TRUE
-    Logical,parameter :: compute_linear_halo_bias = .true. ! COMPUTE LINEAR HALO BIAS IF SET IT TRUE
+    Logical,parameter :: compute_sigma_square = .false. !.true.              ! COMPUTE SIGMA SQUARE AND ITS DERIVATIVE IF SET IT TRUE
+    Logical,parameter :: compute_linear_halo_bias = .false.!.true. ! COMPUTE LINEAR HALO BIAS IF SET IT TRUE
     Logical,parameter :: compute_alpha_in_halo_mass_function = .true. ! COMPUTE CONSTANT ALPHA IN HALO MASS FUNCTION IF SET IT TRUE
     Logical,parameter :: compute_halo_mass_function = .true. ! COMPUTE HALO MASS FUNCTION IF SET IT TRUE
     Logical,parameter :: compute_the_lensing_potential = .true. ! COMPUTE LENSING POTENTIAL IF SET IT TRUE

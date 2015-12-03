@@ -2094,85 +2094,6 @@ Module functions
 
     end function dsigma_squared_dR
 
-    function halo_mass_function(virial_Mass_index,redshift_index) ! Equation (8) in "The large-scale bias of dark matter halos: numerical calibration and model tests".
-
-        use fiducial                 ! Units of M [M_{200d}] : solar mass. Units : 1/(solar mass*Mpc**3). Halo definition : mean density
-        use arrays                    
-        Implicit none                 
-
-        Real*8 :: halo_mass_function,R,sigma,nu,beta,phi,eta,gamma,M200d_M_z
-        Real*8 :: f_nu,g_sigma!,alpha_halo_mass_function_z        
-        Real*8,parameter :: delta_c = 1.686d0    ! page 880 in "The large-scale ..."
-        Real*8,parameter :: beta0 = 0.589d0
-        Real*8,parameter :: phi0 = -0.729d0
-        Real*8,parameter :: eta0 = -0.243d0
-        Real*8,parameter :: gamma0 = 0.864d0
-        Integer*4 :: virial_Mass_index,redshift_index
-
-
-
-        If (z(redshift_index) .gt. 3.d0) then
-
-!            call Interpolate_2D(M200d_M_z,virial_Mass,3.d0,M(1:number_of_M),z(1:number_of_z),M200d(1:number_of_M,1:number_of_z))
-
-!           M200d_M_z = M_delta_d_from_M_virial(3.d0,r_delta_d_from_M_virial(M(virial_Mass_index),3.d0,DeltaSO),DeltaSO)
-
-           R = (3.d0*M200d_M_z/4.d0/Pi/mean_density(3.d0)*&
-            (1.d0 + 3.d0 )**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
-
-           sigma = sqrt(sigma_squared(M200d_M_z,3.d0))    ! Units : dimensionless
-
-           nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
-
-           beta = beta0*( 1.d0 + 3.d0 )**(0.20d0) 
-
-           phi = phi0*( 1.d0 + 3.d0 )**(-0.08d0)
-
-           eta = eta0*( 1.d0 + 3.d0 )**(0.27d0)
-
-           gamma = gamma0*( 1.d0 + 3.d0 )**(-0.01d0)
-
-           f_nu = alpha_halo_redshift_3*(1.d0 + (beta*nu)**(-2.d0*phi))*&
-                nu**(2.d0*eta)*exp(-gamma*nu**2/2.d0)
-
-           g_sigma = nu*f_nu ! dimensionless           ! Equation (C2) in "Toward a ... universality"
-
-           halo_mass_function = -mean_density(3.d0)/(1.d0 + 3.d0)**3.d0/2.d0/M200d_M_z**2&    ! (1+z)**3 to use comoving coordinates
-                *R/3.d0/sigma**2*dsigma_squared_dR(M200d_M_z,3.d0)*g_sigma
-
-        Else
-
-            !call Interpolate_2D(M200d_M_z,virial_Mass,redshift,M(1:number_of_M),z(1:number_of_z),M200d(1:number_of_M,1:number_of_z))
-
-            !call Interpolate_1D(alpha_halo_mass_function_z,redshift,z,alpha_halo_mass_function)
-
-           R = (3.d0*M200d(virial_Mass_index,redshift_index)/4.d0/Pi/mean_density(z(redshift_index))*(1.d0 + &
-                z(redshift_index))**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
-
-           sigma = sqrt(sigma_squared(M200d(virial_Mass_index,redshift_index),z(redshift_index)))    ! Units : dimensionless
-
-           nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
-
-           beta = beta0*( 1.d0 + z(redshift_index) )**(0.20d0) 
-
-           phi = phi0*( 1.d0 + z(redshift_index) )**(-0.08d0)
-
-           eta = eta0*( 1.d0 + z(redshift_index) )**(0.27d0)
-
-           gamma = gamma0*( 1.d0 + z(redshift_index) )**(-0.01d0)
-
-           f_nu = alpha_halo_mass_function(redshift_index)*(1.d0 + (beta*nu)**(-2.d0*phi))*nu**(2.d0*eta)*&
-                exp(-gamma*nu**2/2.d0)
-
-            g_sigma = nu*f_nu ! dimensionless           ! Equation (C2) in "Toward a ... universality"
-
-            halo_mass_function = -mean_density(z(redshift_index))/(1.d0 + z(redshift_index) )**3.d0/2.d0/&
-                 M200d(virial_Mass_index,redshift_index)**2*&    ! (1+z)**3 to use comoving coordinates
-            R/3.d0/sigma**2*dsigma_squared_dR(M200d(virial_Mass_index,redshift_index),z(redshift_index))*g_sigma
-
-        End If
-
-    end function halo_mass_function
 
 
     subroutine compute_dM200ddM_M_z()
@@ -2238,53 +2159,6 @@ Module functions
         close(15)
 
     end subroutine read_alpha_halo_mass_function
-
-    subroutine compute_dndM()    ! It fills halo mass function array in and writes it out to a text file
-
-        use arrays
-        use fiducial
-        Implicit none
-
-        Integer*4 :: indexz,indexM
-        !Real*8 :: dM200ddM_M_z
-
-        open(15,file='./precomputed_quantities/dndM/dndM.dat')
-
-        write(15,*) '# Halo mass function (as function of virial mass and red-shift). Number of lines is ',&
-             number_of_z*number_of_M
-
-        write(15,*) '#  index_of_M    virial_mass[solar mass]    index_of_z    red-shift    dndM '
-
-        If (compute_functions) then
-
-           !$omp Parallel Do Shared(dndM,dM200ddM,M,z)
-
-           Do indexM=1,number_of_M
-
-              Do indexz=1,number_of_z
-
-                 dndM(indexM,indexz) = halo_mass_function(indexM,indexz)*dM200ddM(indexM,indexz)
-
-                 write(15,'(i10,es18.10,i5,2es18.10)') indexM, M(indexM), indexz, z(indexz), dndM(indexM,indexz)
-
-              End Do
-
-           End Do
-
-           !$omp End Parallel Do
-
-        Else
-
-           print *,'HALO MASS FUNCTION COMPUTED ONLY FOR ARRAYS M AND Z OF SIZE ', number_of_M, number_of_z
-
-           stop
-
-        End If
-
-        close(15)
-
-    end subroutine compute_dndM
-
 
     subroutine read_sigma_square_M200d()
 
@@ -2696,7 +2570,7 @@ Module functions
 
       If (compute_functions) then
 
-      !  !$omp Parallel Do Shared(bMz,M,z)
+      !  !$omp Parallel Do Shared(bMz)
 
          Do indexM=1,number_of_M
 
