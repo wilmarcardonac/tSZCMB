@@ -208,7 +208,7 @@ contains
 
     use fiducial
     use arrays
-    !use omp_lib
+    use omp_lib
     !use mod_roots
 
     Implicit none
@@ -229,7 +229,7 @@ contains
 
     write(15,*) '# M_delta_c[solar mass]    r_delta_d[Mpc]    M_delta_d[solar mass] '
 
-!!$omp Parallel Do Shared(rdc,rdd)
+    !$omp Parallel Do Shared(rdc,rdd)
 
     Do indexz = 1,number_of_z
 
@@ -243,7 +243,7 @@ contains
 
     End Do
 
-!!$omp End Parallel Do
+    !$omp End Parallel Do
 
     Do indexz = 1,number_of_z
 

@@ -210,8 +210,8 @@ Program tSZ
 
     ! COMPUTATION STARTS
 
-    call compute_comoving_and_angular_diameter_distance() ! COMPUTE COMOVING DISTANCE, ANGULAR DIAMETER DISTANCE AND CRITICAL SURFACE DENSITY
-
+    call compute_comoving_and_angular_diameter_distance() ! COMPUTE COMOVING DISTANCE, ANGULAR DIAMETER DISTANCE, CRITICAL SURFACE DENSITY,
+                                                          ! AND COMOVING VOLUME PER STERADIAN
     If (do_mass_conversion) then ! COMPUTE MASSES
 
         wtime = omp_get_wtime() ! SETTING STARTING TIME OF MASS CONVERSION
@@ -237,12 +237,12 @@ Program tSZ
 
         call read_M200dc_r200dc() ! READING MASS CONVERSION FILE 
 
-        call compute_dMdc_dM_and_dMdd_dM() ! COMPUTING DERIVATIVES OF MASS CONVERSION
+        call read_dMdc_dM_and_dMdd_dM() ! COMPUTING DERIVATIVES OF MASS CONVERSION
 
         write(UNIT_EXE_FILE,*) 'MASS CONVERSION FILE READ AND DERIVATIVES OF MASS CONVERSION COMPUTED'
 
      End If
-
+     
      call compute_normalization(Normalization) ! IN MATTER POWER SPECTRUM TO FIT FIDUCIAL SIGMA_8
 
      write(UNIT_EXE_FILE,*) 'NORMALIZATION OF MATTER POWER SPECTRUM TO MATCH SIGMA_8 (',sigma8,') WAS COMPUTED'
@@ -363,7 +363,7 @@ Program tSZ
 
      write(UNIT_EXE_FILE,*) 'COMPUTING COMOVING VOLUME ELEMENT PER STERADIAN'
 
-     call compute_d2VdzdO()   ! COMPUTES COMOVING VOLUME ELEMENT PER STERADIAN  
+!     call compute_d2VdzdO()   ! COMPUTES COMOVING VOLUME ELEMENT PER STERADIAN  
 
      If (compute_the_lensing_potential) then 
 
@@ -383,30 +383,30 @@ Program tSZ
 
         call read_philMz() ! READS LENSING POTENTIAL
 
-        If (compute_functions) then
+        !If (compute_functions) then
 
-           continue
+        !   continue
 
-        Else
+        !Else
 
-           allocate(philMz_interpolation(1:number_of_l,1:number_of_M_functions,1:number_of_z_functions),&
-                stat=status2)
+        !   allocate(philMz_interpolation(1:number_of_l,1:number_of_M_functions,1:number_of_z_functions),&
+        !        stat=status2)
 
-           If (status2 .eq. 0) then
+        !   If (status2 .eq. 0) then
 
-              call Interpolate_philMz()
+         !     call Interpolate_philMz()
 
-              deallocate(philMz)
+          !    deallocate(philMz)
 
-           Else
+          ! Else
 
-              write(UNIT_EXE_FILE,*) 'PROBLEM ALLOCATING MEMORY FOR "philMz_interpolation" '
+           !   write(UNIT_EXE_FILE,*) 'PROBLEM ALLOCATING MEMORY FOR "philMz_interpolation" '
 
-              stop
+            !  stop
 
-           End If
+           !End If
 
-        End If
+        !End If
 
      End If
 
@@ -443,7 +443,7 @@ Program tSZ
 
      write(UNIT_EXE_FILE,*) 'COMPUTING ANGULAR POWER SPECTRUM OF LENSING POTENTIAL'
 
-!     call compute_Clphiphi1h() ! ONE HALO TERM
+     call compute_Clphiphi1h() ! ONE HALO TERM
 
      call compute_Clphiphi2h() ! TWO HALO TERM
 

@@ -296,6 +296,8 @@ contains
           Scrit(indexz) = c**2*comoving_distance_at_z(indexz)*(1.d0 + &
                z(indexz))/4.d0/Pi/G/comoving_distance_at_z(indexz)/(com_dist_at_z_dec - comoving_distance_at_z(indexz))*Mpc/M_sun
 
+          d2VdzdO(indexz) = c*(1.d0 + z(indexz))**2*angular_diameter_distance_at_z(indexz)**2/Hubble_parameter(z(indexz))
+
        End Do
 
 !!$omp End Parallel Do
@@ -420,6 +422,7 @@ contains
 
     use arrays
     use fiducial
+    use omp_lib
 
     Implicit none
 
@@ -428,6 +431,8 @@ contains
 
     Integer*4 :: indexz,indexM
 
+    !$omp Parallel Do Shared(f,bMz,M,z,dM200ddM)
+
     Do indexM=1,number_of_M
 
        f(indexM) = nonnormalised_halo_mass_function(indexM,indexz)*bMz(indexM,indexz)*&
@@ -435,6 +440,8 @@ contains
             dM200ddM(indexM,indexz) 
 
     End Do
+
+    !$omp End Parallel Do
 
     call Interpolate_1D(integrand_alpha_halo_mass_function_at_z,dalpha,virial_mass,M,f)
 
@@ -496,17 +503,15 @@ contains
 
     If (compute_functions) then
 
-       !$omp Parallel Do Shared(alpha_halo_mass_function)
+       !!$omp Parallel Do Shared(alpha_halo_mass_function)
 
        Do indexz=1,number_of_z
 
           call compute_alpha_halo_mass_function_at_z(indexz,alpha_halo_mass_function(indexz))   ! dimensionless
 
-          write(15,'(i5,2es18.10)') indexz, z(indexz), alpha_halo_mass_function(indexz)
-
        End Do
 
-       !$omp End Parallel Do
+       !!$omp End Parallel Do
 
     Else
 
@@ -515,6 +520,12 @@ contains
        stop
 
     End If
+
+    Do indexz=1,number_of_z
+
+       write(15,'(i5,2es18.10)') indexz, z(indexz), alpha_halo_mass_function(indexz)
+
+    End Do
 
     close(15)
 
@@ -645,6 +656,369 @@ contains
     close(15)
 
   end subroutine compute_dndM
+
+  Function integrand_mean_bias_matter(virial_mass, params) bind(c)
+
+    real(c_double), value :: virial_mass
+    type(c_ptr), value :: params
+    real(c_double) :: integrand_mean_bias_matter
+    Integer(c_int), pointer :: indexz
+
+    call c_f_pointer(params, indexz)
+
+    integrand_mean_bias_matter =  integrand_mean_bias_matter_at_z(virial_mass,indexz)
+
+  End function integrand_mean_bias_matter
+
+  function integrand_mean_bias_matter_at_z(virial_mass,indexz)
+
+    use arrays
+    use fiducial
+
+    Implicit none
+
+    Real*8 :: virial_mass,integrand_mean_bias_matter_at_z,dalpha
+    Real*8,dimension(number_of_M) :: f
+
+    Integer*4 :: indexz,indexM
+
+    Do indexM=1,number_of_M
+
+       f(indexM) = dndM(indexM,indexz)*bMz(indexM,indexz)*M(indexM)/&
+            mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0
+
+    End Do
+
+    call Interpolate_1D(integrand_mean_bias_matter_at_z,dalpha,virial_mass,M,f)
+
+  End function integrand_mean_bias_matter_at_z
+
+  Subroutine compute_mean_bias_matter_at_z(indexz,output)
+
+    Implicit none
+
+    Integer(fgsl_size_t), parameter :: nmax=10000
+
+    Integer(fgsl_int),target :: pp
+    Real(fgsl_double) :: result, error, output
+    Real(fgsl_double),parameter :: lower_limit = Mmin!1.0E-3_fgsl_double
+    Real(fgsl_double),parameter :: upper_limit = Mmax!1.0E-2_fgsl_double
+    Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
+    Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
+
+    Integer(fgsl_int) :: status
+    Integer(fgsl_int) :: indexz
+
+    Type(c_ptr) :: ptr
+    Type(fgsl_function) :: f_obj
+    Type(fgsl_integration_workspace) :: wk
+
+    pp = indexz
+
+    ptr = c_loc(pp)
+
+    f_obj = fgsl_function_init(integrand_mean_bias_matter, ptr)
+
+    wk = fgsl_integration_workspace_alloc(nmax)
+
+    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
+         absolute_error, relative_error, nmax, wk, result, error)
+
+    output = result
+
+    call fgsl_function_free(f_obj)
+
+    call fgsl_integration_workspace_free(wk)
+
+  End subroutine compute_mean_bias_matter_at_z
+
+  subroutine compute_mean_bias_matter() ! Dimensionless
+
+    use arrays
+    use fiducial
+    Implicit none
+
+    Integer*4 :: indexz
+
+    open(15,file='./precomputed_quantities/bMz/mean_bias_at_z.dat')
+
+    write(15,*) '# red-shift        mean bias all matter'
+
+    Do indexz=1,number_of_z
+
+       call compute_mean_bias_matter_at_z(indexz,mbz(indexz))
+
+       write(15,'(2es18.10)') z(indexz),mbz(indexz)
+
+    End Do
+
+    close(15)
+
+  end subroutine compute_mean_bias_matter
+
+  Function integrand_pre_cl_phiphi(virial_mass, params) bind(c)
+
+    real(c_double), value :: virial_mass
+    type(c_ptr), value :: params
+    real(c_double) :: integrand_pre_cl_phiphi
+    Integer(c_int), pointer :: pa(:)
+
+    call c_f_pointer(params, pa,(/2/)) ! pa(1) = indexz, pa(2) = indexl
+
+    integrand_pre_cl_phiphi =  integrand_pre_cl_phiphi_at_z_and_l(virial_mass,pa(1),pa(2))
+
+  End function integrand_pre_cl_phiphi
+
+  function integrand_pre_cl_phiphi_at_z_and_l(virial_mass,indexz,indexl)
+
+    use arrays
+    use fiducial
+
+    Implicit none
+
+    Real*8 :: virial_mass,integrand_pre_cl_phiphi_at_z_and_l,dalpha
+    Real*8,dimension(number_of_M) :: f
+
+    Integer*4 :: indexz,indexM,indexl
+
+    Do indexM=1,number_of_M
+
+       f(indexM) = dndM(indexM,indexz)*philMz(indexl,indexM,indexz)**2 ! Units : 1/solar mass/Mpc**3
+
+    End Do
+
+    call Interpolate_1D(integrand_pre_cl_phiphi_at_z_and_l,dalpha,virial_mass,M,f)
+
+  End function integrand_pre_cl_phiphi_at_z_and_l
+
+  Subroutine compute_pre_cl_phiphi_at_z_and_l(indexz,indexl,output)
+
+    Implicit none
+
+    Integer(fgsl_size_t), parameter :: nmax=10000
+
+    Integer(fgsl_int),target :: pp(2)
+    Real(fgsl_double) :: result, error, output
+    Real(fgsl_double),parameter :: lower_limit = Mmin!1.0E-3_fgsl_double
+    Real(fgsl_double),parameter :: upper_limit = Mmax!1.0E-2_fgsl_double
+    Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
+    Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
+
+    Integer(fgsl_int) :: status
+    Integer(fgsl_int) :: indexz,indexl
+
+    Type(c_ptr) :: ptr
+    Type(fgsl_function) :: f_obj
+    Type(fgsl_integration_workspace) :: wk
+
+    pp = (/indexz,indexl/)
+
+    ptr = c_loc(pp)
+
+    f_obj = fgsl_function_init(integrand_pre_cl_phiphi, ptr)
+
+    wk = fgsl_integration_workspace_alloc(nmax)
+
+    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
+         absolute_error, relative_error, nmax, wk, result, error)
+
+    output = result
+
+    call fgsl_function_free(f_obj)
+
+    call fgsl_integration_workspace_free(wk)
+
+  End subroutine compute_pre_cl_phiphi_at_z_and_l
+
+  function integrand_cl_phiphi_one_halo_at_z_and_l(redshift,indexl)
+
+    use arrays
+    use fiducial
+
+    Implicit none
+
+    Real*8 :: redshift,integrand_cl_phiphi_one_halo_at_z_and_l,dalpha
+    Real*8,dimension(number_of_z) :: f
+
+    Integer*4 :: indexz,indexl
+
+    Do indexz=1,number_of_z
+
+       call compute_pre_cl_phiphi_at_z_and_l(indexz,indexl,f(indexz)) 
+
+       f(indexz) = f(indexz)*d2VdzdO(indexz)
+
+    End Do
+
+    call Interpolate_1D(integrand_cl_phiphi_one_halo_at_z_and_l,dalpha,redshift,z,f)
+
+  End function integrand_cl_phiphi_one_halo_at_z_and_l
+
+  Function integrand_cl_phiphi_one_halo(redshift, params) bind(c)
+
+    real(c_double), value :: redshift
+    type(c_ptr), value :: params
+    real(c_double) :: integrand_cl_phiphi_one_halo
+    Integer(c_int), pointer :: pa
+
+    call c_f_pointer(params, pa) ! pa = indexl
+
+    integrand_cl_phiphi_one_halo =  integrand_cl_phiphi_one_halo_at_z_and_l(redshift,pa)
+
+  End function integrand_cl_phiphi_one_halo
+
+  Subroutine compute_cl_phiphi_one_halo_at_l(indexl,output)
+
+    Implicit none
+
+    Integer(fgsl_size_t), parameter :: nmax=10000
+
+    Integer(fgsl_int),target :: pp
+    Real(fgsl_double) :: result, error, output
+    Real(fgsl_double),parameter :: lower_limit = zmin!1.0E-3_fgsl_double
+    Real(fgsl_double),parameter :: upper_limit = zmax!1.0E-2_fgsl_double
+    Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
+    Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
+
+    Integer(fgsl_int) :: status
+    Integer(fgsl_int) :: indexl
+
+    Type(c_ptr) :: ptr
+    Type(fgsl_function) :: f_obj
+    Type(fgsl_integration_workspace) :: wk
+
+    pp = indexl
+
+    ptr = c_loc(pp)
+
+    f_obj = fgsl_function_init(integrand_cl_phiphi_one_halo, ptr)
+
+    wk = fgsl_integration_workspace_alloc(nmax)
+
+    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
+         absolute_error, relative_error, nmax, wk, result, error)
+
+    output = result
+
+    call fgsl_function_free(f_obj)
+
+    call fgsl_integration_workspace_free(wk)
+
+  End subroutine compute_cl_phiphi_one_halo_at_l
+
+  subroutine compute_Clphiphi1h()  ! It fills lensing potential angular power spectrum array. Dimensionless
+
+    use arrays
+    use fiducial
+    Implicit none
+
+    Integer*4 :: indexl
+
+!    If (compute_functions) then
+
+ !      print *, 'ONE HALO TERM FOR ANGULAR POWER SPECTRUM OF LENSING POTENTIAL COMPUTED ONLY WITH INTERPOLATING FUNCTIONS'
+
+  !     stop
+
+   ! Else
+
+    Do indexl=1,number_of_l
+
+       call compute_cl_phiphi_one_halo_at_l(indexl,Clphiphi1h(indexl))
+
+    End Do
+
+   ! End If
+
+  end subroutine compute_Clphiphi1h
+
+
+!  function pre_Clphiphi(indexz,indexl) ! Required function to compute one halo term of lensing potential angular power spectrum. Dimensionless
+
+ !   use fiducial
+  !  use arrays
+   ! Implicit none
+
+    !Real*8 :: pre_Clphiphi,sum
+!    Integer*4 :: indexl,i,indexM,indexz
+ !   Integer*4,parameter :: intervals = number_of_M - 1 
+  !  Real*8,dimension(number_of_M) :: f
+
+   ! Do indexM = 1, number_of_M
+
+    !   f(indexM) = dndM(indexM,indexz)*philMz(indexl,indexM,indexz)**2 ! Units : 1/solar mass/Mpc**3
+
+!    End Do
+
+ !   open(15,file='./output/preclphiphi.dat')
+
+  !  write(15,*) '# Virial_ Mass[solar mass]  f_in_preclphiphi',z(indexz),ml(indexl)
+
+    !        Do indexM=1,number_of_M
+
+    !            write(15,'(2es18.10)') M(indexM), f(indexM)
+
+    !        End Do
+
+    !        close(15)
+
+!    sum = 0.d0
+
+ !   Do i=1,intervals
+
+  !     sum = (M(i+1)- M(i))/2.d0*( f(i) + f(i+1) ) + sum   ! Units : 1/Mpc**3
+
+   ! End Do
+
+    !pre_Clphiphi = sum     ! Dimensionless                     
+
+  !end function pre_Clphiphi
+
+!  function C_l_phiphi_one_halo(indexl) ! It computes lensing potential angular power spectrum for a single multipole. Dimensionless
+
+ !   use fiducial
+  !  use arrays
+    !use omp_lib
+   ! Implicit none
+
+    !Real*8 :: C_l_phiphi_one_halo,sum
+!    Integer*4 :: indexl,indexz
+ !   Integer*4,parameter :: number_of_redshift = number_of_z_functions 
+  !  Integer*4,parameter :: intervals = number_of_redshift - 1
+   ! Real*8,dimension(number_of_redshift):: f
+
+!!$omp Parallel Do Shared(f)
+
+    !Do indexz=1,number_of_redshift
+
+!       f(indexz) = pre_Clphiphi(indexz,indexl)*d2VdzdO(indexz)          ! Dimensionless
+
+ !   End Do
+
+!!$omp End Parallel Do
+
+    !    open(16,file='./output/clphiphi.dat')
+
+    !    Do indexz=1,number_of_z
+
+    !        write(16,'(2es18.10)') z(indexz),f(indexz) 
+
+    !    End Do
+
+    !    close(16)
+
+  !  sum = 0.d0
+
+   ! Do indexz=1,intervals
+
+    !   sum = (z_functions(indexz+1) -  z_functions(indexz))/2.d0*( f(indexz) + f(indexz+1) ) + sum
+
+!    End Do
+
+ !   C_l_phiphi_one_halo = sum
+
+  !end function C_l_phiphi_one_halo
+
 
 
 End Module integrator

@@ -561,9 +561,18 @@ Module functions
 
         use fiducial
         use arrays
+        use omp_lib
         Implicit none
 
         Integer*4 :: indexM,indexz
+
+        open(15,file='./precomputed_quantities/dMdd_dM_dMdc_dM.dat')
+
+        write(15,*) '# Mass derivatives file. The number of data is ',number_of_z*number_of_M
+
+        write(15,*) '# index_of_red-shift    red-shift    index_of_M    dM200ddM    dM200cdM'    
+
+        !$omp Parallel Do Shared(dM200ddM,dM200cdM)
 
         Do indexz=1,number_of_z
 
@@ -577,7 +586,51 @@ Module functions
 
         End Do
 
+        !$omp End Parallel Do
+
+        Do indexz=1,number_of_z
+
+           Do indexM=1,number_of_M
+
+              write(15,'(i5,es18.10,i10,3es18.10)') indexz, z(indexz), indexM, M(indexM),&
+                   dM200ddM(indexM,indexz),dM200cdM(indexM,indexz)
+ 
+           End Do
+
+        End Do
+
+        close(15)
+
     end subroutine compute_dMdc_dM_and_dMdd_dM
+
+    subroutine read_dMdc_dM_and_dMdd_dM()
+
+        use arrays
+        use fiducial
+        Implicit none
+
+        Integer*4 :: index,iz,iM
+        Real*8 :: MM,zz,tM200c,tr200d
+
+        open(15,file='./precomputed_quantities/dMdd_dM_dMdc_dM.dat')
+
+        read(15,*)
+
+        read(15,*)
+
+        Do index=1,number_of_z*number_of_M
+
+            read(15,'(i5,es18.10,i10,3es18.10)') iz,zz,iM,MM,tr200d,tM200c
+
+            dM200ddM(iM,iz) = tr200d
+
+            dM200cdM(iM,iz) = tM200c
+
+        End Do
+
+        close(15)
+
+    end subroutine read_dMdc_dM_and_dMdd_dM
 
     function dMdc_dM(indexM,indexz)
 
@@ -2264,117 +2317,6 @@ Module functions
 
     end subroutine write_dndM_at_z
 
-    function pre_Clphiphi(indexz,indexl) ! Required function to compute one halo term of lensing potential angular power spectrum. Dimensionless
-
-        use fiducial
-        use arrays
-        Implicit none
-
-        Real*8 :: pre_Clphiphi,sum
-        Integer*4 :: indexl,i,indexM,indexz
-        Integer*4,parameter :: intervals = number_of_M - 1 
-        Real*8,dimension(number_of_M) :: f
-
-        Do indexM = 1, number_of_M
-
-            f(indexM) = dndM(indexM,indexz)*philMz(indexl,indexM,indexz)**2 ! Units : 1/solar mass/Mpc**3
-
-        End Do
-
-        open(15,file='./output/preclphiphi.dat')
-
-        write(15,*) '# Virial_ Mass[solar mass]  f_in_preclphiphi',z(indexz),ml(indexl)
-
-!        Do indexM=1,number_of_M
-
-!            write(15,'(2es18.10)') M(indexM), f(indexM)
-
-!        End Do
-
-!        close(15)
-
-        sum = 0.d0
-
-        Do i=1,intervals
-
-            sum = (M(i+1)- M(i))/2.d0*( f(i) + f(i+1) ) + sum   ! Units : 1/Mpc**3
-
-        End Do
-
-        pre_Clphiphi = sum     ! Dimensionless                     
-
-    end function pre_Clphiphi
-
-    function C_l_phiphi_one_halo(indexl) ! It computes lensing potential angular power spectrum for a single multipole. Dimensionless
-
-        use fiducial
-        use arrays
-        !use omp_lib
-        Implicit none
-
-        Real*8 :: C_l_phiphi_one_halo,sum
-        Integer*4 :: indexl,indexz
-        Integer*4,parameter :: number_of_redshift = number_of_z_functions 
-        Integer*4,parameter :: intervals = number_of_redshift - 1
-        Real*8,dimension(number_of_redshift):: f
-
-        !!$omp Parallel Do Shared(f)
-
-        Do indexz=1,number_of_redshift
-
-            f(indexz) = pre_Clphiphi(indexz,indexl)*d2VdzdO(indexz)          ! Dimensionless
-
-        End Do
-
-        !!$omp End Parallel Do
-
-        !    open(16,file='./output/clphiphi.dat')
-
-        !    Do indexz=1,number_of_z
-
-        !        write(16,'(2es18.10)') z(indexz),f(indexz) 
-
-        !    End Do
-
-        !    close(16)
-
-        sum = 0.d0
-
-        Do indexz=1,intervals
-
-            sum = (z_functions(indexz+1) -  z_functions(indexz))/2.d0*( f(indexz) + f(indexz+1) ) + sum
-
-        End Do
-
-        C_l_phiphi_one_halo = sum
-
-    end function C_l_phiphi_one_halo
-
-    subroutine compute_Clphiphi1h()  ! It fills lensing potential angular power spectrum array. Dimensionless
-
-        use arrays
-        use fiducial
-        Implicit none
-
-        Integer*4 :: indexl
-
-        If (compute_functions) then
-
-           print *, 'ONE HALO TERM FOR ANGULAR POWER SPECTRUM OF LENSING POTENTIAL COMPUTED ONLY WITH INTERPOLATING FUNCTIONS'
-
-           stop
-
-        Else
-
-           Do indexl=1,number_of_l
-
-              Clphiphi1h(indexl) = C_l_phiphi_one_halo(indexl)
-
-           End Do
-
-        End If
-
-    end subroutine compute_Clphiphi1h
 
     function pre_Cl(indexz,indexl) ! Dimensionless
 
@@ -2556,7 +2498,7 @@ Module functions
 
       use arrays
       use fiducial
-      !use omp_lib
+      use omp_lib
 
       Implicit none
 
@@ -2570,7 +2512,7 @@ Module functions
 
       If (compute_functions) then
 
-      !  !$omp Parallel Do Shared(bMz)
+         !$omp Parallel Do Shared(bMz)
 
          Do indexM=1,number_of_M
 
@@ -2579,13 +2521,11 @@ Module functions
 !                bMz(indexM,indexz) = linear_halo_bias(M(indexM),z(indexz))
                bMz(indexM,indexz) = linear_halo_bias(indexM,indexz)
 
-               write(15,'(i10,es18.10,i5,2es18.10)') indexM,M(indexM),indexz,z(indexz),bMz(indexM,indexz)
-
             End Do
 
          End Do
 
-        !!$omp End Parallel Do
+         !$omp End Parallel Do
 
       Else
 
@@ -2595,74 +2535,20 @@ Module functions
 
       End  If
 
+      Do indexM=1,number_of_M
+
+         Do indexz=1,number_of_z
+
+            write(15,'(i10,es18.10,i5,2es18.10)') indexM,M(indexM),indexz,z(indexz),bMz(indexM,indexz)
+
+         End Do
+
+      End Do
+
       close(15)
 
     end subroutine compute_bMz
 
-    subroutine compute_mean_bias_matter() ! Dimensionless
-
-        use arrays
-        use fiducial
-        Implicit none
-
-        Integer*4 :: indexz
-
-        open(15,file='./precomputed_quantities/bMz/mean_bias_at_z.dat')
-
-        write(15,*) '# red-shift        mean bias all matter'
-
-        Do indexz=1,number_of_z
-
-            mbz(indexz) = pre_mbz(indexz)
-
-            write(15,'(2es18.10)') z(indexz),mbz(indexz)
-
-        End Do
-
-        close(15)
-
-    end subroutine compute_mean_bias_matter
-
-    function pre_mbz(indexz)    !    It computes mean bias of all matter at a given red-shift. Dimensionless.  
-
-        use fiducial
-        use omp_lib
-        use arrays
-        Implicit none
-
-        Real*8 :: pre_mbz,sum
-        Integer*4 :: indexM,indexz
-        Integer*4,parameter :: intervals = number_of_M - 1
-        Real*8,dimension(number_of_M) :: f
-
-        Do indexM=1,number_of_M
-
-            f(indexM) = dndM(indexM,indexz)*bMz(indexM,indexz)*M(indexM)/&
-                 mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0
-
-        End Do
-
-        !    open(16,file='./output/clphiphi.dat')
-
-        !    Do indexM=1,number_of_M
-
-        !        write(16,'(2es18.10)') M(indexM),f(indexM) 
-
-        !    End Do
-
-        !    close(16)
-
-        sum = 0.d0
-
-        Do indexM=1,intervals
-
-            sum = (M(indexM+1)-M(indexM))/2.d0*( f(indexM) + f(indexM+1) ) + sum
-
-        End Do
-
-        pre_mbz = sum
-
-    end function pre_mbz
 
     subroutine read_bMz()
 
