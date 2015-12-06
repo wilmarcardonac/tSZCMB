@@ -473,38 +473,38 @@ Program tSZ
 
         call read_ylMz() ! READS FORM FACTOR
 
-        If (compute_functions) then
+!        If (compute_functions) then
 
-           continue
+ !          continue
 
-        Else
+  !      Else
 
-           allocate(ylMz_interpolation(1:number_of_l,1:number_of_M_functions,1:number_of_z_functions),&
-                stat=status2)
+   !        allocate(ylMz_interpolation(1:number_of_l,1:number_of_M_functions,1:number_of_z_functions),&
+    !            stat=status2)
 
-           If (status2 .eq. 0) then
+     !      If (status2 .eq. 0) then
 
-              call Interpolate_ylMz()
+      !        call Interpolate_ylMz()
 
-              deallocate(ylMz)
+       !       deallocate(ylMz)
 
-           Else
+        !   Else
 
-              write(UNIT_EXE_FILE,*) 'PROBLEM ALLOCATING MEMORY FOR "ylMz_interpolation" '
+         !     write(UNIT_EXE_FILE,*) 'PROBLEM ALLOCATING MEMORY FOR "ylMz_interpolation" '
 
-              stop
+          !    stop
 
-           End If
+     !End If
 
-        End If
+!     End If
 
      End If
         
      write(UNIT_EXE_FILE,*) 'COMPUTING ANGULAR POWER SPECTRUM OF Y-tSZ CROSS-CORRELATION'
 
-     call compute_Cl1h() ! ONE HALO TERM
+     call compute_Clyphi1h() ! ONE HALO TERM
 
-     call compute_Cl2h() ! TWO HALO TERM
+     call compute_Clyphi2h() ! TWO HALO TERM
  
      call compute_Cl()   ! TOTAL 
 
