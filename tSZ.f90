@@ -355,11 +355,11 @@ Program tSZ
 
      End If
 
-     stop
+!     stop
 
      call compute_mean_bias_matter()
 
-     stop
+!     stop
 
      write(UNIT_EXE_FILE,*) 'COMPUTING COMOVING VOLUME ELEMENT PER STERADIAN'
 
@@ -453,7 +453,7 @@ Program tSZ
 
      call write_Cl()     ! OF ALL COMPUTATIONS 
 
-     stop
+!     stop
 
      If (compute_the_form_factor) then
 

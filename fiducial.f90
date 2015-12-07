@@ -13,7 +13,7 @@ Module fiducial
     Integer*4,parameter :: number_of_z_limber = 1000   ! SIZE OF RED-SHIFT ARRAY FOR LIMBER APPROXIMATION 
     Integer*4,parameter :: number_of_M_log = 500        ! SIZE OF VIRIAL MASS ARRAY
     Integer*4,parameter :: number_of_M_linear = 332 
-    Integer*4,parameter :: number_of_M = 1000 !number_of_M_log + number_of_M_linear
+    Integer*4,parameter :: number_of_M = 300 !number_of_M_log + number_of_M_linear
     Integer*4,parameter :: number_of_M_functions = 1000 ! SIZE OF VIRIAL MASS ARRAY FOR FUNCTIONS
     Integer*4,parameter :: number_of_l = 5  ! SIZE OF MULTIPOLE ARRAY 
     Integer*4,parameter :: number_of_l_functions = 100 ! SIZE OF MULTIPOLE ARRAY FOR INTERPOLATING FUNCTIONS
@@ -44,7 +44,7 @@ Module fiducial
     Real*8,parameter :: zmin = 5.d-3               ! LOWER RED-SHIFT IN HILL & SPERGEL PAPER [1312.4525] 
     Real*8,parameter :: sigma8 = 0.817d0           ! RMS OF MATTER FLUCTUATIONS TODAY IN LINEAR THEORY
     Real*8,parameter :: Mmin = 1.d5/h              ! LOWER MASS IN HILL & SPERGEL PAPER [1312.4525]
-    Real*8,parameter :: Mmax = 5.d15/h             ! UPPER MASS IN HILL & SPERGEL PAPER [1312.4525]
+    Real*8,parameter :: Mmax = 1.d12/h!5.d15/h             ! UPPER MASS IN HILL & SPERGEL PAPER [1312.4525]
     Real*8,parameter :: tcmb0 = 2.728d0            ! CMB TEMPERATURE TODAY IN KELVIN
     Real*8 :: Normalization                        ! NORMALIZATION CONSTANT FOR MATTER POWER SPECTRUM (EQUATION (A7) IN EISENSTEIN & HU PAPER)
     Real*8 :: com_dist_at_z_dec                    ! COMOVING DISTANCE AT DECOUPLING
@@ -56,8 +56,8 @@ Module fiducial
 
     Logical,parameter :: do_mass_conversion = .false.!.true.       ! COMPUTE MASSES FOR OTHER HALO DEFINITIONS IF SET IT TRUE
     Logical,parameter :: compute_functions = .true.                 ! COMPUTE FUNCTIONS HAVING 'number_of_z' AND 'number_of_M' SIZE OF ARRAYS, OTHERWISE INTERPOLATE
-    Logical,parameter :: compute_sigma_square = .false.!true.              ! COMPUTE SIGMA SQUARE AND ITS DERIVATIVE IF SET IT TRUE
-    Logical,parameter :: compute_linear_halo_bias = .true. ! COMPUTE LINEAR HALO BIAS IF SET IT TRUE
+    Logical,parameter :: compute_sigma_square = .false.!.true.              ! COMPUTE SIGMA SQUARE AND ITS DERIVATIVE IF SET IT TRUE
+    Logical,parameter :: compute_linear_halo_bias = .false.!.true. ! COMPUTE LINEAR HALO BIAS IF SET IT TRUE
     Logical,parameter :: compute_alpha_in_halo_mass_function = .true. ! COMPUTE CONSTANT ALPHA IN HALO MASS FUNCTION IF SET IT TRUE
     Logical,parameter :: compute_halo_mass_function = .true. ! COMPUTE HALO MASS FUNCTION IF SET IT TRUE
     Logical,parameter :: compute_the_lensing_potential = .true. ! COMPUTE LENSING POTENTIAL IF SET IT TRUE

@@ -460,7 +460,7 @@ contains
     Real(fgsl_double),parameter :: lower_limit = Mmin!1.0E-3_fgsl_double
     Real(fgsl_double),parameter :: upper_limit = Mmax!1.0E-2_fgsl_double
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
-    Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
+    Real(fgsl_double),parameter :: relative_error = 1.0E-1_fgsl_double
 
     Integer(fgsl_int) :: status
     Integer(fgsl_int) :: indexz
@@ -491,7 +491,7 @@ contains
   subroutine compute_alpha_halo_mass_function()    ! It computes \alpha constant in halo mass function (Equation (8)) of "The large-scale 
 
     use fiducial    ! bias of dark matter halos: numerical calibration and model tests" for the red-shift array
-    use omp_lib
+    !use omp_lib
     use arrays
     Implicit none
 

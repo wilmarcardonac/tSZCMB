@@ -209,7 +209,6 @@ contains
     use fiducial
     use arrays
     use omp_lib
-    !use mod_roots
 
     Implicit none
 
