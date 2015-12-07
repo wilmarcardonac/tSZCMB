@@ -1054,34 +1054,24 @@ contains
 
     Implicit none
 
-    Real*8 :: integrand_limber_approximation_at_z_and_l,dalpha,redshift,prefactor
-    Real*8,dimension(number_of_z_limber) :: f,zlimber
-    Real*8,parameter :: zminlimber = 1.d-5
+    Real*8 :: integrand_limber_approximation_at_z_and_l,dalpha,redshift
 
-    Integer*4 :: indexz,indexl
+    Integer*4 :: indexl
 
-    ! Red-shift array. Dimensionless.
+!    prefactor = 4.d0/dble(ml(indexl))**2/(dble(ml(indexl))+1.d0)**2*9.d0/4.d0/&
+ !        c**4*Hubble_parameter(0.d0)**4*Omega_m(0.d0)**2    !    Units : 
 
-    Do indexz = 1, number_of_z_limber      
+    !Do indexz=1,number_of_z_limber
 
-       zlimber(indexz) = 10**(log10(zminlimber) + real(indexz-1)*(log10(z_dec) - log10(zminlimber))/real(number_of_z_limber-1))
+     !  f(indexz) = (1.d0 + zlimber(indexz))**2*( com_dist_at_z_dec - comoving_distance(zlimber(indexz)) )**2/&
+      !      com_dist_at_z_dec**2*c/Hubble_parameter(zlimber(indexz))*&
+       !     matter_power_spectrum((dble(ml(indexl)) + 1.d0/2.d0)/comoving_distance(zlimber(indexz)),zlimber(indexz))
 
-    End Do
+!    End Do
 
-    prefactor = 4.d0/dble(ml(indexl))**2/(dble(ml(indexl))+1.d0)**2*9.d0/4.d0/&
-         c**4*Hubble_parameter(0.d0)**4*Omega_m(0.d0)**2    !    Units : 
+    call Interpolate_1D(integrand_limber_approximation_at_z_and_l,dalpha,redshift,zlimber,integrand_limber(:,indexl))
 
-    Do indexz=1,number_of_z_limber
-
-       f(indexz) = (1.d0 + zlimber(indexz))**2*( com_dist_at_z_dec - comoving_distance(zlimber(indexz)) )**2/&
-            com_dist_at_z_dec**2*c/Hubble_parameter(zlimber(indexz))*&
-            matter_power_spectrum((dble(ml(indexl)) + 1.d0/2.d0)/comoving_distance(zlimber(indexz)),zlimber(indexz))
-
-    End Do
-
-    call Interpolate_1D(integrand_limber_approximation_at_z_and_l,dalpha,redshift,zlimber,f)
-
-    integrand_limber_approximation_at_z_and_l = integrand_limber_approximation_at_z_and_l*prefactor/h**3
+!    integrand_limber_approximation_at_z_and_l = integrand_limber_approximation_at_z_and_l!*prefactor/h**3
 
   End function integrand_limber_approximation_at_z_and_l
 
@@ -1111,7 +1101,7 @@ contains
     Real(fgsl_double),parameter :: lower_limit = 1.0E-5_fgsl_double
     Real(fgsl_double),parameter :: upper_limit = z_dec!1.0E-2_fgsl_double
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
-    Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
+    Real(fgsl_double),parameter :: relative_error = 1.0E-8_fgsl_double
 
     Integer(fgsl_int) :: status
     Integer(fgsl_int) :: indexl
@@ -1143,11 +1133,13 @@ contains
 
     use arrays
     use fiducial
+    use omp_lib
+
     Implicit none
 
     Integer*4 :: indexl
 
-    !!$omp Parallel Do Shared(Clpsilimber)
+    !$omp Parallel Do Shared(Clpsilimber)
 
     Do indexl=1,number_of_l
 
@@ -1155,7 +1147,7 @@ contains
 
     End Do
 
-    !!$omp End Parallel Do
+    !$omp End Parallel Do
 
   end subroutine compute_Clpsilimber
 

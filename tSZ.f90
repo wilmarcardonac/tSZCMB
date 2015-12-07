@@ -50,7 +50,8 @@ Program tSZ
     M_functions(1:number_of_M_functions),angular_diameter_distance_at_z(1:number_of_z_functions),&
     dM200ddM_M_z(1:number_of_M_functions,1:number_of_z_functions),&
     sigma_square_M200d(1:number_of_M_functions,1:number_of_z_functions),&
-    dsigma_square_M200d(1:number_of_M_functions,1:number_of_z_functions),stat = status1)
+    dsigma_square_M200d(1:number_of_M_functions,1:number_of_z_functions),&
+    zlimber(number_of_z_limber),integrand_limber(number_of_z_limber,number_of_l),stat = status1)
 
     If (status1 .eq. 0) then
        
@@ -212,6 +213,7 @@ Program tSZ
 
     call compute_comoving_and_angular_diameter_distance() ! COMPUTE COMOVING DISTANCE, ANGULAR DIAMETER DISTANCE, CRITICAL SURFACE DENSITY,
                                                           ! AND COMOVING VOLUME PER STERADIAN
+
     If (do_mass_conversion) then ! COMPUTE MASSES
 
         wtime = omp_get_wtime() ! SETTING STARTING TIME OF MASS CONVERSION
@@ -244,6 +246,8 @@ Program tSZ
      End If
      
      call compute_normalization(Normalization) ! IN MATTER POWER SPECTRUM TO FIT FIDUCIAL SIGMA_8
+
+     call compute_integrand_limber_approximation()
 
      write(UNIT_EXE_FILE,*) 'NORMALIZATION OF MATTER POWER SPECTRUM TO MATCH SIGMA_8 (',sigma8,') WAS COMPUTED'
 
@@ -443,11 +447,11 @@ Program tSZ
 
      write(UNIT_EXE_FILE,*) 'COMPUTING ANGULAR POWER SPECTRUM OF LENSING POTENTIAL'
 
+     call compute_Clpsilimber()! LIMBER APPROXIMATION 
+
      call compute_Clphiphi1h() ! ONE HALO TERM
 
      call compute_Clphiphi2h() ! TWO HALO TERM
-
-     call compute_Clpsilimber()! LIMBER APPROXIMATION 
 
      call compute_Cl()   ! TOTAL 
 

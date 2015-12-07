@@ -363,6 +363,41 @@ Module functions
 
     end function critical_surface_density
 
+    subroutine compute_integrand_limber_approximation()
+
+      use arrays
+      use fiducial
+
+      Implicit none
+
+      Real*8 :: prefactor
+      Integer*4 :: indexz,indexl
+
+      Do indexz = 1, number_of_z_limber      
+
+         zlimber(indexz) = 10**(log10(zminlimber) + real(indexz-1)*(log10(z_dec) - log10(zminlimber))/real(number_of_z_limber-1))
+
+      End Do
+
+      Do indexl=1,number_of_l
+
+         prefactor = 4.d0/dble(ml(indexl))**2/(dble(ml(indexl))+1.d0)**2*9.d0/4.d0/&
+              c**4*Hubble_parameter(0.d0)**4*Omega_m(0.d0)**2    !    Units : 
+
+         Do indexz=1,number_of_z_limber
+
+            integrand_limber(indexz,indexl) = (1.d0 + zlimber(indexz))**2*( com_dist_at_z_dec - &
+                 comoving_distance(zlimber(indexz)) )**2/com_dist_at_z_dec**2*c/Hubble_parameter(zlimber(indexz))*&
+                 matter_power_spectrum((dble(ml(indexl)) + 1.d0/2.d0)/comoving_distance(zlimber(indexz)),zlimber(indexz))
+
+            integrand_limber(indexz,indexl) = integrand_limber(indexz,indexl)*prefactor/h**3
+
+         End Do
+         
+      End Do
+
+    end subroutine compute_integrand_limber_approximation
+
 !    subroutine compute_critical_surface_density()    !    It fills in the vector with critical surface density
 
 !        use arrays

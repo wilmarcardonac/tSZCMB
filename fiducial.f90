@@ -42,6 +42,7 @@ Module fiducial
     Real*8,parameter :: kmax = 1.d3                ! MAXIMUM WAVENUMBER FOR COMPUTATION OF ANGULAR POWER SPECTRUM OF LENSING POTENTIAL 
     Real*8,parameter :: zmax = 1.d1                ! UPPER RED-SHIFT IN HILL & SPERGEL PAPER [1312.4525]
     Real*8,parameter :: zmin = 5.d-3               ! LOWER RED-SHIFT IN HILL & SPERGEL PAPER [1312.4525] 
+    Real*8,parameter :: zminlimber = 1.d-5         ! LOWER RED-SHIFT FOR LIMBER APPROXIMATION
     Real*8,parameter :: sigma8 = 0.817d0           ! RMS OF MATTER FLUCTUATIONS TODAY IN LINEAR THEORY
     Real*8,parameter :: Mmin = 1.d5/h              ! LOWER MASS IN HILL & SPERGEL PAPER [1312.4525]
     Real*8,parameter :: Mmax = 5.d15/h             ! UPPER MASS IN HILL & SPERGEL PAPER [1312.4525]
@@ -54,13 +55,13 @@ Module fiducial
 
     Character(len=*),parameter :: path_to_execution_information = './output/execution_information.txt' ! EXECUTION INFORMATION FILE
 
-    Logical,parameter :: do_mass_conversion = .true.       ! COMPUTE MASSES FOR OTHER HALO DEFINITIONS IF SET IT TRUE
+    Logical,parameter :: do_mass_conversion = .false.!.true.       ! COMPUTE MASSES FOR OTHER HALO DEFINITIONS IF SET IT TRUE
     Logical,parameter :: compute_functions = .true.                 ! COMPUTE FUNCTIONS HAVING 'number_of_z' AND 'number_of_M' SIZE OF ARRAYS, OTHERWISE INTERPOLATE
-    Logical,parameter :: compute_sigma_square = .true.              ! COMPUTE SIGMA SQUARE AND ITS DERIVATIVE IF SET IT TRUE
-    Logical,parameter :: compute_linear_halo_bias = .true. ! COMPUTE LINEAR HALO BIAS IF SET IT TRUE
-    Logical,parameter :: compute_alpha_in_halo_mass_function = .true. ! COMPUTE CONSTANT ALPHA IN HALO MASS FUNCTION IF SET IT TRUE
-    Logical,parameter :: compute_halo_mass_function = .true. ! COMPUTE HALO MASS FUNCTION IF SET IT TRUE
-    Logical,parameter :: compute_the_lensing_potential = .true. ! COMPUTE LENSING POTENTIAL IF SET IT TRUE
+    Logical,parameter :: compute_sigma_square = .false.!.true.              ! COMPUTE SIGMA SQUARE AND ITS DERIVATIVE IF SET IT TRUE
+    Logical,parameter :: compute_linear_halo_bias = .false.!.true. ! COMPUTE LINEAR HALO BIAS IF SET IT TRUE
+    Logical,parameter :: compute_alpha_in_halo_mass_function = .false.!.true. ! COMPUTE CONSTANT ALPHA IN HALO MASS FUNCTION IF SET IT TRUE
+    Logical,parameter :: compute_halo_mass_function = .false.!.true. ! COMPUTE HALO MASS FUNCTION IF SET IT TRUE
+    Logical,parameter :: compute_the_lensing_potential = .false.!.true. ! COMPUTE LENSING POTENTIAL IF SET IT TRUE
     Logical,parameter :: compute_the_form_factor = .true. !.false. !.true. ! COMPUTE FORM FACTOR IF SET IT TRUE
 
 End Module fiducial
