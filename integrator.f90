@@ -324,6 +324,16 @@ contains
 
   end subroutine compute_comoving_and_angular_diameter_distance
 
+  function nonnormalised_halo_mass_function_f_nu(nu,beta,phi,eta,gamma)
+
+    Implicit none
+
+    Real*8 :: nonnormalised_halo_mass_function_f_nu,nu,beta,phi,eta,gamma
+
+    nonnormalised_halo_mass_function_f_nu = (1.d0 + (beta*nu)**(-2.d0*phi))*nu**(2.d0*eta)*exp(-gamma*nu**2/2.d0)
+
+  end function nonnormalised_halo_mass_function_f_nu
+
   function nonnormalised_halo_mass_function(virial_Mass_index,redshift_index)    ! Equation (8) in "The large-scale bias of dark matter halos: 
 
     use fiducial    ! numerical calibration and model tests" without \alpha constant. This function corresponds to Equation (C2) in
@@ -332,7 +342,7 @@ contains
 
     Implicit none    ! from first line of table 4. Units : 1/(solar mass*Mpc**3)
 
-    Real*8 :: nonnormalised_halo_mass_function,R,sigma,nu,beta,phi,eta,gamma,M200d_M_z
+    Real*8 :: nonnormalised_halo_mass_function,R,sigma,nu,M200d_M_z
     Real*8 :: f_nu,g_sigma,rdeltad,dsigma
     Real*8,parameter :: delta_c = 1.686d0    ! page 880 in "The large-scale ..."
     Real*8,parameter :: beta0 = 0.589d0
@@ -357,15 +367,7 @@ contains
 
        nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
 
-       beta = beta0*( 1.d0 + 3.d0 )**(0.20d0) 
-
-       phi = phi0*( 1.d0 + 3.d0 )**(-0.08d0)
-
-       eta = eta0*( 1.d0 + 3.d0 )**(0.27d0)
-
-       gamma = gamma0*( 1.d0 + 3.d0 )**(-0.01d0)
-
-       f_nu = (1.d0 + (beta*nu)**(-2.d0*phi))*nu**(2.d0*eta)*dexp(-gamma*nu**2/2.d0)
+       f_nu = halo_mass_function_f_nu(nu,1.d0,3.d0) 
 
        g_sigma = nu*f_nu            ! Equation (C2) in "Toward a ... universality"
 
@@ -385,15 +387,7 @@ contains
 
        nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
 
-       beta = beta0*( 1.d0 + z(redshift_index) )**(0.20d0) 
-
-       phi = phi0*( 1.d0 + z(redshift_index) )**(-0.08d0)
-
-       eta = eta0*( 1.d0 + z(redshift_index) )**(0.27d0)
-
-       gamma = gamma0*( 1.d0 + z(redshift_index) )**(-0.01d0)
-
-       f_nu = (1.d0 + (beta*nu)**(-2.d0*phi))*nu**(2.d0*eta)*exp(-gamma*nu**2/2.d0)
+       f_nu = halo_mass_function_f_nu(nu,1.d0,z(redshift_index)) 
 
        g_sigma = nu*f_nu            ! Equation (C2) in "Toward a ... universality"
 
@@ -405,49 +399,50 @@ contains
 
   end function nonnormalised_halo_mass_function
 
-  Function integrand_alpha_halo_mass_function(virial_mass, params) bind(c)
+  Function integrand_alpha_halo_mass_function(nu, params) bind(c)
 
-    real(c_double), value :: virial_mass
+    real(c_double), value :: nu
     type(c_ptr), value :: params
     real(c_double) :: integrand_alpha_halo_mass_function
-    Integer(c_int), pointer :: indexz
+    Real(c_double), pointer :: pa(:)
 
-    call c_f_pointer(params, indexz)
+    call c_f_pointer(params, pa,(/2/)) ! pa(1) = alpha, pa(2) = red-shift
 
-    integrand_alpha_halo_mass_function =  integrand_alpha_halo_mass_function_at_z(virial_mass,indexz)
+    integrand_alpha_halo_mass_function =  linear_halo_bias_b_nu(nu)*halo_mass_function_f_nu(nu,pa(1),pa(2))
+!integrand_alpha_halo_mass_function_at_z(virial_mass,indexz)
 
   End function integrand_alpha_halo_mass_function
 
-  function integrand_alpha_halo_mass_function_at_z(virial_mass,indexz)
+!  function integrand_alpha_halo_mass_function_at_z(virial_mass,indexz)
 
-    use arrays
-    use fiducial
-    use omp_lib
+  !  use arrays
+ !   use fiducial
+!    use omp_lib
 
-    Implicit none
+!    Implicit none
 
-    Real*8 :: virial_mass,integrand_alpha_halo_mass_function_at_z,dalpha
-    Real*8,dimension(number_of_M) :: f
+    !Real*8 :: virial_mass,integrand_alpha_halo_mass_function_at_z,dalpha
+   ! Real*8,dimension(number_of_M) :: f
 
-    Integer*4 :: indexz,indexM
+  !  Integer*4 :: indexz,indexM
 
-    !$omp Parallel Do Shared(f,bMz,M,z,dM200ddM)
+ !   !$omp Parallel Do Shared(f,bMz,M,z,dM200ddM)
 
-    Do indexM=1,number_of_M
+    !Do indexM=1,number_of_M
 
-       f(indexM) = nonnormalised_halo_mass_function(indexM,indexz)*bMz(indexM,indexz)*&
-            M(indexM)/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0*&
-            dM200ddM(indexM,indexz) 
+     !  f(indexM) = nonnormalised_halo_mass_function(indexM,indexz)*bMz(indexM,indexz)*&
+      !      M(indexM)/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0*&
+       !     dM200ddM(indexM,indexz) 
 
-    End Do
+!    End Do
 
-    !$omp End Parallel Do
+  !  !$omp End Parallel Do
 
-    call Interpolate_1D(integrand_alpha_halo_mass_function_at_z,dalpha,virial_mass,M,f)
+   ! call Interpolate_1D(integrand_alpha_halo_mass_function_at_z,dalpha,virial_mass,M,f)
 
-  End function integrand_alpha_halo_mass_function_at_z
+ ! End function integrand_alpha_halo_mass_function_at_z
 
-  Subroutine compute_alpha_halo_mass_function_at_z(indexz,output)
+  Subroutine compute_alpha_halo_mass_function_at_z(redshift,output)
 
     use fiducial
 
@@ -455,22 +450,29 @@ contains
 
     Integer(fgsl_size_t), parameter :: nmax=10000
 
-    Integer(fgsl_int),target :: pp
-    Real(fgsl_double) :: result, error, output
-    Real(fgsl_double),parameter :: lower_limit = Mmin!1.0E-3_fgsl_double
-    Real(fgsl_double),parameter :: upper_limit = Mmax!1.0E-2_fgsl_double
+    Real(fgsl_double),target :: pp(2)
+    Real(fgsl_double) :: result, error, output, redshift
+    Real(fgsl_double),parameter :: lower_limit = 1.0E-6_fgsl_double
+    Real(fgsl_double),parameter :: upper_limit = 1.0E1_fgsl_double
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
-    Real(fgsl_double),parameter :: relative_error = 1.0E-1_fgsl_double
+    Real(fgsl_double),parameter :: relative_error = 1.0E-8_fgsl_double
 
     Integer(fgsl_int) :: status
-    Integer(fgsl_int) :: indexz
 
     Type(c_ptr) :: ptr
     Type(fgsl_function) :: f_obj
     Type(fgsl_integration_workspace) :: wk
 
-    pp = indexz
+    If (redshift .gt. 3.d0) then
 
+       pp = (/1.d0,3.d0/)
+
+    Else
+
+       pp = (/1.d0,redshift/)
+
+    End If
+    
     ptr = c_loc(pp)
 
     f_obj = fgsl_function_init(integrand_alpha_halo_mass_function, ptr)
@@ -491,7 +493,7 @@ contains
   subroutine compute_alpha_halo_mass_function()    ! It computes \alpha constant in halo mass function (Equation (8)) of "The large-scale 
 
     use fiducial    ! bias of dark matter halos: numerical calibration and model tests" for the red-shift array
-    !use omp_lib
+    use omp_lib
     use arrays
     Implicit none
 
@@ -505,15 +507,15 @@ contains
 
     If (compute_functions) then
 
-       !!$omp Parallel Do Shared(alpha_halo_mass_function)
+       !$omp Parallel Do Shared(alpha_halo_mass_function)
 
        Do indexz=1,number_of_z
 
-          call compute_alpha_halo_mass_function_at_z(indexz,alpha_halo_mass_function(indexz))   ! dimensionless
+          call compute_alpha_halo_mass_function_at_z(z(indexz),alpha_halo_mass_function(indexz))   ! dimensionless
 
        End Do
 
-       !!$omp End Parallel Do
+       !$omp End Parallel Do
 
     Else
 
@@ -533,6 +535,29 @@ contains
 
   end subroutine compute_alpha_halo_mass_function
 
+  function halo_mass_function_f_nu(nu,alpha,z)
+
+    Implicit none
+
+    Real*8 :: halo_mass_function_f_nu,nu,alpha,beta,phi,eta,gamma,z
+    Real*8,parameter :: beta0 = 0.589d0    ! page 880 in "The large-scale ..."
+    Real*8,parameter :: phi0 = -0.729d0
+    Real*8,parameter :: eta0 = -0.243d0
+    Real*8,parameter :: gamma0 = 0.864d0
+
+    beta = beta0*( 1.d0 + z )**(0.20d0) 
+
+    phi = phi0*( 1.d0 + z )**(-0.08d0)
+
+    eta = eta0*( 1.d0 + z )**(0.27d0)
+
+    gamma = gamma0*( 1.d0 + z )**(-0.01d0)
+
+    halo_mass_function_f_nu = alpha*(1.d0 + (beta*nu)**(-2.d0*phi))*&
+         nu**(2.d0*eta)*exp(-gamma*nu**2/2.d0)
+
+  end function halo_mass_function_f_nu
+
   function halo_mass_function(virial_Mass_index,redshift_index) ! Equation (8) in "The large-scale bias of dark matter halos: numerical calibration and model tests".
 
     use fiducial                 ! Units of M [M_{200d}] : solar mass. Units : 1/(solar mass*Mpc**3). Halo definition : mean density
@@ -541,7 +566,7 @@ contains
 
     Implicit none                 
 
-    Real*8 :: halo_mass_function,R,sigma,nu,beta,phi,eta,gamma,M200d_M_z
+    Real*8 :: halo_mass_function,R,sigma,nu,M200d_M_z,alpha
     Real*8 :: f_nu,g_sigma,rdeltad,dsigma!,alpha_halo_mass_function_z        
     Real*8,parameter :: delta_c = 1.686d0    ! page 880 in "The large-scale ..."
     Real*8,parameter :: beta0 = 0.589d0
@@ -566,16 +591,9 @@ contains
 
        nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
 
-       beta = beta0*( 1.d0 + 3.d0 )**(0.20d0) 
+       alpha = alpha_halo_redshift_3
 
-       phi = phi0*( 1.d0 + 3.d0 )**(-0.08d0)
-
-       eta = eta0*( 1.d0 + 3.d0 )**(0.27d0)
-
-       gamma = gamma0*( 1.d0 + 3.d0 )**(-0.01d0)
-
-       f_nu = alpha_halo_redshift_3*(1.d0 + (beta*nu)**(-2.d0*phi))*&
-            nu**(2.d0*eta)*exp(-gamma*nu**2/2.d0)
+       f_nu = halo_mass_function_f_nu(nu,alpha,3.d0)
 
        g_sigma = nu*f_nu ! dimensionless           ! Equation (C2) in "Toward a ... universality"
 
@@ -593,16 +611,9 @@ contains
 
        nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
 
-       beta = beta0*( 1.d0 + z(redshift_index) )**(0.20d0) 
+       alpha = alpha_halo_mass_function(redshift_index)
 
-       phi = phi0*( 1.d0 + z(redshift_index) )**(-0.08d0)
-
-       eta = eta0*( 1.d0 + z(redshift_index) )**(0.27d0)
-
-       gamma = gamma0*( 1.d0 + z(redshift_index) )**(-0.01d0)
-
-       f_nu = alpha_halo_mass_function(redshift_index)*(1.d0 + (beta*nu)**(-2.d0*phi))*nu**(2.d0*eta)*&
-            exp(-gamma*nu**2/2.d0)
+       f_nu = halo_mass_function_f_nu(nu,alpha,z(redshift_index))
 
        g_sigma = nu*f_nu ! dimensionless           ! Equation (C2) in "Toward a ... universality"
 
@@ -654,6 +665,16 @@ contains
        stop
 
     End If
+
+    Do indexM=1,number_of_M
+
+       Do indexz=1,number_of_z
+
+          write(15,'(i10,es18.10,i5,2es18.10)') indexM, M(indexM), indexz, z(indexz), dndM(indexM,indexz)
+
+       End Do
+
+    End Do
 
     close(15)
 

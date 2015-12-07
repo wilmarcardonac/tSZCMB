@@ -1362,6 +1362,20 @@ Module functions
                        philMz(indexl,indexM,indexz) = lensing_potential(M(indexM),z(indexz),indexl,'virial')/&
                             Scrit(indexz)
 
+                    End Do
+
+                 End Do
+
+              End Do
+
+              !$omp End Parallel Do
+
+              Do indexl=1,number_of_l
+
+                 Do indexM=1,number_of_M
+
+                    Do indexz=1,number_of_z
+
                        write(15,'(3i10,es18.10,i5,2es18.10)') indexl,ml(indexl),indexM,M(indexM),indexz,&
                             z(indexz),philMz(indexl,indexM,indexz)
 
@@ -1370,8 +1384,6 @@ Module functions
                  End Do
 
               End Do
-
-              !$omp End Parallel Do
 
               close(15)
         
@@ -2153,16 +2165,10 @@ Module functions
 
         use arrays    ! numerical calibration and model tests". It computes the linear halo bias. (See paper for details about parameters). 
         use fiducial  ! Mass given must be M_{200d}. Dimensionless. 
+
         Implicit none    
 
-        Real*8 :: linear_halo_bias,sigma,nu
-        Real*8,parameter :: y = log10(DeltaSO)
-        Real*8,parameter :: A = 1.d0 + 2.4d-1*y*exp(-(4.d0/y)**4)
-        Real*8,parameter :: aa = 4.4d-1*y - 8.8d-1
-        Real*8,parameter :: B = 1.83d-1
-        Real*8,parameter :: bb = 1.5d0 
-        Real*8,parameter :: CC = 1.9d-2 + 1.07d-1*y + 1.9d-1*dexp(-(4.d0/y)**4)
-        Real*8,parameter :: ccc = 2.4d0
+        Real*8 :: linear_halo_bias,nu,sigma
         Real*8,parameter :: delta_c = 1.686d0
         Integer*4 :: indexM_virial,index_redshift
         
@@ -2171,9 +2177,29 @@ Module functions
 
         nu = delta_c/sigma
 
-        linear_halo_bias = 1.d0 - A*nu**aa/(nu**aa + delta_c**aa) + B*nu**b + CC*nu**ccc
+        linear_halo_bias = linear_halo_bias_b_nu(nu)
 
     end function linear_halo_bias
+
+    function linear_halo_bias_b_nu(nu)
+
+      use fiducial
+
+      Implicit none
+
+      Real*8 :: linear_halo_bias_b_nu,nu
+      Real*8,parameter :: y = log10(DeltaSO)
+      Real*8,parameter :: A = 1.d0 + 2.4d-1*y*exp(-(4.d0/y)**4)
+      Real*8,parameter :: aa = 4.4d-1*y - 8.8d-1
+      Real*8,parameter :: B = 1.83d-1
+      Real*8,parameter :: bb = 1.5d0 
+      Real*8,parameter :: CC = 1.9d-2 + 1.07d-1*y + 1.9d-1*exp(-(4.d0/y)**4)
+      Real*8,parameter :: ccc = 2.4d0
+      Real*8,parameter :: delta_c = 1.686d0
+
+      linear_halo_bias_b_nu = 1.d0 - A*nu**aa/(nu**aa + delta_c**aa) + B*nu**b + CC*nu**ccc
+
+    end function linear_halo_bias_b_nu
 
     subroutine compute_bMz()
 

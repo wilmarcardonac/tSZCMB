@@ -314,7 +314,7 @@ Program tSZ
 
      End If
      
-     call Interpolate_1D(alpha_halo_redshift_3,d_alpha_halo_redshift_3,3.d0,z,alpha_halo_mass_function)
+     call compute_alpha_halo_mass_function_at_z(3.d0,alpha_halo_redshift_3)
 
      If (compute_halo_mass_function) then
 
@@ -357,7 +357,7 @@ Program tSZ
 
 !     stop
 
-     call compute_mean_bias_matter()
+!     call compute_mean_bias_matter()
 
 !     stop
 
@@ -453,7 +453,7 @@ Program tSZ
 
      call write_Cl()     ! OF ALL COMPUTATIONS 
 
-!     stop
+     stop
 
      If (compute_the_form_factor) then
 
