@@ -51,7 +51,10 @@ Program tSZ
     dM200ddM_M_z(1:number_of_M_functions,1:number_of_z_functions),&
     sigma_square_M200d(1:number_of_M_functions,1:number_of_z_functions),&
     dsigma_square_M200d(1:number_of_M_functions,1:number_of_z_functions),&
-    zlimber(number_of_z_limber),integrand_limber(number_of_z_limber,number_of_l),stat = status1)
+    zlimber(number_of_z_limber),integrand_limber(number_of_z_limber,number_of_l),&
+    inte_pre_cl_phiphi(number_of_l,number_of_M,number_of_z),inte_cl_phiphi_1h(number_of_l,number_of_z),&
+    inte_pre_cl_phiphi_2h(number_of_l,number_of_M,number_of_z),&
+    inte_cl_phiphi_2h(number_of_l,number_of_z),stat = status1)
 
     If (status1 .eq. 0) then
        
@@ -449,7 +452,15 @@ Program tSZ
 
      call compute_Clpsilimber()! LIMBER APPROXIMATION 
 
+     call compute_integrand_pre_cl_phiphi_at_z_and_l()
+
+     call compute_integrand_cl_phiphi_one_halo_at_z_and_l()
+     
      call compute_Clphiphi1h() ! ONE HALO TERM
+
+     call compute_integrand_pre_cl_phiphi_2h_at_z_and_l()
+
+     call compute_integrand_cl_phiphi_two_halo_at_z_and_l()
 
      call compute_Clphiphi2h() ! TWO HALO TERM
 

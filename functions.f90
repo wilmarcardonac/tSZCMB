@@ -1161,35 +1161,35 @@ Module functions
 
     end subroutine read_ylMz
 
-    subroutine Interpolate_ylMz()
+!    subroutine Interpolate_ylMz()
 
-      use arrays
-      use fiducial
+ !     use arrays
+  !    use fiducial
       !use omp_lib
-      Implicit none
+   !   Implicit none
 
-      Integer*4 :: indexM,indexz,indexl
+    !  Integer*4 :: indexM,indexz,indexl
 
-      Do indexl=1,number_of_l
+     ! Do indexl=1,number_of_l
 
          !!!!$omp Parallel Do Shared(ylMz_interpolation,M_functions,z_functions,M,z,ylMz)
 
-         Do indexM=1,number_of_M_functions
+      !   Do indexM=1,number_of_M_functions
 
-            Do indexz=1,number_of_z_functions
+       !     Do indexz=1,number_of_z_functions
 
-               call Interpolate_2D(ylMz_interpolation(indexl,indexM,indexz),M_functions(indexM),z_functions(indexz),&
-                    M(1:number_of_M),z(1:number_of_z),ylMz(indexl,1:number_of_M,1:number_of_z))
+        !       call Interpolate_2D(ylMz_interpolation(indexl,indexM,indexz),M_functions(indexM),z_functions(indexz),&
+         !           M(1:number_of_M),z(1:number_of_z),ylMz(indexl,1:number_of_M,1:number_of_z))
 
-            End Do
+          !  End Do
 
-         End Do
+!         End Do
 
          !!!!$omp End Parallel Do
 
-      End Do
+ !     End Do
 
-    end subroutine Interpolate_ylMz
+  !  end subroutine Interpolate_ylMz
 
     function lensing_potential(virial_Mass,redshift,indexl,halo_definition)    ! Lensing potential. Equation (2.10) in 1312.4525. Units of M : solar mass
 
@@ -1461,35 +1461,35 @@ Module functions
 
     end subroutine read_philMz
 
-    subroutine Interpolate_philMz()
+    !subroutine Interpolate_philMz()
 
-      use arrays
-      use fiducial
+    !  use arrays
+    !  use fiducial
       !use omp_lib
-      Implicit none
+    !  Implicit none
 
-      Integer*4 :: indexM,indexz,indexl
+     ! Integer*4 :: indexM,indexz,indexl
 
-      Do indexl=1,number_of_l
+      !Do indexl=1,number_of_l
 
          !!!!$omp Parallel Do Shared(philMz_interpolation,M_functions,z_functions,M,z,philMz)
 
-         Do indexM=1,number_of_M_functions
+       !  Do indexM=1,number_of_M_functions
 
-            Do indexz=1,number_of_z_functions
+        !    Do indexz=1,number_of_z_functions
 
-               call Interpolate_2D(philMz_interpolation(indexl,indexM,indexz),M_functions(indexM),z_functions(indexz),&
-                    M(1:number_of_M),z(1:number_of_z),philMz(indexl,1:number_of_M,1:number_of_z))
+         !      call Interpolate_2D(philMz_interpolation(indexl,indexM,indexz),M_functions(indexM),z_functions(indexz),&
+          !          M(1:number_of_M),z(1:number_of_z),philMz(indexl,1:number_of_M,1:number_of_z))
 
-            End Do
+           ! End Do
 
-         End Do
+         !End Do
 
          !!!!$omp End Parallel Do
 
-      End Do
+      !End Do
 
-    end subroutine Interpolate_philMz
+    !end subroutine Interpolate_philMz
 
     function window_function(k,R) ! Equation (7) of "Cosmology from the Thermal Sunyaev-Zel'dovich Power spectrum: Primordial 
                               ! non-Gaussianity and massive neutrinos [1303.4726]. Units of k : 1/Mpc. Units of R : Mpc. Both k and R 
@@ -2119,31 +2119,31 @@ Module functions
 
     end subroutine read_dndM
 
-    subroutine Interpolate_dndM()
+!    subroutine Interpolate_dndM()
 
-      use arrays
-      use fiducial
+ !     use arrays
+  !    use fiducial
       !use omp_lib
-      Implicit none
+   !   Implicit none
 
-      Integer*4 :: indexM,indexz
+    !  Integer*4 :: indexM,indexz
 
       !!!!$omp Parallel Do Shared(dndM_interpolation,M_functions,z_functions,M,z,dndM)
 
-      Do indexM=1,number_of_M_functions
+     ! Do indexM=1,number_of_M_functions
 
-         Do indexz=1,number_of_z_functions
+      !   Do indexz=1,number_of_z_functions
 
-            call Interpolate_2D(dndM_interpolation(indexM,indexz),M_functions(indexM),z_functions(indexz),&
-                 M(1:number_of_M),z(1:number_of_z),dndM(1:number_of_M,1:number_of_z))
+       !     call Interpolate_2D(dndM_interpolation(indexM,indexz),M_functions(indexM),z_functions(indexz),&
+        !         M(1:number_of_M),z(1:number_of_z),dndM(1:number_of_M,1:number_of_z))
 
-         End Do
+         !End Do
 
-      End Do
+!      End Do
 
       !!!!$omp End Parallel Do
 
-    end subroutine Interpolate_dndM
+ !   end subroutine Interpolate_dndM
 
     subroutine write_dndM_at_z(indexz)
 
@@ -2319,31 +2319,31 @@ Module functions
 
     end subroutine read_bMz
 
-    subroutine Interpolate_bMz()
+!    subroutine Interpolate_bMz()
 
-      use arrays
-      use fiducial
-      !use omp_lib
-      Implicit none
+ !     use arrays
+  !    use fiducial
+   !   !use omp_lib
+    !  Implicit none
 
-      Integer*4 :: indexM,indexz
+     ! Integer*4 :: indexM,indexz
 
       !!!!$omp Parallel Do Shared(bMz_interpolation,M_functions,z_functions,M,z,bMz)
 
-      Do indexM=1,number_of_M_functions
+      !Do indexM=1,number_of_M_functions
 
-         Do indexz=1,number_of_z_functions
+       !  Do indexz=1,number_of_z_functions
 
-            call Interpolate_2D(bMz_interpolation(indexM,indexz),M_functions(indexM),z_functions(indexz),&
-                 M(1:number_of_M),z(1:number_of_z),bMz(1:number_of_M,1:number_of_z))
+        !    call Interpolate_2D(bMz_interpolation(indexM,indexz),M_functions(indexM),z_functions(indexz),&
+         !        M(1:number_of_M),z(1:number_of_z),bMz(1:number_of_M,1:number_of_z))
 
-         End Do
+         !End Do
 
-      End Do
+      !End Do
 
       !!!!!$omp End Parallel Do
 
-    end subroutine Interpolate_bMz
+    !end subroutine Interpolate_bMz
 
     subroutine write_bMz_at_z(indexz)
 

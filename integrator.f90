@@ -794,25 +794,50 @@ contains
 
   End function integrand_pre_cl_phiphi
 
-  function integrand_pre_cl_phiphi_at_z_and_l(virial_mass,indexz,indexl)
+  subroutine compute_integrand_pre_cl_phiphi_at_z_and_l()
 
     use arrays
     use fiducial
 
     Implicit none
 
-    Real*8 :: virial_mass,integrand_pre_cl_phiphi_at_z_and_l,dalpha
-    Real*8,dimension(number_of_M) :: f
+    Integer*4 :: indexM,indexz,indexl
 
-    Integer*4 :: indexz,indexM,indexl
+    Do indexl=1,number_of_l
 
-    Do indexM=1,number_of_M
+       Do indexM=1,number_of_M
 
-       f(indexM) = dndM(indexM,indexz)*philMz(indexl,indexM,indexz)**2 ! Units : 1/solar mass/Mpc**3
+          Do indexz=1,number_of_z
+
+             inte_pre_cl_phiphi(indexl,indexM,indexz) = dndM(indexM,indexz)*philMz(indexl,indexM,indexz)**2 ! Units : 1/solar mass/Mpc**3
+
+          End Do
+
+       End Do
 
     End Do
+    
+  end subroutine compute_integrand_pre_cl_phiphi_at_z_and_l
 
-    call Interpolate_1D(integrand_pre_cl_phiphi_at_z_and_l,dalpha,virial_mass,M,f)
+  function integrand_pre_cl_phiphi_at_z_and_l(virial_mass,indexz,indexl)
+
+    use arrays
+    !use fiducial
+
+    Implicit none
+
+    Real*8 :: virial_mass,integrand_pre_cl_phiphi_at_z_and_l,dalpha
+    !Real*8,dimension(number_of_M) :: f
+
+    Integer*4 :: indexz,indexl
+
+    !Do indexM=1,number_of_M
+
+    !   f(indexM) = dndM(indexM,indexz)*philMz(indexl,indexM,indexz)**2 ! Units : 1/solar mass/Mpc**3
+
+    !End Do
+
+    call Interpolate_1D(integrand_pre_cl_phiphi_at_z_and_l,dalpha,virial_mass,M,inte_pre_cl_phiphi(indexl,:,indexz))
 
   End function integrand_pre_cl_phiphi_at_z_and_l
 
@@ -865,21 +890,44 @@ contains
     Implicit none
 
     Real*8 :: redshift,integrand_cl_phiphi_one_halo_at_z_and_l,dalpha
-    Real*8,dimension(number_of_z) :: f
+    !Real*8,dimension(number_of_z) :: f
 
-    Integer*4 :: indexz,indexl
+    Integer*4 :: indexl !indexl
 
-    Do indexz=1,number_of_z
+    !Do indexz=1,number_of_z
 
-       call compute_pre_cl_phiphi_at_z_and_l(indexz,indexl,f(indexz)) 
+    !   call compute_pre_cl_phiphi_at_z_and_l(indexz,indexl,f(indexz)) 
 
-       f(indexz) = f(indexz)*d2VdzdO(indexz)
+    !   f(indexz) = f(indexz)*d2VdzdO(indexz)
+
+    !End Do
+
+    call Interpolate_1D(integrand_cl_phiphi_one_halo_at_z_and_l,dalpha,redshift,z,inte_cl_phiphi_1h(indexl,:))
+
+  End function integrand_cl_phiphi_one_halo_at_z_and_l
+
+  subroutine compute_integrand_cl_phiphi_one_halo_at_z_and_l()
+
+    use arrays
+    use fiducial
+
+    Implicit none
+
+    Integer*4 :: indexl,indexz
+
+    Do indexl=1,number_of_l
+
+       Do indexz=1,number_of_z
+
+          call compute_pre_cl_phiphi_at_z_and_l(indexz,indexl,inte_cl_phiphi_1h(indexl,indexz))
+
+          inte_cl_phiphi_1h(indexl,indexz) = inte_cl_phiphi_1h(indexl,indexz)*d2VdzdO(indexz)
+
+       End Do
 
     End Do
 
-    call Interpolate_1D(integrand_cl_phiphi_one_halo_at_z_and_l,dalpha,redshift,z,f)
-
-  End function integrand_cl_phiphi_one_halo_at_z_and_l
+  end subroutine compute_integrand_cl_phiphi_one_halo_at_z_and_l
 
   Function integrand_cl_phiphi_one_halo(redshift, params) bind(c)
 
@@ -1235,25 +1283,50 @@ contains
 
 !  end function pre_Cl_1
 
-  function integrand_pre_cl_phiphi_2h_at_z_and_l(virial_mass,indexz,indexl)
+  subroutine compute_integrand_pre_cl_phiphi_2h_at_z_and_l()
 
     use arrays
     use fiducial
 
     Implicit none
 
-    Real*8 :: virial_mass,integrand_pre_cl_phiphi_2h_at_z_and_l,dalpha
-    Real*8,dimension(number_of_M) :: f
+    Integer*4 :: indexl,indexM,indexz
 
-    Integer*4 :: indexz,indexM,indexl
+    Do indexl=1,number_of_l
 
-    Do indexM=1,number_of_M
+       Do indexM=1,number_of_M
 
-       f(indexM) = dndM(indexM,indexz)*bMz(indexM,indexz)*philMz(indexl,indexM,indexz)  
+          Do indexz=1,number_of_z
+
+             inte_pre_cl_phiphi_2h(indexl,indexM,indexz) = dndM(indexM,indexz)*bMz(indexM,indexz)*philMz(indexl,indexM,indexz)  
+
+          End Do
+
+       End Do
 
     End Do
 
-    call Interpolate_1D(integrand_pre_cl_phiphi_2h_at_z_and_l,dalpha,virial_mass,M,f)
+  end subroutine compute_integrand_pre_cl_phiphi_2h_at_z_and_l
+
+  function integrand_pre_cl_phiphi_2h_at_z_and_l(virial_mass,indexz,indexl)
+
+    use arrays
+    !use fiducial
+
+    Implicit none
+
+    Real*8 :: virial_mass,integrand_pre_cl_phiphi_2h_at_z_and_l,dalpha
+    !Real*8,dimension(number_of_M) :: f
+
+    Integer*4 :: indexz,indexl
+
+    !Do indexM=1,number_of_M
+
+    !   f(indexM) = dndM(indexM,indexz)*bMz(indexM,indexz)*philMz(indexl,indexM,indexz)  
+
+    !End Do
+
+    call Interpolate_1D(integrand_pre_cl_phiphi_2h_at_z_and_l,dalpha,virial_mass,M,inte_pre_cl_phiphi_2h(indexl,:,indexz))
 
   End function integrand_pre_cl_phiphi_2h_at_z_and_l
 
@@ -1311,6 +1384,30 @@ contains
 
   End subroutine compute_pre_cl_phiphi_2h_at_z_and_l
 
+  subroutine compute_integrand_cl_phiphi_two_halo_at_z_and_l()
+
+    use arrays 
+    use fiducial
+
+    Implicit none 
+
+    Integer*4 :: indexz,indexl
+
+    Do indexl=1,number_of_l
+
+       Do indexz=1,number_of_z
+
+          call compute_pre_cl_phiphi_2h_at_z_and_l(indexz,indexl,inte_cl_phiphi_2h(indexl,indexz))
+
+          inte_cl_phiphi_2h(indexl,indexz) = inte_cl_phiphi_2h(indexl,indexz)**2*d2VdzdO(indexz)*&
+            matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance_at_z(indexz),z(indexz))    !  Dimensionless
+          
+       End Do
+
+    End Do
+
+  end subroutine compute_integrand_cl_phiphi_two_halo_at_z_and_l
+
   function integrand_cl_phiphi_two_halo_at_z_and_l(redshift,indexl)
 
     use arrays
@@ -1320,20 +1417,20 @@ contains
     Implicit none
 
     Real*8 :: redshift,integrand_cl_phiphi_two_halo_at_z_and_l,dalpha
-    Real*8,dimension(number_of_z) :: f
+    !Real*8,dimension(number_of_z) :: f
 
-    Integer*4 :: indexz,indexl
+    Integer*4 :: indexl!,indexl
 
-    Do indexz=1,number_of_z
+    !Do indexz=1,number_of_z
 
-       call compute_pre_cl_phiphi_2h_at_z_and_l(indexz,indexl,f(indexz)) 
+    !   call compute_pre_cl_phiphi_2h_at_z_and_l(indexz,indexl,f(indexz)) 
 
-       f(indexz) = f(indexz)**2*d2VdzdO(indexz)*&
-            matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance_at_z(indexz),z(indexz))    !  Dimensionless
+    !   f(indexz) = f(indexz)**2*d2VdzdO(indexz)*&
+     !       matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance_at_z(indexz),z(indexz))    !  Dimensionless
 
-    End Do
+    !End Do
 
-    call Interpolate_1D(integrand_cl_phiphi_two_halo_at_z_and_l,dalpha,redshift,z,f)
+    call Interpolate_1D(integrand_cl_phiphi_two_halo_at_z_and_l,dalpha,redshift,z,inte_cl_phiphi_2h(indexl,:))
 
   End function integrand_cl_phiphi_two_halo_at_z_and_l
 
