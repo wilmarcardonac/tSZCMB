@@ -26,6 +26,8 @@ contains
 
   subroutine sigma_square_at_M_and_z(mass,redshift,output)
 
+    use fiducial
+
     Implicit none
 
     Integer(fgsl_size_t), parameter :: nmax=1000000
@@ -283,44 +285,22 @@ contains
 
     Integer*4 :: indexz
 
-    If (compute_functions) then
-
 !!$omp Parallel Do Shared(comoving_distance_at_z,z)
 
-       Do indexz=1,number_of_z
+    Do indexz=1,number_of_z
 
-          call comoving_distance_at_redshift(z(indexz),comoving_distance_at_z(indexz))
+       call comoving_distance_at_redshift(z(indexz),comoving_distance_at_z(indexz))
 
-          angular_diameter_distance_at_z(indexz) = comoving_distance_at_z(indexz)/(1.d0 + z(indexz))
+       angular_diameter_distance_at_z(indexz) = comoving_distance_at_z(indexz)/(1.d0 + z(indexz))
 
-          Scrit(indexz) = c**2*comoving_distance_at_z(indexz)*(1.d0 + &
-               z(indexz))/4.d0/Pi/G/comoving_distance_at_z(indexz)/(com_dist_at_z_dec - comoving_distance_at_z(indexz))*Mpc/M_sun
+       Scrit(indexz) = c**2*comoving_distance_at_z(indexz)*(1.d0 + &
+            z(indexz))/4.d0/Pi/G/comoving_distance_at_z(indexz)/(com_dist_at_z_dec - comoving_distance_at_z(indexz))*Mpc/M_sun
 
-          d2VdzdO(indexz) = c*(1.d0 + z(indexz))**2*angular_diameter_distance_at_z(indexz)**2/Hubble_parameter(z(indexz))
+       d2VdzdO(indexz) = c*(1.d0 + z(indexz))**2*angular_diameter_distance_at_z(indexz)**2/Hubble_parameter(z(indexz))
 
-       End Do
-
-!!$omp End Parallel Do
-
-    Else
-
-!!$omp Parallel Do Shared(comoving_distance_at_z,z_functions)
-
-       Do indexz=1,number_of_z_functions
-
-          call comoving_distance_at_redshift(z_functions(indexz),comoving_distance_at_z(indexz))
-
-          angular_diameter_distance_at_z(indexz) = comoving_distance_at_z(indexz)/(1.d0 + z_functions(indexz))
-
-          Scrit(indexz) = c**2*comoving_distance_at_z(indexz)*(1.d0 + &
-               z_functions(indexz))/4.d0/Pi/G/comoving_distance_at_z(indexz)/(com_dist_at_z_dec - &
-               comoving_distance_at_z(indexz))*Mpc/M_sun
-
-       End Do
+    End Do
 
 !!$omp End Parallel Do
-
-    End If
 
   end subroutine compute_comoving_and_angular_diameter_distance
 
@@ -445,6 +425,7 @@ contains
   Subroutine compute_alpha_halo_mass_function_at_z(redshift,output)
 
     use fiducial
+    use arrays
 
     Implicit none
 
@@ -452,8 +433,8 @@ contains
 
     Real(fgsl_double),target :: pp(2)
     Real(fgsl_double) :: result, error, output, redshift
-    Real(fgsl_double),parameter :: lower_limit = 1.0E-6_fgsl_double
-    Real(fgsl_double),parameter :: upper_limit = 1.0E1_fgsl_double
+    Real(fgsl_double) :: lower_limit != 1.686/sqrt(maxval(sigma_square_M200d))! 1.0E-1_fgsl_double
+    Real(fgsl_double) :: upper_limit != 1.13E2_fgsl_double
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
     Real(fgsl_double),parameter :: relative_error = 1.0E-8_fgsl_double
 
@@ -462,6 +443,10 @@ contains
     Type(c_ptr) :: ptr
     Type(fgsl_function) :: f_obj
     Type(fgsl_integration_workspace) :: wk
+
+    lower_limit = 1.686d0/sqrt(maxval(sigma_square_M200d))
+
+    upper_limit = 1.686d0/sqrt(minval(sigma_square_M200d))
 
     If (redshift .gt. 3.d0) then
 
@@ -505,25 +490,15 @@ contains
 
     write(15,*) '# index_of_z    red-shift    dndM '
 
-    If (compute_functions) then
+    !$omp Parallel Do Shared(alpha_halo_mass_function)
 
-       !$omp Parallel Do Shared(alpha_halo_mass_function)
+    Do indexz=1,number_of_z
 
-       Do indexz=1,number_of_z
+       call compute_alpha_halo_mass_function_at_z(z(indexz),alpha_halo_mass_function(indexz))   ! dimensionless
 
-          call compute_alpha_halo_mass_function_at_z(z(indexz),alpha_halo_mass_function(indexz))   ! dimensionless
+    End Do
 
-       End Do
-
-       !$omp End Parallel Do
-
-    Else
-
-       print *,'COMPUTE ALPHA HALO MASS FUNCTIONS ROUTINE WORKS ONLY FOR M AND Z ARRAYS OF SIZE ', number_of_M, number_of_z
-
-       stop
-
-    End If
+    !$omp End Parallel Do
 
     Do indexz=1,number_of_z
 
@@ -640,31 +615,21 @@ contains
 
     write(15,*) '#  index_of_M    virial_mass[solar mass]    index_of_z    red-shift    dndM '
 
-    If (compute_functions) then
+    !$omp Parallel Do Shared(dndM,dM200ddM)
 
-       !$omp Parallel Do Shared(dndM,dM200ddM)
+    Do indexM=1,number_of_M
 
-       Do indexM=1,number_of_M
+       Do indexz=1,number_of_z
 
-          Do indexz=1,number_of_z
+          dndM(indexM,indexz) = halo_mass_function(indexM,indexz)*dM200ddM(indexM,indexz)
 
-             dndM(indexM,indexz) = halo_mass_function(indexM,indexz)*dM200ddM(indexM,indexz)
-
-             write(15,'(i10,es18.10,i5,2es18.10)') indexM, M(indexM), indexz, z(indexz), dndM(indexM,indexz)
-
-          End Do
+          write(15,'(i10,es18.10,i5,2es18.10)') indexM, M(indexM), indexz, z(indexz), dndM(indexM,indexz)
 
        End Do
 
-       !$omp End Parallel Do
+    End Do
 
-    Else
-
-       print *,'HALO MASS FUNCTION COMPUTED ONLY FOR ARRAYS M AND Z OF SIZE ', number_of_M, number_of_z
-
-       stop
-
-    End If
+    !$omp End Parallel Do
 
     Do indexM=1,number_of_M
 
@@ -693,6 +658,29 @@ contains
 
   End function integrand_mean_bias_matter
 
+  subroutine compute_integrand_mean_bias_matter_at_z()
+
+    use fiducial
+    use arrays
+    use functions 
+
+    Implicit none
+
+    Integer*4 :: indexM,indexz
+
+    Do indexM=1,number_of_M
+
+       Do indexz=1,number_of_z
+
+          inte_mbz(indexM,indexz) = dndM(indexM,indexz)*bMz(indexM,indexz)*M(indexM)/&
+            mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0
+
+       End Do
+
+    End Do
+
+  end subroutine compute_integrand_mean_bias_matter_at_z
+
   function integrand_mean_bias_matter_at_z(virial_mass,indexz)
 
     use arrays
@@ -701,18 +689,18 @@ contains
     Implicit none
 
     Real*8 :: virial_mass,integrand_mean_bias_matter_at_z,dalpha
-    Real*8,dimension(number_of_M) :: f
+!    Real*8,dimension(number_of_M) :: f
 
-    Integer*4 :: indexz,indexM
+    Integer*4 :: indexz
 
-    Do indexM=1,number_of_M
+!    Do indexM=1,number_of_M
 
-       f(indexM) = dndM(indexM,indexz)*bMz(indexM,indexz)*M(indexM)/&
-            mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0
+!       f(indexM) = dndM(indexM,indexz)*bMz(indexM,indexz)*M(indexM)/&
+ !           mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0
 
-    End Do
+  !  End Do
 
-    call Interpolate_1D(integrand_mean_bias_matter_at_z,dalpha,virial_mass,M,f)
+    call Interpolate_1D(integrand_mean_bias_matter_at_z,dalpha,virial_mass,M,inte_mbz(:,indexz))
 
   End function integrand_mean_bias_matter_at_z
 
@@ -847,7 +835,7 @@ contains
 
     Implicit none
 
-    Integer(fgsl_size_t), parameter :: nmax=10000
+    Integer(fgsl_size_t), parameter :: nmax=1000000
 
     Integer(fgsl_int),target :: pp(2)
     Real(fgsl_double) :: result, error, output
@@ -858,6 +846,7 @@ contains
 
     Integer(fgsl_int) :: status
     Integer(fgsl_int) :: indexz,indexl
+    Integer(fgsl_int),parameter :: key = 4
 
     Type(c_ptr) :: ptr
     Type(fgsl_function) :: f_obj
@@ -871,8 +860,10 @@ contains
 
     wk = fgsl_integration_workspace_alloc(nmax)
 
-    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
-         absolute_error, relative_error, nmax, wk, result, error)
+!    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
+ !        absolute_error, relative_error, nmax, wk, result, error)
+    status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
+         absolute_error, relative_error, nmax, key, wk, result, error)
 
     output = result
 
@@ -989,21 +980,11 @@ contains
 
     Integer*4 :: indexl
 
-!    If (compute_functions) then
-
- !      print *, 'ONE HALO TERM FOR ANGULAR POWER SPECTRUM OF LENSING POTENTIAL COMPUTED ONLY WITH INTERPOLATING FUNCTIONS'
-
-  !     stop
-
-   ! Else
-
     Do indexl=1,number_of_l
 
        call compute_cl_phiphi_one_halo_at_l(indexl,Clphiphi1h(indexl))
 
     End Do
-
-   ! End If
 
   end subroutine compute_Clphiphi1h
 
@@ -1349,7 +1330,7 @@ contains
 
     Implicit none
 
-    Integer(fgsl_size_t), parameter :: nmax=10000
+    Integer(fgsl_size_t), parameter :: nmax=1000000
 
     Integer(fgsl_int),target :: pp(2)
     Real(fgsl_double) :: result, error, output
@@ -1360,6 +1341,7 @@ contains
 
     Integer(fgsl_int) :: status
     Integer(fgsl_int) :: indexz,indexl
+    Integer(fgsl_int),parameter :: key = 4
 
     Type(c_ptr) :: ptr
     Type(fgsl_function) :: f_obj
@@ -1373,8 +1355,11 @@ contains
 
     wk = fgsl_integration_workspace_alloc(nmax)
 
-    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
-         absolute_error, relative_error, nmax, wk, result, error)
+!    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
+ !        absolute_error, relative_error, nmax, wk, result, error)
+
+    status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
+         absolute_error, relative_error, nmax, key, wk, result, error)
 
     output = result
 
@@ -1451,7 +1436,7 @@ contains
 
     Implicit none
 
-    Integer(fgsl_size_t), parameter :: nmax=10000
+    Integer(fgsl_size_t), parameter :: nmax=1000000
 
     Integer(fgsl_int),target :: pp
     Real(fgsl_double) :: result, error, output
@@ -1462,6 +1447,7 @@ contains
 
     Integer(fgsl_int) :: status
     Integer(fgsl_int) :: indexl
+!    Integer(fgsl_int),parameter :: key = 4
 
     Type(c_ptr) :: ptr
     Type(fgsl_function) :: f_obj
@@ -1477,8 +1463,13 @@ contains
 
     status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
          absolute_error, relative_error, nmax, wk, result, error)
+!    status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
+ !        absolute_error, relative_error, nmax, key, wk, result, error)
+
 
     output = result/h**3
+
+!    print *, output, error, indexl
 
     call fgsl_function_free(f_obj)
 
@@ -1494,22 +1485,11 @@ contains
 
     Integer*4 :: indexl
 
-    !        If (compute_functions) then
-
-    !           print *, 'TWO HALO TERM FOR ANGULAR POWER SPECTRUM OF LENSING POTENTIAL COMPUTED ONLY WITH INTERPOLATING FUNCTIONS'
-
-    !           stop
-
-    !        Else
-
     Do indexl=1,number_of_l
 
        call compute_cl_phiphi_two_halo_at_l(indexl,Clphiphi2h(indexl))
 
     End Do
-
-    !        End If
-
 
   end subroutine compute_Clphiphi2h
 
@@ -1655,33 +1635,23 @@ contains
 
     Integer*4 :: indexl,indexM,indexz
 
-    If (compute_functions) then
+!!$omp Parallel Do Shared(ylMz)
 
-       !!$omp Parallel Do Shared(ylMz)
+    Do indexl=1,number_of_l
 
-       Do indexl=1,number_of_l
+       Do indexM=1,number_of_M
 
-          Do indexM=1,number_of_M
+          Do indexz=1,number_of_z
 
-             Do indexz=1,number_of_z
-
-                call compute_form_factor_at_M_z_and_l(indexM,indexz,indexl,ylMz(indexl,indexM,indexz))
-
-             End Do
+             call compute_form_factor_at_M_z_and_l(indexM,indexz,indexl,ylMz(indexl,indexM,indexz))
 
           End Do
 
        End Do
 
-       !!$omp End Parallel Do
+    End Do
 
-    Else
-
-       print *,'FORM FACTOR COMPUTATION NEED L,M, AND Z ARRAYS OF SIZE ', number_of_l, number_of_M, number_of_z
-
-       stop
-
-    End If
+!!$omp End Parallel Do
 
     open(15,file='./precomputed_quantities/form_factor/form_factor.dat')
 
@@ -1760,6 +1730,31 @@ contains
 
 !  end function pre_Cl
 
+  subroutine compute_integrand_pre_cl_yphi_at_z_and_l()
+
+    use arrays
+    use fiducial
+
+    Implicit none
+
+    Integer*4 :: indexl,indexz,indexM
+
+    Do indexl=1,number_of_l
+
+       Do indexM=1,number_of_M
+
+          Do indexz=1,number_of_z
+
+             inte_pre_cl_yphi(indexl,indexM,indexz) = dndM(indexM,indexz)*ylMz(indexl,indexM,indexz)*philMz(indexl,indexM,indexz) ! Units : 1/solar mass/Mpc**3 
+
+          End Do
+
+       End Do
+
+    End Do
+
+  end subroutine compute_integrand_pre_cl_yphi_at_z_and_l
+
   function integrand_pre_cl_yphi_at_z_and_l(virial_mass,indexz,indexl)
 
     use arrays
@@ -1768,17 +1763,17 @@ contains
     Implicit none
 
     Real*8 :: virial_mass,integrand_pre_cl_yphi_at_z_and_l,dalpha
-    Real*8,dimension(number_of_M) :: f
+!    Real*8,dimension(number_of_M) :: f
 
-    Integer*4 :: indexz,indexM,indexl
+    Integer*4 :: indexz,indexl!,indexl
 
-    Do indexM=1,number_of_M
+!    Do indexM=1,number_of_M
 
-       f(indexM) = dndM(indexM,indexz)*ylMz(indexl,indexM,indexz)*philMz(indexl,indexM,indexz) ! Units : 1/solar mass/Mpc**3 
+ !      f(indexM) = dndM(indexM,indexz)*ylMz(indexl,indexM,indexz)*philMz(indexl,indexM,indexz) ! Units : 1/solar mass/Mpc**3 
 
-    End Do
+  !  End Do
 
-    call Interpolate_1D(integrand_pre_cl_yphi_at_z_and_l,dalpha,virial_mass,M,f)
+    call Interpolate_1D(integrand_pre_cl_yphi_at_z_and_l,dalpha,virial_mass,M,inte_pre_cl_yphi(indexl,:,indexz))
 
   End function integrand_pre_cl_yphi_at_z_and_l
 
@@ -1836,6 +1831,29 @@ contains
 
   End subroutine compute_pre_cl_yphi_at_z_and_l
 
+  subroutine compute_integrand_cl_yphi_one_halo_at_z_and_l()
+
+    use arrays
+    use fiducial
+
+    Implicit none
+
+    Integer*4 :: indexz, indexl
+
+    Do indexl=1,number_of_l
+
+       Do indexz=1,number_of_z
+
+          call compute_pre_cl_yphi_at_z_and_l(indexz,indexl,inte_cl_yphi_1h(indexl,indexz))
+
+          inte_cl_yphi_1h(indexl,indexz)  = inte_cl_yphi_1h(indexl,indexz)*d2VdzdO(indexz)
+
+       End Do
+
+    End Do
+
+  end subroutine compute_integrand_cl_yphi_one_halo_at_z_and_l
+
   function integrand_cl_yphi_one_halo_at_z_and_l(redshift,indexl)
 
     use arrays
@@ -1844,19 +1862,19 @@ contains
     Implicit none
 
     Real*8 :: redshift,integrand_cl_yphi_one_halo_at_z_and_l,dalpha
-    Real*8,dimension(number_of_z) :: f
+!    Real*8,dimension(number_of_z) :: f
 
-    Integer*4 :: indexz,indexl
+    Integer*4 :: indexl!,indexl
 
-    Do indexz=1,number_of_z
+!    Do indexz=1,number_of_z
 
-       call compute_pre_cl_yphi_at_z_and_l(indexz,indexl,f(indexz)) 
+ !      call compute_pre_cl_yphi_at_z_and_l(indexz,indexl,f(indexz)) 
 
-       f(indexz) = f(indexz)*d2VdzdO(indexz)
+  !     f(indexz) = f(indexz)*d2VdzdO(indexz)
 
-    End Do
+   ! End Do
 
-    call Interpolate_1D(integrand_cl_yphi_one_halo_at_z_and_l,dalpha,redshift,z,f)
+    call Interpolate_1D(integrand_cl_yphi_one_halo_at_z_and_l,dalpha,redshift,z,inte_cl_yphi_1h(indexl,:))
 
   End function integrand_cl_yphi_one_halo_at_z_and_l
 
@@ -1920,21 +1938,11 @@ contains
 
     Integer*4 :: indexl
 
-!    If (compute_functions) then
-
- !      print *, 'ONE HALO TERM FOR ANGULAR POWER SPECTRUM OF LENSING POTENTIAL COMPUTED ONLY WITH INTERPOLATING FUNCTIONS'
-
-  !     stop
-
-   ! Else
-
     Do indexl=1,number_of_l
 
        call compute_cl_yphi_one_halo_at_l(indexl,Cl1h(indexl))
 
     End Do
-
-   ! End If
 
   end subroutine compute_Clyphi1h
 
@@ -2201,6 +2209,31 @@ contains
 
   !end function pre_Cl_2
 
+  subroutine compute_integrand_pre_cl_yphi_2h_at_z_and_l()
+
+    use arrays 
+    use fiducial
+
+    Implicit none 
+
+    Integer*4 :: indexl,indexM,indexz
+
+    Do indexl=1,number_of_l
+
+       Do indexM=1,number_of_M
+
+          Do indexz=1,1,number_of_z
+
+             inte_pre_cl_yphi_2h(indexl,indexM,indexz) = dndM(indexM,indexz)*bMz(indexM,indexz)*ylMz(indexl,indexM,indexz) 
+
+          End Do
+
+       End Do
+
+    End Do
+
+  end subroutine compute_integrand_pre_cl_yphi_2h_at_z_and_l
+
   function integrand_pre_cl_yphi_2h_at_z_and_l(virial_mass,indexz,indexl)
 
     use arrays
@@ -2209,17 +2242,17 @@ contains
     Implicit none
 
     Real*8 :: virial_mass,integrand_pre_cl_yphi_2h_at_z_and_l,dalpha
-    Real*8,dimension(number_of_M) :: f
+!    Real*8,dimension(number_of_M) :: f
 
-    Integer*4 :: indexz,indexM,indexl
+    Integer*4 :: indexz,indexl!,indexl
 
-    Do indexM=1,number_of_M
+ !   Do indexM=1,number_of_M
 
-       f(indexM) = dndM(indexM,indexz)*bMz(indexM,indexz)*ylMz(indexl,indexM,indexz) 
+  !     f(indexM) = dndM(indexM,indexz)*bMz(indexM,indexz)*ylMz(indexl,indexM,indexz) 
 
-    End Do
+   ! End Do
 
-    call Interpolate_1D(integrand_pre_cl_yphi_2h_at_z_and_l,dalpha,virial_mass,M,f)
+    call Interpolate_1D(integrand_pre_cl_yphi_2h_at_z_and_l,dalpha,virial_mass,M,inte_pre_cl_yphi_2h(indexl,:,indexz))
 
   End function integrand_pre_cl_yphi_2h_at_z_and_l
 
@@ -2277,31 +2310,59 @@ contains
 
   End subroutine compute_pre_cl_yphi_2h_at_z_and_l
 
-  function integrand_cl_yphi_two_halo_at_z_and_l(redshift,indexl)
+  subroutine compute_integrand_cl_yphi_two_halo_at_z_and_l()
 
-    use arrays
     use fiducial
+    use arrays
     use functions
 
     Implicit none
 
-    Real*8 :: redshift,integrand_cl_yphi_two_halo_at_z_and_l,dalpha
-    Real*8,dimension(number_of_z) :: f1,f2,f3
+    Integer*4 :: indexl,indexz
+    Real*8,dimension(number_of_z) :: f1,f2
 
-    Integer*4 :: indexz,indexl
+    Do indexl=1,number_of_l
 
-    Do indexz=1,number_of_z
+       Do indexz=1,number_of_z
 
-       call compute_pre_cl_yphi_2h_at_z_and_l(indexz,indexl,f1(indexz)) 
+          call compute_pre_cl_yphi_2h_at_z_and_l(indexz,indexl,f1(indexz)) 
 
-       call compute_pre_cl_phiphi_2h_at_z_and_l(indexz,indexl,f2(indexz))
+          call compute_pre_cl_phiphi_2h_at_z_and_l(indexz,indexl,f2(indexz))
 
-       f3(indexz) = f1(indexz)*f2(indexz)*d2VdzdO(indexz)*&
+          inte_cl_yphi_2h(indexl,indexz) = f1(indexz)*f2(indexz)*d2VdzdO(indexz)*&
             matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance_at_z(indexz),z(indexz))    !  Dimensionless
+
+       End Do
 
     End Do
 
-    call Interpolate_1D(integrand_cl_yphi_two_halo_at_z_and_l,dalpha,redshift,z,f3)
+  end subroutine compute_integrand_cl_yphi_two_halo_at_z_and_l
+    
+  function integrand_cl_yphi_two_halo_at_z_and_l(redshift,indexl)
+
+    use arrays
+    use fiducial
+!    use functions
+
+    Implicit none
+
+    Real*8 :: redshift,integrand_cl_yphi_two_halo_at_z_and_l,dalpha
+!    Real*8,dimension(number_of_z) :: f1,f2,f3
+
+    Integer*4 :: indexl!,indexl
+
+ !   Do indexz=1,number_of_z
+
+  !     call compute_pre_cl_yphi_2h_at_z_and_l(indexz,indexl,f1(indexz)) 
+
+   !    call compute_pre_cl_phiphi_2h_at_z_and_l(indexz,indexl,f2(indexz))
+
+    !   f3(indexz) = f1(indexz)*f2(indexz)*d2VdzdO(indexz)*&
+     !       matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance_at_z(indexz),z(indexz))    !  Dimensionless
+
+!    End Do
+
+    call Interpolate_1D(integrand_cl_yphi_two_halo_at_z_and_l,dalpha,redshift,z,inte_cl_yphi_2h(indexl,:))
 
   End function integrand_cl_yphi_two_halo_at_z_and_l
 
@@ -2365,22 +2426,11 @@ contains
 
     Integer*4 :: indexl
 
-    !        If (compute_functions) then
-
-    !           print *, 'TWO HALO TERM FOR ANGULAR POWER SPECTRUM OF LENSING POTENTIAL COMPUTED ONLY WITH INTERPOLATING FUNCTIONS'
-
-    !           stop
-
-    !        Else
-
     Do indexl=1,number_of_l
 
        call compute_cl_yphi_two_halo_at_l(indexl,Cl2h(indexl))
 
     End Do
-
-    !        End If
-
 
   end subroutine compute_Clyphi2h
 
@@ -2472,14 +2522,6 @@ contains
 
     Integer*4 :: indexl
 
-    !        If (compute_functions) then
-
-    !           print *,'CL ARE COMPUTED WHEN INTERPOLATING FUNCTIONS USED'
-
-    !           stop
-
-    !        Else
-
     Do indexl=1,number_of_l
 
        Cl(indexl) = Cl1h(indexl) + Cl2h(indexl)
@@ -2487,8 +2529,6 @@ contains
        Clphiphi(indexl) = Clphiphi1h(indexl) + Clphiphi2h(indexl)
 
     End Do
-
-    !       End If
 
   end subroutine compute_Cl
 

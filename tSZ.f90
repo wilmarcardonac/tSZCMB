@@ -10,26 +10,13 @@ Program tSZ
 
     ! DECLARATION AND INITIALIZATION OF VARIABLES
     Implicit none
-    Integer*4 :: index1!,index2,index3                                       ! COUNTER
-    Real*8 :: wtime!,hola                          ! STORES TIME OF EXECUTION
+    Integer*4 :: index1                                       ! COUNTER
+    Real*8 :: wtime                          ! STORES TIME OF EXECUTION
     Character(len=15),parameter :: halo_definition = 'virial' ! HALO DEFINITION USED IN THE COMPUTATIONS
-    !Integer*4,parameter :: hola1=10
-    !Integer*4,parameter :: hola2=100
-    !Real*8,dimension(hola1) :: zdebug
-    !Real*8,dimension(hola2) :: Mdebug
-!    Real*8,dimension(hola2,hola1) :: dndM_M_z
 
     call comoving_distance_at_redshift(z_dec,com_dist_at_z_dec) ! COMPUTE COMOVING DISTANCE AT DECOUPLING
 
     open(UNIT_EXE_FILE,file=path_to_execution_information)     ! OPEN FILE TO STORE EXECUTION INFORMATION 
-
-    If ((number_of_M .lt. 100) .or. (number_of_M_functions .lt. 100)) then
-
-       write(UNIT_EXE_FILE,*) 'MASS ARRAYS TOO SMALL. THEY MUST BE AT LEAST SIZE 100'
-
-       stop
-
-    End If
 
     ! ALLOCATING MEMORY FOR : RED-SHIFT, VIRIAL MASS, MULTIPOLES, WAVEVECTOR, ONE- AND TWO-HALO Y-tSZ CROSS CORRELATION AND THEIR SUM, 
     ! MEAN DENSITY MASS, CRITICAL DENSITY MASS, CRITICAL DENSITY RADIUS, DERIVATIVE OF MEAN DENSITY MASS w.r.t VIRIAL MASS, 
@@ -41,20 +28,21 @@ Program tSZ
     Cl1h(1:number_of_l),Cl2h(1:number_of_l),Cl(1:number_of_l),M200d(1:number_of_M,1:number_of_z),&
     M200c(1:number_of_M,1:number_of_z),r200c(1:number_of_M,1:number_of_z),dM200ddM(1:number_of_M,1:number_of_z),&
     r200d(1:number_of_M,1:number_of_z),Clphiphi1h(1:number_of_l),Clphiphi2h(1:number_of_l),&
-    Clphiphi(1:number_of_l),alpha_halo_mass_function(1:number_of_z_functions),dM200cdM(1:number_of_M,1:number_of_z),&
-    Clpsilimber(1:number_of_l),dndM(1:number_of_M_functions,1:number_of_z_functions),&
-    ylMz(1:number_of_l,1:number_of_M_functions,1:number_of_z_functions),&
-    philMz(1:number_of_l,1:number_of_M_functions,1:number_of_z_functions),d2VdzdO(1:number_of_z_functions),&
-    bMz(1:number_of_M,1:number_of_z),mbz(1:number_of_z_functions),&
-    comoving_distance_at_z(1:number_of_z_functions),z_functions(1:number_of_z_functions),Scrit(1:number_of_z_functions),&
-    M_functions(1:number_of_M_functions),angular_diameter_distance_at_z(1:number_of_z_functions),&
-    dM200ddM_M_z(1:number_of_M_functions,1:number_of_z_functions),&
-    sigma_square_M200d(1:number_of_M_functions,1:number_of_z_functions),&
-    dsigma_square_M200d(1:number_of_M_functions,1:number_of_z_functions),&
+    Clphiphi(1:number_of_l),alpha_halo_mass_function(1:number_of_z),dM200cdM(1:number_of_M,1:number_of_z),&
+    Clpsilimber(1:number_of_l),dndM(1:number_of_M,1:number_of_z),&
+    ylMz(1:number_of_l,1:number_of_M,1:number_of_z),&
+    philMz(1:number_of_l,1:number_of_M,1:number_of_z),d2VdzdO(1:number_of_z),&
+    bMz(1:number_of_M,1:number_of_z),mbz(1:number_of_z),inte_mbz(number_of_M,number_of_z),&
+    comoving_distance_at_z(1:number_of_z),Scrit(1:number_of_z),&
+    angular_diameter_distance_at_z(1:number_of_z),&
+    dM200ddM_M_z(1:number_of_M,1:number_of_z),&
+    sigma_square_M200d(1:number_of_M,1:number_of_z),&
+    dsigma_square_M200d(1:number_of_M,1:number_of_z),&
     zlimber(number_of_z_limber),integrand_limber(number_of_z_limber,number_of_l),&
     inte_pre_cl_phiphi(number_of_l,number_of_M,number_of_z),inte_cl_phiphi_1h(number_of_l,number_of_z),&
-    inte_pre_cl_phiphi_2h(number_of_l,number_of_M,number_of_z),&
-    inte_cl_phiphi_2h(number_of_l,number_of_z),stat = status1)
+    inte_pre_cl_phiphi_2h(number_of_l,number_of_M,number_of_z),inte_cl_yphi_1h(number_of_l,number_of_z),&
+    inte_cl_phiphi_2h(number_of_l,number_of_z),inte_pre_cl_yphi(number_of_l,number_of_M,number_of_z),&
+    inte_pre_cl_yphi_2h(number_of_l,number_of_M,number_of_z),inte_cl_yphi_2h(number_of_l,number_of_z),stat = status1)
 
     If (status1 .eq. 0) then
        
@@ -68,11 +56,11 @@ Program tSZ
 
     End If
 
-    Do index1 = 1, number_of_k ! FILLS WAVEVECTOR ARRAY. UNITS : 1/Mpc
+!    Do index1 = 1, number_of_k ! FILLS WAVEVECTOR ARRAY. UNITS : 1/Mpc
 
-        k(index1) = 10**(log10(kmin) + real(index1-1)*(log10(kmax) - log10(kmin))/real(number_of_k-1))
+ !       k(index1) = 10**(log10(kmin) + real(index1-1)*(log10(kmax) - log10(kmin))/real(number_of_k-1))
 
-    End Do
+  !  End Do
 
     Do  index1 = 1,number_of_z+1  ! FILLS RED-SHIFT ARRAY.     
 
@@ -94,123 +82,20 @@ Program tSZ
 
        End If
 
-        !z(index1) = 10**(log10(zmin) + real(index1-1)*(log10(zmax) - log10(zmin))/real(number_of_z-1))
-
     End Do
 
     Do index1 = 1, number_of_M ! FILLS VIRIAL MASS ARRAY. UNITS: Solar mass    
        
-!       If (index1 .le. number_of_M_log) then
-
        M(index1) = 10**(log10(Mmin) + real(index1-1)*(log10(Mmax) - log10(Mmin))/real(number_of_M-1))
-
-!       Else
-
-!       If ( index1 .le. 90 ) then
-          
- !         M(index1) = 1.d5 + dble(index1 - 1)*1.d4
-
-  !     Else If ( index1 .le. 180 ) then 
-          
-   !       M(index1) = M(90) + dble(index1 - 90)*1.d5
-
-    !   Else If ( index1 .le. 270 ) then
-
-     !     M(index1) = M(180) + dble(index1 - 180)*1.d6
-
-      ! Else If ( index1 .le. 360 ) then
-
-       !   M(index1) = M(270) + dble(index1 - 270)*1.d7
-
-       !Else If ( index1 .le. 450 ) then
-
-!          M(index1) = M(360) + dble(index1 - 360)*1.d8
-
- !      Else If ( index1 .le. 540 ) then
-
-  !        M(index1) = M(450) + dble(index1 - 450)*1.d9
-
-   !    Else If ( index1 .le. 630 ) then
-
-    !      M(index1) = M(540) + dble(index1 - 540)*1.d10
-
-     !  Else If ( index1 .le. 720 ) then
-
-      !    M(index1) = M(630) + dble(index1 - 630)*1.d11
-
-!       Else If ( index1 .le. 810 ) then
-
- !         M(index1) = M(720) + dble(index1 - 720)*1.d12
-
-  !     Else If ( index1 .le. 900 ) then
-
-   !       M(index1) = M(810) + dble(index1 - 810)*1.d13
-
-    !   Else 
-
-     !     M(index1) = M(900) + dble(index1 - 900)*1.d14
-
-!       Else 
-
-!          M(index1) = M(number_of_M_log+270) + dble(index1 - number_of_M_log - 270)*1.d14
-
-      ! End If
-
-    !End If
 
     End Do
     
-!    Do index1 = -1, number_of_M+2 ! FILLS VIRIAL MASS ARRAY. UNITS: Solar mass    
-
-!       M(index1) = M(index1)/h
-
-!       If (M(index1) .lt. M(index1-1)) then
-
-!          print *, 'FOUND', index1
-
-!          stop
-
-!       End If
-
-!    End Do
-
-!    print *, M(-1),M(0),M(1),Mmin,M(number_of_M),Mmax
-
-    !stop
-
     Do index1 = 1, number_of_l ! FILLS MULTIPOLE ARRAY.    
 
         ml(index1) = int(10**(log10(dble(lmin)) + real(index1-1)*(log10(dble(lmax)) - &
         log10(dble(lmin)))/real(number_of_l-1)),4)
 
     End Do
-
-!    If (compute_functions) then 
-
-!       continue
-
-!    Else
-
-!       Do index1 = 1, number_of_z_functions ! FILLS RED-SHIFT ARRAY.     
-
-!          z_functions(index1) = 10**(log10(zmin) + real(index1-1)*(log10(zmax) - log10(zmin))/real(number_of_z_functions-1))
-
-!       End Do
-    
-!       Do index1 = 1, number_of_M_functions ! FILLS VIRIAL MASS ARRAY. UNITS: Solar mass    
-
-!          M_functions(index1) = 10**(log10(Mmin) + real(index1-1)*(log10(Mmax) - log10(Mmin))/real(number_of_M_functions-1))
-
-!       End Do
-
-!       Do index1 = 1, number_of_l_functions ! FILLS MULTIPOLE ARRAY.    
-
-!          ml_functions(index1) = int(10**(log10(dble(lmin)) + real(index1-1)*(log10(dble(lmax)) - &
-!               log10(dble(lmin)))/real(number_of_l_functions-1)),4)
-
-!       End Do
-
-!    End If 
 
     ! COMPUTATION STARTS
 
@@ -263,7 +148,7 @@ Program tSZ
         call read_sigma_square_M200d()
 
      End If
-     
+
      If (compute_linear_halo_bias) then
 
         write(UNIT_EXE_FILE,*) 'COMPUTING LINEAR HALO BIAS'
@@ -276,34 +161,7 @@ Program tSZ
 
         call read_bMz() ! LINEAR HALO BIAS AS A FUNCTION OF MASS AND RED-SHIFT
 
-        !If (compute_functions) then
-
-        !   continue
-
-        !Else
-
-           !allocate(bMz_interpolation(1:number_of_M_functions,1:number_of_z_functions),&
-            !    stat=status2)
-
-           !If (status2 .eq. 0) then
-
-           !   call Interpolate_bMz()
-
-           !   deallocate(bMz)
-
-           !Else
-
-         !     write(UNIT_EXE_FILE,*) 'PROBLEM ALLOCATING MEMORY FOR "bMz_interpolation" '
-
-          !    stop
-
-          ! End If
-
-        !End If
-
      End If
-
-     !call compute_dM200ddM_M_z()
 
      If (compute_alpha_in_halo_mass_function) then
 
@@ -320,7 +178,7 @@ Program tSZ
                                              ! AT A FIXED RED-SHIFT IS UNITY
 
      End If
-     
+
      call compute_alpha_halo_mass_function_at_z(3.d0,alpha_halo_redshift_3)
 
      If (compute_halo_mass_function) then
@@ -335,42 +193,15 @@ Program tSZ
 
         call read_dndM() ! READING HALO MASS FUNCTION    
 
-!        If (compute_functions) then
-
- !          continue
-
-  !      Else
-
-   !        allocate(dndM_interpolation(1:number_of_M_functions,1:number_of_z_functions),&
-    !            stat=status2)
-
-     !      If (status2 .eq. 0) then
-
-      !        call Interpolate_dndM()
-
-       !       deallocate(dndM)
-
-        !   Else
-
-         !     write(UNIT_EXE_FILE,*) 'PROBLEM ALLOCATING MEMORY FOR "dndM_interpolation" '
-
-          !    stop
-
-           !End If
-
-     !End If
-
      End If
 
-!     stop
+!     call write_dndM_at_z(1)
+
+!     call compute_integrand_mean_bias_matter_at_z()
 
 !     call compute_mean_bias_matter()
-
 !     stop
-
      write(UNIT_EXE_FILE,*) 'COMPUTING COMOVING VOLUME ELEMENT PER STERADIAN'
-
-!     call compute_d2VdzdO()   ! COMPUTES COMOVING VOLUME ELEMENT PER STERADIAN  
 
      If (compute_the_lensing_potential) then 
 
@@ -390,63 +221,7 @@ Program tSZ
 
         call read_philMz() ! READS LENSING POTENTIAL
 
-        !If (compute_functions) then
-
-        !   continue
-
-        !Else
-
-        !   allocate(philMz_interpolation(1:number_of_l,1:number_of_M_functions,1:number_of_z_functions),&
-        !        stat=status2)
-
-        !   If (status2 .eq. 0) then
-
-         !     call Interpolate_philMz()
-
-          !    deallocate(philMz)
-
-          ! Else
-
-           !   write(UNIT_EXE_FILE,*) 'PROBLEM ALLOCATING MEMORY FOR "philMz_interpolation" '
-
-            !  stop
-
-           !End If
-
-        !End If
-
      End If
-
-!     Do index3=1,number_of_l
-
-!        Do index1=1,hola2
-
-!           Do index2=1,hola1
-
-!              call Interpolate_2D(dndM_M_z(index1,index2),Mdebug(index1),zdebug(index2),M_functions(1:number_of_M_functions),&
-!                   z_functions(1:number_of_z_functions),philMz(index3,1:number_of_M_functions,1:number_of_z_functions))
-
-!              hola = (dndM_M_z(index1,index2)- halo_mass_function(Mdebug(index1),zdebug(index2)))/&
-!                   halo_mass_function(Mdebug(index1),zdebug(index2))*100.d0
-
-!              If (hola .gt. 1.d-5) then
-
-!                 print *, Mdebug(index1),zdebug(index2),(dndM_M_z(index1,index2)- lensing_potential(Mdebug(index1),zdebug(index2),&
-!                      index3,halo_definition))
-
-!              End If
-
-!           End Do
-
-!        End Do
-
-!     End Do
-     
-!     stop
-
-!     print *, pre_Clphiphi(320,3)
-
-!     stop
 
      write(UNIT_EXE_FILE,*) 'COMPUTING ANGULAR POWER SPECTRUM OF LENSING POTENTIAL'
 
@@ -455,7 +230,7 @@ Program tSZ
      call compute_integrand_pre_cl_phiphi_at_z_and_l()
 
      call compute_integrand_cl_phiphi_one_halo_at_z_and_l()
-     
+
      call compute_Clphiphi1h() ! ONE HALO TERM
 
      call compute_integrand_pre_cl_phiphi_2h_at_z_and_l()
@@ -488,36 +263,19 @@ Program tSZ
 
         call read_ylMz() ! READS FORM FACTOR
 
-!        If (compute_functions) then
-
- !          continue
-
-  !      Else
-
-   !        allocate(ylMz_interpolation(1:number_of_l,1:number_of_M_functions,1:number_of_z_functions),&
-    !            stat=status2)
-
-     !      If (status2 .eq. 0) then
-
-      !        call Interpolate_ylMz()
-
-       !       deallocate(ylMz)
-
-        !   Else
-
-         !     write(UNIT_EXE_FILE,*) 'PROBLEM ALLOCATING MEMORY FOR "ylMz_interpolation" '
-
-          !    stop
-
-     !End If
-
-!     End If
-
      End If
         
      write(UNIT_EXE_FILE,*) 'COMPUTING ANGULAR POWER SPECTRUM OF Y-tSZ CROSS-CORRELATION'
 
+     call compute_integrand_pre_cl_yphi_at_z_and_l()
+
+     call compute_integrand_cl_yphi_one_halo_at_z_and_l()
+
      call compute_Clyphi1h() ! ONE HALO TERM
+
+     call compute_integrand_pre_cl_yphi_2h_at_z_and_l()
+
+     call compute_integrand_cl_yphi_two_halo_at_z_and_l()
 
      call compute_Clyphi2h() ! TWO HALO TERM
  
@@ -531,7 +289,7 @@ Program tSZ
     deallocate (z,M,k,ml,Cl1h,Cl2h,Clphiphi1h,Clphiphi2h,Cl,Clphiphi,&
     d2VdzdO,dndM,ylMz,philMz,bMz,alpha_halo_mass_function,&
     Clpsilimber,comoving_distance_at_z,mbz,M200c,M200d,r200c,r200d,dM200ddM,dM200cdM,&
-    z_functions,M_functions,Scrit,dM200ddM_M_z)
+    Scrit,dM200ddM_M_z)
 
     ! CLOSE EXECUTION INFORMATION FILE
     close(UNIT_EXE_FILE)

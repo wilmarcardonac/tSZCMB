@@ -247,31 +247,15 @@ Module functions
 
         Integer*4 :: indexz
 
-        If (compute_functions) then
+        !$omp Parallel Do Shared(d2VdzdO)
 
-           !$omp Parallel Do Shared(d2VdzdO)
+        Do indexz=1,number_of_z
 
-           Do indexz=1,number_of_z
+           d2VdzdO(indexz) = comoving_volume_per_steradian(z(indexz))
 
-              d2VdzdO(indexz) = comoving_volume_per_steradian(z(indexz))
+        End Do
 
-           End Do
-
-           !$omp End Parallel Do
-
-        Else
-
-           !$omp Parallel Do Shared(d2VdzdO)
-
-           Do indexz=1,number_of_z_functions
-
-              d2VdzdO(indexz) = comoving_volume_per_steradian(z_functions(indexz))
-
-           End Do
-
-           !$omp End Parallel Do
-
-        End If
+        !$omp End Parallel Do
 
     end subroutine compute_d2VdzdO
 
@@ -1236,7 +1220,7 @@ Module functions
                          ! Xia et al. M is the virial mass. The Fourier transform is truncated to the virial radius
         Real*8 :: k,M,z,FT_NFW_density_profile,Si1,Si2,Ci1,Ci2
         Real*8 :: alpha     ! It determines upper limit in Eq. (2.10) of 1312.4525
-        Real*8,parameter :: alphafactor = 1.060d0!1.037d0
+        Real*8,parameter :: alphafactor = 1.5d0!1.060d0!1.037d0
 
         alpha = alphafactor*concentration_mass_virial(M,z)
 
@@ -1324,111 +1308,101 @@ Module functions
         Integer*4 :: indexl,indexM,indexz
         Character(len=*) :: halo_definition 
 
-        If (compute_functions) then
+        open(15,file='./precomputed_quantities/lensing_potential/lensing_potential.dat')
 
-           open(15,file='./precomputed_quantities/lensing_potential/lensing_potential.dat')
+        If (halo_definition .eq. 'critical_density') then
 
-           If (halo_definition .eq. 'critical_density') then
+           write(15,*) '#  l  virial mass [solar mass]  red-shift  phi'
 
-              write(15,*) '#  l  virial mass [solar mass]  red-shift  phi'
+           !            !$omp Parallel Do Shared(philMz)        
 
-              !            !$omp Parallel Do Shared(philMz)        
+           !            Do indexl=1,number_of_l
 
-              !            Do indexl=1,number_of_l
+           !                Do indexM=1,number_of_M
 
-              !                Do indexM=1,number_of_M
+           !                    Do indexz=1,number_of_z
 
-              !                    Do indexz=1,number_of_z
+           !                        philMz(indexl,indexM,indexz) = lensing_potential(indexM,indexz,indexl,'critical_density')
 
-              !                        philMz(indexl,indexM,indexz) = lensing_potential(indexM,indexz,indexl,'critical_density')
+           !                        write(15,'(i5,3es18.10)') ml(indexl),M(indexM),z(indexz),philMz(indexl,indexM,indexz)
 
-              !                        write(15,'(i5,3es18.10)') ml(indexl),M(indexM),z(indexz),philMz(indexl,indexM,indexz)
+           !                    End Do
 
-              !                    End Do
+           !                End Do
 
-              !                End Do
+           !            End Do
 
-              !            End Do
+           !            !$omp End Parallel Do
 
-              !            !$omp End Parallel Do
+           close(15)
 
-              close(15)
-        
-           Else If (halo_definition .eq. 'mean_background') then 
+        Else If (halo_definition .eq. 'mean_background') then 
 
-              write(15,*) '#  l  virial mass [solar mass]  red-shift  phi'
+           write(15,*) '#  l  virial mass [solar mass]  red-shift  phi'
 
-              !            !$omp Parallel Do Shared(philMz)        
+           !            !$omp Parallel Do Shared(philMz)        
 
-              !            Do indexl=1,number_of_l
+           !            Do indexl=1,number_of_l
 
-              !                Do indexM=1,number_of_M
+           !                Do indexM=1,number_of_M
 
-              !                    Do indexz=1,number_of_z
+           !                    Do indexz=1,number_of_z
 
-              !                        philMz(indexl,indexM,indexz) = lensing_potential(indexM,indexz,indexl,'mean_background')
+           !                        philMz(indexl,indexM,indexz) = lensing_potential(indexM,indexz,indexl,'mean_background')
 
-              !                        write(15,'(i5,3es18.10)') ml(indexl),M(indexM),z(indexz),philMz(indexl,indexM,indexz)
+           !                        write(15,'(i5,3es18.10)') ml(indexl),M(indexM),z(indexz),philMz(indexl,indexM,indexz)
 
-              !                    End Do
+           !                    End Do
 
-              !                End Do
+           !                End Do
 
-              !            End Do
+           !            End Do
 
-              !            !$omp End Parallel Do
+           !            !$omp End Parallel Do
 
-              close(15)
-        
-           Else If (halo_definition .eq. 'virial') then
+           close(15)
 
-              write(15,*) '# Lensing potential file. Number of lines is ',number_of_l*number_of_M*number_of_z
+        Else If (halo_definition .eq. 'virial') then
 
-              write(15,*) '#  index_of_l    l   index_of_M    virial_mass[solar mass]    index_of_z    red-shift    phi'
+           write(15,*) '# Lensing potential file. Number of lines is ',number_of_l*number_of_M*number_of_z
 
-              !$omp Parallel Do Shared(philMz,z,Scrit,M)        
+           write(15,*) '#  index_of_l    l   index_of_M    virial_mass[solar mass]    index_of_z    red-shift    phi'
 
-              Do indexl=1,number_of_l
+           !$omp Parallel Do Shared(philMz,z,Scrit,M)        
 
-                 Do indexM=1,number_of_M
+           Do indexl=1,number_of_l
 
-                    Do indexz=1,number_of_z
+              Do indexM=1,number_of_M
 
-                       philMz(indexl,indexM,indexz) = lensing_potential(M(indexM),z(indexz),indexl,'virial')/&
-                            Scrit(indexz)
+                 Do indexz=1,number_of_z
 
-                    End Do
+                    philMz(indexl,indexM,indexz) = lensing_potential(M(indexM),z(indexz),indexl,'virial')/&
+                         Scrit(indexz)
 
                  End Do
 
               End Do
 
-              !$omp End Parallel Do
+           End Do
 
-              Do indexl=1,number_of_l
+           !$omp End Parallel Do
 
-                 Do indexM=1,number_of_M
+           Do indexl=1,number_of_l
 
-                    Do indexz=1,number_of_z
+              Do indexM=1,number_of_M
 
-                       write(15,'(3i10,es18.10,i5,2es18.10)') indexl,ml(indexl),indexM,M(indexM),indexz,&
-                            z(indexz),philMz(indexl,indexM,indexz)
+                 Do indexz=1,number_of_z
 
-                    End Do
+                    write(15,'(3i10,es18.10,i5,2es18.10)') indexl,ml(indexl),indexM,M(indexM),indexz,&
+                         z(indexz),philMz(indexl,indexM,indexz)
 
                  End Do
 
               End Do
 
-              close(15)
-        
-           End If
+           End Do
 
-        Else
-
-           print *,'LENSING POTENTIAL COMPUTED ONLY FOR L, M, AND Z ARRAYS OF SIZE ', number_of_l, number_of_M, number_of_z
-
-           stop
+           close(15)
 
         End If
 
@@ -1999,41 +1973,41 @@ Module functions
 
 
 
-    subroutine compute_dM200ddM_M_z()
+!    subroutine compute_dM200ddM_M_z()
 
-      use fiducial
-      use arrays
-      use omp_lib
-      Implicit none
+ !     use fiducial
+  !    use arrays
+   !   use omp_lib
+    !  Implicit none
 
-      Integer*4 :: indexM,indexz
+     ! Integer*4 :: indexM,indexz
 
-      If (compute_functions) then
+!      If (compute_functions) then
 
-         print *, 'NEED TO IMPLEMENT DERIVATIVES ROUTINE FOR MASSES'
+ !        print *, 'NEED TO IMPLEMENT DERIVATIVES ROUTINE FOR MASSES'
          
-         stop
+  !       stop
 
-      Else
+   !   Else
 
-         !$omp Parallel Do Shared(dM200ddM_M_z,M_functions,z_functions,M,z,dM200ddM)
+    !     !$omp Parallel Do Shared(dM200ddM_M_z,M_functions,z_functions,M,z,dM200ddM)
 
-         Do indexz=1,number_of_z_functions 
+     !    Do indexz=1,number_of_z_functions 
 
-            Do indexM=1,number_of_M_functions
+      !      Do indexM=1,number_of_M_functions
 
-               call Interpolate_2D(dM200ddM_M_z(indexM,indexz),M_functions(indexM),z_functions(indexz),&
-                    M(1:number_of_M),z(1:number_of_z),dM200ddM(1:number_of_M,1:number_of_z))
+       !        call Interpolate_2D(dM200ddM_M_z(indexM,indexz),M_functions(indexM),z_functions(indexz),&
+        !            M(1:number_of_M),z(1:number_of_z),dM200ddM(1:number_of_M,1:number_of_z))
 
-            End Do
+         !   End Do
 
-         End Do
+!         End Do
 
-         !$omp End Parallel Do
+ !        !$omp End Parallel Do
 
-      End If
+  !    End If
 
-    end subroutine compute_dM200ddM_M_z
+   ! end subroutine compute_dM200ddM_M_z
 
 
     subroutine read_alpha_halo_mass_function()
@@ -2159,7 +2133,7 @@ Module functions
 
         Do indexM=1,number_of_M
 
-            write(15,'(2es18.10)') M(indexM), dndM(indexM,indexz)
+            write(15,'(2es18.10)') M(indexM), M(indexM)**2*dndM(indexM,indexz)/mean_density(z(indexz))
 
         End Do
 
@@ -2252,30 +2226,20 @@ Module functions
 
       write(15,*) '# index_of_M    SO_virial_mass[solar mass]   index_of_z    red-shift  b '
 
-      If (compute_functions) then
+      !$omp Parallel Do Shared(bMz)
 
-         !$omp Parallel Do Shared(bMz)
+      Do indexM=1,number_of_M
 
-         Do indexM=1,number_of_M
+         Do indexz=1,number_of_z
 
-            Do indexz=1,number_of_z
-
-!                bMz(indexM,indexz) = linear_halo_bias(M(indexM),z(indexz))
-               bMz(indexM,indexz) = linear_halo_bias(indexM,indexz)
-
-            End Do
+            !                bMz(indexM,indexz) = linear_halo_bias(M(indexM),z(indexz))
+            bMz(indexM,indexz) = linear_halo_bias(indexM,indexz)
 
          End Do
 
-         !$omp End Parallel Do
+      End Do
 
-      Else
-
-         print *, 'LINEAR HALO BIAS COMPUTED IS ONLY COMPUTED FOR M AND Z ARRAYS OF SIZE ',number_of_M, number_of_z
-
-         stop
-
-      End  If
+      !$omp End Parallel Do
 
       Do indexM=1,number_of_M
 
