@@ -293,8 +293,8 @@ contains
 
        angular_diameter_distance_at_z(indexz) = comoving_distance_at_z(indexz)/(1.d0 + z(indexz))
 
-       Scrit(indexz) = c**2*comoving_distance_at_z(indexz)*(1.d0 + &
-            z(indexz))/4.d0/Pi/G/comoving_distance_at_z(indexz)/(com_dist_at_z_dec - comoving_distance_at_z(indexz))*Mpc/M_sun
+       Scrit(indexz) = c**2*com_dist_at_z_dec*(1.d0 + z(indexz))/4.d0/Pi/G/&
+            comoving_distance_at_z(indexz)/(com_dist_at_z_dec - comoving_distance_at_z(indexz))*Mpc/M_sun
 
        d2VdzdO(indexz) = c*(1.d0 + z(indexz))**2*angular_diameter_distance_at_z(indexz)**2/Hubble_parameter(z(indexz))
 
@@ -322,39 +322,39 @@ contains
 
     Implicit none    ! from first line of table 4. Units : 1/(solar mass*Mpc**3)
 
-    Real*8 :: nonnormalised_halo_mass_function,R,sigma,nu,M200d_M_z
-    Real*8 :: f_nu,g_sigma,rdeltad,dsigma
+    Real*8 :: nonnormalised_halo_mass_function,R,sigma,nu!,M200d_M_z
+    Real*8 :: f_nu,g_sigma,dsigma!rdeltad,dsigma
     Real*8,parameter :: delta_c = 1.686d0    ! page 880 in "The large-scale ..."
-    Real*8,parameter :: beta0 = 0.589d0
-    Real*8,parameter :: phi0 = -0.729d0
-    Real*8,parameter :: eta0 = -0.243d0
-    Real*8,parameter :: gamma0 = 0.864d0
+!    Real*8,parameter :: beta0 = 0.589d0
+ !   Real*8,parameter :: phi0 = -0.729d0
+  !  Real*8,parameter :: eta0 = -0.243d0
+   ! Real*8,parameter :: gamma0 = 0.864d0
     Integer*4 :: virial_Mass_index,redshift_index
 
-    If (z(redshift_index) .gt. 3.d0) then
+!    If (z(redshift_index) .gt. 3.d0) then
 
-       call compute_r_delta_d_from_M_virial_at_z(M(virial_Mass_index),3.d0,DeltaSO,rdeltad)
+ !      call compute_r_delta_d_from_M_virial_at_z(M(virial_Mass_index),3.d0,DeltaSO,rdeltad)
 
-       M200d_M_z = M_delta_d_from_M_virial(3.d0,rdeltad,DeltaSO)
+  !     M200d_M_z = M_delta_d_from_M_virial(3.d0,rdeltad,DeltaSO)
 
-       R = (3.d0*M200d_M_z/4.d0/Pi/mean_density(3.d0)*( 1.d0 + 3.d0 )**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
+   !    R = (3.d0*M200d_M_z/4.d0/Pi/mean_density(3.d0)*( 1.d0 + 3.d0 )**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
 
-       call sigma_square_at_M_and_z(M200d_M_z,3.d0,sigma)
+    !   call sigma_square_at_M_and_z(M200d_M_z,3.d0,sigma)
 
-       call dsigma_square_at_M_and_z(M200d_M_z,3.d0,dsigma)
+     !  call dsigma_square_at_M_and_z(M200d_M_z,3.d0,dsigma)
 
-       sigma = sqrt(sigma) !sigma_squared(M200d_M_z,3.d0))    ! Units : dimensionless
+      ! sigma = sqrt(sigma) !sigma_squared(M200d_M_z,3.d0))    ! Units : dimensionless
 
-       nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
+!       nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
 
-       f_nu = halo_mass_function_f_nu(nu,1.d0,3.d0) 
+ !      f_nu = halo_mass_function_f_nu(nu,1.d0,3.d0) 
 
-       g_sigma = nu*f_nu            ! Equation (C2) in "Toward a ... universality"
+  !     g_sigma = nu*f_nu            ! Equation (C2) in "Toward a ... universality"
 
-       nonnormalised_halo_mass_function = -mean_density(3.d0)/(1.d0 + 3.d0 )**3.d0/2.d0/M200d_M_z**2&
-            *R/3.d0/sigma**2*dsigma*g_sigma ! dsigma_squared_dR(M200d_M_z,3.d0)*g_sigma
+!       nonnormalised_halo_mass_function = -mean_density(3.d0)/(1.d0 + 3.d0 )**3.d0/2.d0/M200d_M_z**2&
+ !           *R/3.d0/sigma**2*dsigma*g_sigma ! dsigma_squared_dR(M200d_M_z,3.d0)*g_sigma
 
-    Else
+  !  Else
 
        R = (3.d0*M200d(virial_Mass_index,redshift_index)/4.d0/Pi/mean_density(z(redshift_index))*(1.d0 + &
             z(redshift_index) )**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
@@ -367,7 +367,15 @@ contains
 
        nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
 
-       f_nu = halo_mass_function_f_nu(nu,1.d0,z(redshift_index)) 
+       If (z(redshift_index) .gt. 3.d0) then
+
+          f_nu = halo_mass_function_f_nu(nu,1.d0,3.d0) 
+
+       Else
+
+          f_nu = halo_mass_function_f_nu(nu,1.d0,z(redshift_index)) 
+
+       End If
 
        g_sigma = nu*f_nu            ! Equation (C2) in "Toward a ... universality"
 
@@ -375,97 +383,118 @@ contains
             2.d0/M200d(virial_Mass_index,redshift_index)**2*&
             R/3.d0/sigma**2*dsigma*g_sigma !dsigma_squared_dR(M200d(virial_Mass_index,redshift_index),z(redshift_index))*g_sigma
 
-    End If
+!    End If
 
   end function nonnormalised_halo_mass_function
 
-  Function integrand_alpha_halo_mass_function(nu, params) bind(c)
+  Function integrand_alpha_halo_mass_function(virial_mass, params) bind(c)
 
-    real(c_double), value :: nu
+    real(c_double), value :: virial_mass
     type(c_ptr), value :: params
     real(c_double) :: integrand_alpha_halo_mass_function
-    Real(c_double), pointer :: pa(:)
 
-    call c_f_pointer(params, pa,(/2/)) ! pa(1) = alpha, pa(2) = red-shift
+    Integer(c_int), pointer :: pa
 
-    integrand_alpha_halo_mass_function =  linear_halo_bias_b_nu(nu)*halo_mass_function_f_nu(nu,pa(1),pa(2))
-!integrand_alpha_halo_mass_function_at_z(virial_mass,indexz)
+    call c_f_pointer(params, pa) ! pa = indexz !(1) = alpha, pa(2) = red-shift
+
+!    integrand_alpha_halo_mass_function =  linear_halo_bias_b_nu(nu)*halo_mass_function_f_nu(nu,pa(1),pa(2))
+    integrand_alpha_halo_mass_function = integrand_alpha_halo_mass_function_at_M_and_z(virial_mass,pa)
 
   End function integrand_alpha_halo_mass_function
 
-!  function integrand_alpha_halo_mass_function_at_z(virial_mass,indexz)
+  subroutine compute_integrand_alpha_halo_mass_function()
 
-  !  use arrays
+    use arrays
+    use fiducial
+    use functions
+
+    Implicit none
+
+    Integer*4 :: indexM,indexz
+
+    Do indexM=1,number_of_M
+
+       Do indexz=1,number_of_z
+
+          inte_dndM(indexM,indexz) = nonnormalised_halo_mass_function(indexM,indexz)*bMz(indexM,indexz)*&
+               M(indexM)/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0*&
+               dM200ddM(indexM,indexz) 
+
+       End Do
+
+    End Do
+
+  end subroutine compute_integrand_alpha_halo_mass_function
+
+  function integrand_alpha_halo_mass_function_at_M_and_z(virial_mass,indexz)
+
+    use arrays
  !   use fiducial
 !    use omp_lib
 
-!    Implicit none
+    Implicit none
 
-    !Real*8 :: virial_mass,integrand_alpha_halo_mass_function_at_z,dalpha
+    Real*8 :: virial_mass,integrand_alpha_halo_mass_function_at_M_and_z,dalpha
    ! Real*8,dimension(number_of_M) :: f
 
-  !  Integer*4 :: indexz,indexM
+    Integer*4 :: indexz!,indexM
 
  !   !$omp Parallel Do Shared(f,bMz,M,z,dM200ddM)
 
-    !Do indexM=1,number_of_M
-
-     !  f(indexM) = nonnormalised_halo_mass_function(indexM,indexz)*bMz(indexM,indexz)*&
-      !      M(indexM)/mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0*&
-       !     dM200ddM(indexM,indexz) 
-
-!    End Do
-
   !  !$omp End Parallel Do
 
-   ! call Interpolate_1D(integrand_alpha_halo_mass_function_at_z,dalpha,virial_mass,M,f)
+    call Interpolate_1D(integrand_alpha_halo_mass_function_at_M_and_z,dalpha,virial_mass,M,inte_dndM(:,indexz))
 
- ! End function integrand_alpha_halo_mass_function_at_z
+  End function integrand_alpha_halo_mass_function_at_M_and_z
 
-  Subroutine compute_alpha_halo_mass_function_at_z(redshift,output)
+  Subroutine compute_alpha_halo_mass_function_at_z(indexz,output)
 
     use fiducial
     use arrays
 
     Implicit none
 
-    Integer(fgsl_size_t), parameter :: nmax=10000
+    Integer(fgsl_size_t), parameter :: nmax=1000000
 
-    Real(fgsl_double),target :: pp(2)
-    Real(fgsl_double) :: result, error, output, redshift
-    Real(fgsl_double) :: lower_limit != 1.686/sqrt(maxval(sigma_square_M200d))! 1.0E-1_fgsl_double
-    Real(fgsl_double) :: upper_limit != 1.13E2_fgsl_double
+!    Real(fgsl_double),target :: pp(2)
+    Real(fgsl_double) :: result, error, output!, redshift
+    Real(fgsl_double),parameter :: lower_limit =  Mmin !1.686/sqrt(maxval(sigma_square_M200d))! 1.0E-1_fgsl_double
+    Real(fgsl_double),parameter :: upper_limit = Mmax !1.13E2_fgsl_double
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
-    Real(fgsl_double),parameter :: relative_error = 1.0E-8_fgsl_double
+    Real(fgsl_double),parameter :: relative_error = 1.0E-4_fgsl_double
 
-    Integer(fgsl_int) :: status
+    Integer(fgsl_int) :: status,indexz
+    Integer(fgsl_int),target :: pp
+    Integer(fgsl_int),parameter :: key = 4
 
     Type(c_ptr) :: ptr
     Type(fgsl_function) :: f_obj
     Type(fgsl_integration_workspace) :: wk
 
-    lower_limit = 1.686d0/sqrt(maxval(sigma_square_M200d))
+!    lower_limit = 1.686d0/sqrt(maxval(sigma_square_M200d))
 
-    upper_limit = 1.686d0/sqrt(minval(sigma_square_M200d))
+ !   upper_limit = 1.686d0/sqrt(minval(sigma_square_M200d))
 
-    If (redshift .gt. 3.d0) then
+  !  If (redshift .gt. 3.d0) then
 
-       pp = (/1.d0,3.d0/)
+   !    pp = (/1.d0,3.d0/)
 
-    Else
+    !Else
 
-       pp = (/1.d0,redshift/)
+     !  pp = (/1.d0,redshift/)
 
-    End If
+!    End If
     
+    pp = indexz
+
     ptr = c_loc(pp)
 
     f_obj = fgsl_function_init(integrand_alpha_halo_mass_function, ptr)
 
     wk = fgsl_integration_workspace_alloc(nmax)
 
-    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
-         absolute_error, relative_error, nmax, wk, result, error)
+    status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
+         absolute_error, relative_error, nmax, key, wk, result, error)
 
     output = 1.d0/result
 
@@ -494,7 +523,7 @@ contains
 
     Do indexz=1,number_of_z
 
-       call compute_alpha_halo_mass_function_at_z(z(indexz),alpha_halo_mass_function(indexz))   ! dimensionless
+       call compute_alpha_halo_mass_function_at_z(indexz,alpha_halo_mass_function(indexz))   ! dimensionless
 
     End Do
 
@@ -541,41 +570,41 @@ contains
 
     Implicit none                 
 
-    Real*8 :: halo_mass_function,R,sigma,nu,M200d_M_z,alpha
-    Real*8 :: f_nu,g_sigma,rdeltad,dsigma!,alpha_halo_mass_function_z        
+    Real*8 :: halo_mass_function,R,sigma,nu,alpha !M200d_M_z
+    Real*8 :: f_nu,g_sigma,dsigma !rdeltad
     Real*8,parameter :: delta_c = 1.686d0    ! page 880 in "The large-scale ..."
-    Real*8,parameter :: beta0 = 0.589d0
-    Real*8,parameter :: phi0 = -0.729d0
-    Real*8,parameter :: eta0 = -0.243d0
-    Real*8,parameter :: gamma0 = 0.864d0
+!    Real*8,parameter :: beta0 = 0.589d0
+ !   Real*8,parameter :: phi0 = -0.729d0
+  !  Real*8,parameter :: eta0 = -0.243d0
+   ! Real*8,parameter :: gamma0 = 0.864d0
     Integer*4 :: virial_Mass_index,redshift_index
 
-    If (z(redshift_index) .gt. 3.d0) then
+    !If (z(redshift_index) .gt. 3.d0) then
 
-       call compute_r_delta_d_from_M_virial_at_z(M(virial_Mass_index),3.d0,DeltaSO,rdeltad)
+!       call compute_r_delta_d_from_M_virial_at_z(M(virial_Mass_index),3.d0,DeltaSO,rdeltad)
 
-       M200d_M_z = M_delta_d_from_M_virial(3.d0,rdeltad,DeltaSO)
+ !      M200d_M_z = M_delta_d_from_M_virial(3.d0,rdeltad,DeltaSO)
 
-       R = (3.d0*M200d_M_z/4.d0/Pi/mean_density(3.d0)*(1.d0 + 3.d0 )**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
+  !     R = (3.d0*M200d_M_z/4.d0/Pi/mean_density(3.d0)*(1.d0 + 3.d0 )**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
 
-       call sigma_square_at_M_and_z(M200d_M_z,3.d0,sigma)
+   !    call sigma_square_at_M_and_z(M200d_M_z,3.d0,sigma)
 
-       call dsigma_square_at_M_and_z(M200d_M_z,3.d0,dsigma)
+    !   call dsigma_square_at_M_and_z(M200d_M_z,3.d0,dsigma)
 
-       sigma = sqrt(sigma)!sigma_squared(M200d_M_z,3.d0))    ! Units : dimensionless
+     !  sigma = sqrt(sigma)!sigma_squared(M200d_M_z,3.d0))    ! Units : dimensionless
 
-       nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
+      ! nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
 
-       alpha = alpha_halo_redshift_3
+       !alpha = alpha_halo_redshift_3
 
-       f_nu = halo_mass_function_f_nu(nu,alpha,3.d0)
+!       f_nu = halo_mass_function_f_nu(nu,alpha,3.d0)
 
-       g_sigma = nu*f_nu ! dimensionless           ! Equation (C2) in "Toward a ... universality"
+ !      g_sigma = nu*f_nu ! dimensionless           ! Equation (C2) in "Toward a ... universality"
 
-       halo_mass_function = -mean_density(3.d0)/(1.d0 + 3.d0)**3.d0/2.d0/M200d_M_z**2&    ! (1+z)**3 to use comoving coordinates
-            *R/3.d0/sigma**2*dsigma*g_sigma  !dsigma_squared_dR(M200d_M_z,3.d0)*g_sigma
+  !     halo_mass_function = -mean_density(3.d0)/(1.d0 + 3.d0)**3.d0/2.d0/M200d_M_z**2&    ! (1+z)**3 to use comoving coordinates
+   !         *R/3.d0/sigma**2*dsigma*g_sigma  !dsigma_squared_dR(M200d_M_z,3.d0)*g_sigma
 
-    Else
+    !Else
 
        R = (3.d0*M200d(virial_Mass_index,redshift_index)/4.d0/Pi/mean_density(z(redshift_index))*(1.d0 + &
             z(redshift_index))**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
@@ -588,7 +617,15 @@ contains
 
        alpha = alpha_halo_mass_function(redshift_index)
 
-       f_nu = halo_mass_function_f_nu(nu,alpha,z(redshift_index))
+       If (z(redshift_index) .gt. 3.d0) then
+
+          f_nu = halo_mass_function_f_nu(nu,alpha,3.d0)
+
+       Else
+
+          f_nu = halo_mass_function_f_nu(nu,alpha,z(redshift_index))
+
+       End If
 
        g_sigma = nu*f_nu ! dimensionless           ! Equation (C2) in "Toward a ... universality"
 
@@ -596,7 +633,7 @@ contains
             M200d(virial_Mass_index,redshift_index)**2*&    ! (1+z)**3 to use comoving coordinates
             R/3.d0/sigma**2*dsigma*g_sigma !dsigma_squared_dR(M200d(virial_Mass_index,redshift_index),z(redshift_index))*g_sigma
 
-    End If
+    !End If
 
   end function halo_mass_function
 
@@ -710,17 +747,18 @@ contains
 
     Implicit none
 
-    Integer(fgsl_size_t), parameter :: nmax=10000
+    Integer(fgsl_size_t), parameter :: nmax=1000000
 
     Integer(fgsl_int),target :: pp
     Real(fgsl_double) :: result, error, output
     Real(fgsl_double),parameter :: lower_limit = Mmin!1.0E-3_fgsl_double
     Real(fgsl_double),parameter :: upper_limit = Mmax!1.0E-2_fgsl_double
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
-    Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
+    Real(fgsl_double),parameter :: relative_error = 1.0E-4_fgsl_double
 
     Integer(fgsl_int) :: status
     Integer(fgsl_int) :: indexz
+    Integer(fgsl_int),parameter :: key = 4
 
     Type(c_ptr) :: ptr
     Type(fgsl_function) :: f_obj
@@ -734,8 +772,8 @@ contains
 
     wk = fgsl_integration_workspace_alloc(nmax)
 
-    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
-         absolute_error, relative_error, nmax, wk, result, error)
+    status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
+         absolute_error, relative_error, nmax, key, wk, result, error)
 
     output = result
 
@@ -804,7 +842,7 @@ contains
        End Do
 
     End Do
-    
+
   end subroutine compute_integrand_pre_cl_phiphi_at_z_and_l
 
   function integrand_pre_cl_phiphi_at_z_and_l(virial_mass,indexz,indexl)
@@ -901,11 +939,13 @@ contains
 
     use arrays
     use fiducial
+    use omp_lib
 
     Implicit none
 
     Integer*4 :: indexl,indexz
 
+    !$omp Parallel Do Shared(inte_cl_phiphi_1h)
     Do indexl=1,number_of_l
 
        Do indexz=1,number_of_z
@@ -917,6 +957,7 @@ contains
        End Do
 
     End Do
+    !$omp End Parallel Do
 
   end subroutine compute_integrand_cl_phiphi_one_halo_at_z_and_l
 
@@ -976,15 +1017,19 @@ contains
 
     use arrays
     use fiducial
+    use omp_lib
+
     Implicit none
 
     Integer*4 :: indexl
 
+    !$omp Parallel Do Shared(Clphiphi1h)
     Do indexl=1,number_of_l
 
        call compute_cl_phiphi_one_halo_at_l(indexl,Clphiphi1h(indexl))
 
     End Do
+    !$omp End Parallel Do
 
   end subroutine compute_Clphiphi1h
 
@@ -1373,11 +1418,13 @@ contains
 
     use arrays 
     use fiducial
+    use omp_lib
 
     Implicit none 
 
     Integer*4 :: indexz,indexl
 
+    !$omp Parallel Do Shared(inte_cl_phiphi_2h)
     Do indexl=1,number_of_l
 
        Do indexz=1,number_of_z
@@ -1390,6 +1437,7 @@ contains
        End Do
 
     End Do
+    !$omp End Parallel Do
 
   end subroutine compute_integrand_cl_phiphi_two_halo_at_z_and_l
 
@@ -1481,15 +1529,19 @@ contains
 
     use arrays
     use fiducial
+    use omp_lib
+
     Implicit none
 
     Integer*4 :: indexl
 
+    !$omp Parallel Do Shared(Clphiphi2h)
     Do indexl=1,number_of_l
 
        call compute_cl_phiphi_two_halo_at_l(indexl,Clphiphi2h(indexl))
 
     End Do
+    !$omp End Parallel Do 
 
   end subroutine compute_Clphiphi2h
 

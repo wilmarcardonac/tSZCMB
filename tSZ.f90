@@ -11,7 +11,7 @@ Program tSZ
     ! DECLARATION AND INITIALIZATION OF VARIABLES
     Implicit none
     Integer*4 :: index1                                       ! COUNTER
-    Real*8 :: wtime                          ! STORES TIME OF EXECUTION
+    Real*8 :: wtime,dalpha                          ! STORES TIME OF EXECUTION
     Character(len=15),parameter :: halo_definition = 'virial' ! HALO DEFINITION USED IN THE COMPUTATIONS
 
     call comoving_distance_at_redshift(z_dec,com_dist_at_z_dec) ! COMPUTE COMOVING DISTANCE AT DECOUPLING
@@ -35,7 +35,7 @@ Program tSZ
     bMz(1:number_of_M,1:number_of_z),mbz(1:number_of_z),inte_mbz(number_of_M,number_of_z),&
     comoving_distance_at_z(1:number_of_z),Scrit(1:number_of_z),&
     angular_diameter_distance_at_z(1:number_of_z),&
-    dM200ddM_M_z(1:number_of_M,1:number_of_z),&
+    dM200ddM_M_z(1:number_of_M,1:number_of_z),inte_dndM(number_of_M,number_of_z),&
     sigma_square_M200d(1:number_of_M,1:number_of_z),&
     dsigma_square_M200d(1:number_of_M,1:number_of_z),&
     zlimber(number_of_z_limber),integrand_limber(number_of_z_limber,number_of_l),&
@@ -167,6 +167,8 @@ Program tSZ
 
         write(UNIT_EXE_FILE,*) 'COMPUTING NORMALIZATION OF HALO MASS FUNCTION'
 
+        call compute_integrand_alpha_halo_mass_function()
+
         call compute_alpha_halo_mass_function() ! NORMALIZE HALO MASS FUNCTION TO FULLFILL CONDITION THAT MEAN BIAS OF ALL MATTER
                                                 ! AT A FIXED RED-SHIFT IS UNITY
 
@@ -179,7 +181,7 @@ Program tSZ
 
      End If
 
-     call compute_alpha_halo_mass_function_at_z(3.d0,alpha_halo_redshift_3)
+     call Interpolate_1D(alpha_halo_redshift_3,dalpha,3.d0,z,alpha_halo_mass_function)
 
      If (compute_halo_mass_function) then
 
@@ -194,14 +196,6 @@ Program tSZ
         call read_dndM() ! READING HALO MASS FUNCTION    
 
      End If
-
-!     call write_dndM_at_z(1)
-
-!     call compute_integrand_mean_bias_matter_at_z()
-
-!     call compute_mean_bias_matter()
-!     stop
-     write(UNIT_EXE_FILE,*) 'COMPUTING COMOVING VOLUME ELEMENT PER STERADIAN'
 
      If (compute_the_lensing_potential) then 
 

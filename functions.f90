@@ -340,7 +340,7 @@ Module functions
 
         Real*8 :: redshift,critical_surface_density
 
-        critical_surface_density = c**2*comoving_distance(redshift)*(1.d0 + &
+        critical_surface_density = c**2*com_dist_at_z_dec*(1.d0 + &
              redshift)/4.d0/Pi/G/comoving_distance(redshift)/(com_dist_at_z_dec - comoving_distance(redshift))
 
         critical_surface_density = critical_surface_density*Mpc/M_sun 
@@ -1220,7 +1220,7 @@ Module functions
                          ! Xia et al. M is the virial mass. The Fourier transform is truncated to the virial radius
         Real*8 :: k,M,z,FT_NFW_density_profile,Si1,Si2,Ci1,Ci2
         Real*8 :: alpha     ! It determines upper limit in Eq. (2.10) of 1312.4525
-        Real*8,parameter :: alphafactor = 1.5d0!1.060d0!1.037d0
+        Real*8,parameter :: alphafactor = 1.060d0!1.037d0
 
         alpha = alphafactor*concentration_mass_virial(M,z)
 
