@@ -30,16 +30,13 @@ contains
 
     Implicit none
 
-    Integer(fgsl_size_t), parameter :: nmax=1000000
+    Integer(fgsl_size_t), parameter :: nmax=1000
 
     Real(fgsl_double), target :: fpar(2)
     Real(fgsl_double) :: result, error, output, R, mass, redshift
-    Real(fgsl_double) :: lower_limit != kmin !1.0E-3_fgsl_double
-    Real(fgsl_double) :: upper_limit != 1.d-1*kmax !1.0E-2_fgsl_double
+    Real(fgsl_double),parameter :: lower_limit = 0.0_fgsl_double 
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
-    Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
-    Real(fgsl_double),parameter :: upper_scale = 1.0E4_fgsl_double
-    Real(fgsl_double),parameter :: lower_scale = 1.0E-3_fgsl_double
+    Real(fgsl_double),parameter :: relative_error = 1.0E-8_fgsl_double
 
     Integer(fgsl_int) :: status
 
@@ -49,10 +46,6 @@ contains
 
     R = (3.d0*mass/4.d0/Pi/mean_density(redshift)*(1.d0 + redshift)**3.d0)**(1.d0/3.d0) ! Units : Mpc. (1+z)**3 factor to use comoving coordinates
 
-    upper_limit = 1/R*upper_scale
-
-    lower_limit = 1/R*lower_scale
-
     fpar = (/R,redshift/)
 
     ptr = c_loc(fpar)
@@ -61,7 +54,7 @@ contains
 
     wk = fgsl_integration_workspace_alloc(nmax)
 
-    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
+    status = fgsl_integration_qagiu(f_obj, lower_limit, &
          absolute_error, relative_error, nmax, wk, result, error)
 
     output = 1.d0/2.d0/Pi**2*result/h**3
@@ -90,16 +83,13 @@ contains
 
     Implicit none
 
-    Integer(fgsl_size_t), parameter :: nmax=1000000
+    Integer(fgsl_size_t), parameter :: nmax=10000
 
     Real(fgsl_double), target :: fpar(2)
     Real(fgsl_double) :: result, error, output, R, mass, redshift
-    Real(fgsl_double) :: lower_limit != kmin !1.0E-3_fgsl_double
-    Real(fgsl_double) :: upper_limit != 1.d-1*kmax !1.0E-2_fgsl_double
+    Real(fgsl_double),parameter :: lower_limit = 0.0_fgsl_double
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
-    Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
-    Real(fgsl_double),parameter :: upper_scale = 1.0E4_fgsl_double
-    Real(fgsl_double),parameter :: lower_scale = 1.0E-3_fgsl_double
+    Real(fgsl_double),parameter :: relative_error = 1.0E-8_fgsl_double
 
     Integer(fgsl_int) :: status
 
@@ -109,10 +99,6 @@ contains
 
     R = (3.d0*mass/4.d0/Pi/mean_density(redshift)*(1.d0 + redshift)**3.d0)**(1.d0/3.d0) ! Units : Mpc. (1+z)**3 factor to use comoving coordinates
 
-    upper_limit = 1/R*upper_scale
-
-    lower_limit = 1/R*lower_scale
-
     fpar = (/R,redshift/)
 
     ptr = c_loc(fpar)
@@ -121,7 +107,7 @@ contains
 
     wk = fgsl_integration_workspace_alloc(nmax)
 
-    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
+    status = fgsl_integration_qagiu(f_obj, lower_limit, &
          absolute_error, relative_error, nmax, wk, result, error)
 
     output = 1.d0/Pi**2*result/h**3
@@ -188,12 +174,11 @@ contains
 
     Implicit none
 
-    Integer(fgsl_size_t), parameter :: nmax=10000
+    Integer(fgsl_size_t), parameter :: nmax=1000
 
     Real(fgsl_double), target :: R
     Real(fgsl_double) :: result, error, output
-    Real(fgsl_double),parameter :: lower_limit = kmin!1.0E-3_fgsl_double
-    Real(fgsl_double),parameter :: upper_limit = kmax!1.0E-2_fgsl_double
+    Real(fgsl_double),parameter :: lower_limit = 0.0_fgsl_double 
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
     Real(fgsl_double),parameter :: relative_error = 1.0E-12_fgsl_double
 
@@ -211,7 +196,7 @@ contains
 
     wk = fgsl_integration_workspace_alloc(nmax)
 
-    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
+    status = fgsl_integration_qagiu(f_obj, lower_limit, &
          absolute_error, relative_error, nmax, wk, result, error)
 
     output = sigma8**2/result
@@ -1848,17 +1833,18 @@ contains
 
     Implicit none
 
-    Integer(fgsl_size_t), parameter :: nmax=10000
+    Integer(fgsl_size_t), parameter :: nmax=1000000
 
     Integer(fgsl_int),target :: pp(2)
     Real(fgsl_double) :: result, error, output
     Real(fgsl_double),parameter :: lower_limit = Mmin!1.0E-3_fgsl_double
     Real(fgsl_double),parameter :: upper_limit = Mmax!1.0E-2_fgsl_double
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
-    Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
+    Real(fgsl_double),parameter :: relative_error = 1.0E-4_fgsl_double
 
     Integer(fgsl_int) :: status
     Integer(fgsl_int) :: indexz,indexl
+    Integer(fgsl_int),parameter :: key = 4
 
     Type(c_ptr) :: ptr
     Type(fgsl_function) :: f_obj
@@ -1872,8 +1858,8 @@ contains
 
     wk = fgsl_integration_workspace_alloc(nmax)
 
-    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
-         absolute_error, relative_error, nmax, wk, result, error)
+    status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
+         absolute_error, relative_error, nmax, key, wk, result, error)
 
     output = result
 
@@ -2327,17 +2313,18 @@ contains
 
     Implicit none
 
-    Integer(fgsl_size_t), parameter :: nmax=10000
+    Integer(fgsl_size_t), parameter :: nmax=1000000
 
     Integer(fgsl_int),target :: pp(2)
     Real(fgsl_double) :: result, error, output
     Real(fgsl_double),parameter :: lower_limit = Mmin!1.0E-3_fgsl_double
     Real(fgsl_double),parameter :: upper_limit = Mmax!1.0E-2_fgsl_double
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
-    Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
+    Real(fgsl_double),parameter :: relative_error = 1.0E-4_fgsl_double
 
     Integer(fgsl_int) :: status
     Integer(fgsl_int) :: indexz,indexl
+    Integer(fgsl_int),parameter :: key = 4
 
     Type(c_ptr) :: ptr
     Type(fgsl_function) :: f_obj
@@ -2351,8 +2338,8 @@ contains
 
     wk = fgsl_integration_workspace_alloc(nmax)
 
-    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
-         absolute_error, relative_error, nmax, wk, result, error)
+    status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
+         absolute_error, relative_error, nmax, key, wk, result, error)
 
     output = result
 
