@@ -1025,97 +1025,84 @@ Module functions
         use arrays                ! power spectrum" by Battaglia et al. All the masses and distances in this work are given relative to h.
         Implicit none             ! Units of ICM_electron_pressure : solar mass/(Mpc*s**2)        
 
-        Real*8 :: x,A_p,alpha_pm,alpha_pz,P_0,A_xc,alpha_xcm!,virial_Mass,redshift
-        Real*8 :: alpha_xcz,x_c,A_beta,r,ICM_electron_pressure!,M200c_M_z,r200c_M_z
-        Real*8 :: alpha_betam,alpha_betaz,beta,gamma,alpha,P_th,P_e,P200,P_fit
+        ! Parameters from columns "AGN Feedback \Delta = 200" in Table 1 in published version of 1109.3711
+        Real*8,parameter :: A_p = 18.1d0                      ! FOR P_0
+        Real*8,parameter :: alpha_pm = 0.154d0                ! FOR P_0
+        Real*8,parameter :: alpha_pz = -0.758d0               ! FOR P_0
+
+        Real*8,parameter :: A_xc = 0.497d0                    ! FOR x_c
+        Real*8,parameter :: alpha_xcm = -0.00865d0            ! FOR x_c
+        Real*8,parameter :: alpha_xcz = 0.731d0               ! FOR x_c
+
+        Real*8,parameter :: A_beta = 4.35d0                   ! FOR beta
+        Real*8,parameter :: alpha_betam = 0.0393d0            ! FOR beta
+        Real*8,parameter :: alpha_betaz = 0.415d0             ! FOR beta
+
+        Real*8,parameter :: gamma = -0.3d0                    ! Parameters \gamma and \alpha in equation (10) of published version of 1109.3711
+        Real*8,parameter :: alpha = 1.0d0
+        
+        Real*8,parameter :: thermal_gas_pressure_electron_pressure_relation = 1.932d0
+
+        Real*8 :: x,P_0,x_c,r,ICM_electron_pressure,beta,P_th,P200,P_fit
+
         Integer*4 :: indexM,indexz
-
-!        call Interpolate_2D(M200c_M_z,virial_Mass,redshift,M(1:number_of_M),z(1:number_of_z),M200c(1:number_of_M,1:number_of_z))
-
-!        call Interpolate_2D(r200c_M_z,virial_Mass,redshift,M(1:number_of_M),z(1:number_of_z),r200c(1:number_of_M,1:number_of_z))
 
         P200 = G*M200c(indexM,indexz)*DeltaSO*critical_density(z(indexz))&
         *Omega_b_h2/h**2/Omega_m0/2.d0/r200c(indexM,indexz)*M_sun/(Mpc)**3 ! Units : solar mass/(Mpc*s**2)
-!        P200 = G*M200c_M_z*DeltaSO*critical_density(redshift)*Omega_b_h2/h**2/Omega_m0/2.d0/r200c_M_z*M_sun/(Mpc)**3 ! Units : solar mass/(Mpc*s**2)
 
         x = r/r200c(indexM,indexz)        ! Dimensionless 
-!        x = r/r200c_M_z        ! Dimensionless 
-                                      ! Parameters from columns "AGN Feedback \Delta = 200" in Table 1 in published version of 1109.3711
-        A_p = 18.1d0                      ! For P_0
 
-        alpha_pm = 0.154d0
+        P_0 = A_p*(M200c(indexM,indexz)*1.d-14)**alpha_pm*( 1.d0 + z(indexz) )**alpha_pz
 
-        alpha_pz = -0.758d0
+        x_c = A_xc*(M200c(indexM,indexz)*1.d-14)**alpha_xcm*( 1.d0 + z(indexz) )**alpha_xcz
 
-        P_0 = A_p*(M200c(indexM,indexz)*1.d-14)**alpha_pm*(1+z(indexz))**alpha_pz
-!        P_0 = A_p*(M200c_M_z*1.d-14)**alpha_pm*( 1.d0 + redshift )**alpha_pz
+        beta = A_beta*(M200c(indexM,indexz)*1.d-14)**alpha_betam*( 1.d0  + z(indexz) )**alpha_betaz
 
-        A_xc = 0.497d0                    ! For x_c
-
-        alpha_xcm = -0.00865d0
-
-        alpha_xcz = 0.731d0
-
-        x_c = A_xc*(M200c(indexM,indexz)*1.d-14)**alpha_xcm*(1+z(indexz))**alpha_xcz
-!        x_c = A_xc*(M200c_M_z*1.d-14)**alpha_xcm*( 1.d0 + redshift )**alpha_xcz
-
-        A_beta = 4.35d0                   ! For beta
-
-        alpha_betam = 0.0393d0
-
-        alpha_betaz = 0.415d0
-
-        beta = A_beta*(M200c(indexM,indexz)*1.d-14)**alpha_betam*(1+z(indexz))**alpha_betaz
-!        beta = A_beta*(M200c_M_z*1.d-14)**alpha_betam*( 1.d0 + redshift )**alpha_betaz
-
-        gamma = -0.3d0                    ! Parameters \gamma and \alpha in equation (10) of published version of 1109.3711
-
-        alpha = 1.0d0
-
-        P_fit = P_0*(x/x_c)**gamma*(1.d0+(x/x_c)**alpha)**(-beta) ! Equation (10) in published version of 1109.3711
+        P_fit = P_0*(x/x_c)**gamma*( 1.d0 + (x/x_c)**alpha )**(-beta) ! Equation (10) in published version of 1109.3711
 
         P_th = P200*P_fit
 
-        P_e = P_th/1.932d0
-
-        ICM_electron_pressure = P_e
+        ICM_electron_pressure = P_th/thermal_gas_pressure_electron_pressure_relation
 
     end function ICM_electron_pressure    
 
-!    subroutine write_ICM_electron_pressure_at_z(indexM,indexz)
+    subroutine write_ICM_electron_pressure_at_z(indexM,indexz)
 
- !       use arrays
-  !      use fiducial
-   !     Implicit none
+        use arrays
+        use fiducial
+        Implicit none
 
-    !    Integer*4 :: indexM,indexz,index
-     !   Integer*4,parameter :: indexr = 1d2
-      !  Real*8 :: rmin,rmax
-       ! Real*8,dimension(indexr) :: r
+        Integer*4 :: indexM,indexz,index
+        
+        Real*8 :: P200
+        Real*8,dimension(number_of_M) :: r
+        Real*8 :: rmin 
+        Real*8 :: rmax 
+        
+        rmin = 1.d-2*r200c(indexM,indexz)
 
-!        rmin = 1.d-2*r200c(indexM,indexz)
+        rmax = 3.d0*r200c(indexM,indexz)
 
- !       rmax = 3.d0*r200c(indexM,indexz)
+        P200 = G*M200c(indexM,indexz)*DeltaSO*critical_density(z(indexz))&
+             *Omega_b_h2/h**2/Omega_m0/2.d0/r200c(indexM,indexz)*M_sun/(Mpc)**3 ! Units : solar mass/(Mpc*s**2)
+        
+        open(15,file='./output/Pth_at_z.dat')
 
-  !      Do index = 1, indexr 
+        write(15,*) '# r/R_200       P_th/P_200*(r/R_200)**3 at redshift and mass',z(indexz),M200c(indexM,indexz)
 
-   !         r(index) = 10**(log10(rmin) + real(index-1)*(log10(rmax) - log10(rmin))/real(indexr-1))
+        Do index=1,number_of_M
 
-    !    End Do
+           r(index) = 10**(log10(rmin) + real(index-1)*(log10(rmax) - log10(rmin))/real(number_of_M-1))
 
-     !   open(15,file='./output/Pth_at_z.dat')
+            write(15,'(2es18.10)') r(index)/r200c(indexM,indexz), &
+                 ICM_electron_pressure(r(index),indexM,indexz)/P200*&
+                 (r(index)/r200c(indexM,indexz))**3
 
-      !  write(15,*) '# r/R_200       P_th at redshift and mass',z(indexz),M200c(indexM,indexz)
+        End Do
 
-       ! Do index =1,indexr
+        close(15)
 
-!            write(15,'(2es18.10)') r(index)/r200c(indexM,indexz), ICM_electron_pressure(r(index),indexM,indexz)
-
- !       End Do
-
-  !      close(15)
-
-   ! end subroutine write_ICM_electron_pressure_at_z
+    end subroutine write_ICM_electron_pressure_at_z
 
 
     subroutine read_ylMz()
@@ -1220,7 +1207,7 @@ Module functions
                          ! Xia et al. M is the virial mass. The Fourier transform is truncated to the virial radius
         Real*8 :: k,M,z,FT_NFW_density_profile,Si1,Si2,Ci1,Ci2
         Real*8 :: alpha     ! It determines upper limit in Eq. (2.10) of 1312.4525
-        Real*8,parameter :: alphafactor = 1.060d0!1.037d0
+        Real*8,parameter :: alphafactor = 1.045d0!1.060d0!1.037d0
 
         alpha = alphafactor*concentration_mass_virial(M,z)
 

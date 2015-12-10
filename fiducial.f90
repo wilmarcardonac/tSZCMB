@@ -55,7 +55,7 @@ Module fiducial
     Logical,parameter :: compute_linear_halo_bias = .false.!.true. ! COMPUTE LINEAR HALO BIAS IF SET IT TRUE
     Logical,parameter :: compute_alpha_in_halo_mass_function = .false.!.true. ! COMPUTE CONSTANT ALPHA IN HALO MASS FUNCTION IF SET IT TRUE
     Logical,parameter :: compute_halo_mass_function = .false.!.true. ! COMPUTE HALO MASS FUNCTION IF SET IT TRUE
-    Logical,parameter :: compute_the_lensing_potential = .true. ! COMPUTE LENSING POTENTIAL IF SET IT TRUE
-    Logical,parameter :: compute_the_form_factor = .true. !.false. !.true. ! COMPUTE FORM FACTOR IF SET IT TRUE
+    Logical,parameter :: compute_the_lensing_potential = .false.!.true. ! COMPUTE LENSING POTENTIAL IF SET IT TRUE
+    Logical,parameter :: compute_the_form_factor = .false. !.true. ! COMPUTE FORM FACTOR IF SET IT TRUE
 
 End Module fiducial

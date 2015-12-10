@@ -36,7 +36,7 @@ contains
     Real(fgsl_double) :: result, error, output, R, mass, redshift
     Real(fgsl_double),parameter :: lower_limit = 0.0_fgsl_double 
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
-    Real(fgsl_double),parameter :: relative_error = 1.0E-8_fgsl_double
+    Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
 
     Integer(fgsl_int) :: status
 
@@ -89,7 +89,7 @@ contains
     Real(fgsl_double) :: result, error, output, R, mass, redshift
     Real(fgsl_double),parameter :: lower_limit = 0.0_fgsl_double
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
-    Real(fgsl_double),parameter :: relative_error = 1.0E-8_fgsl_double
+    Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
 
     Integer(fgsl_int) :: status
 
@@ -1594,8 +1594,8 @@ contains
 
     l_s = angular_diameter_distance_at_z(indexz)/r200c(indexM,indexz)         ! dimensionless
 
-    integrand_form_factor_at_M_z_and_l = x**2*sin((dble(ml(indexl))+1.d0/2.d0)*x/l_s)&
-         *ICM_electron_pressure(x*r200c(indexM,indexz),indexM,indexz)/(dble(ml(indexl))+1.d0/2.d0)/x*l_s
+    integrand_form_factor_at_M_z_and_l = x*sin( ( dble(ml(indexl)) + 1.d0/2.d0)*x/l_s)&
+         *ICM_electron_pressure(x*r200c(indexM,indexz),indexM,indexz)/( dble(ml(indexl)) + 1.d0/2.d0)*l_s
 
   End function integrand_form_factor_at_M_z_and_l
 
@@ -1620,19 +1620,20 @@ contains
 
     Implicit none
 
-    Integer(fgsl_size_t), parameter :: nmax=10000
+    Integer(fgsl_size_t),parameter :: nmax= 10000000
 
     Integer(fgsl_int),target :: pp(3)
 
     Real(fgsl_double) :: result, error, output, prefactor, l_s
     Real(fgsl_double),parameter :: lower_limit = 0.0_fgsl_double
-    Real(fgsl_double) :: upper_limit !! Mmax!1.0E-2_fgsl_double
+    Real(fgsl_double) :: upper_limit 
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
     Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
-    Real*8,parameter :: betafactor = 1.060d0!1.037d0
+    Real(fgsl_double),parameter :: betafactor = 1.045d0 !1.060d0!1.037d0
 
     Integer(fgsl_int) :: status
     Integer(fgsl_int) :: indexz,indexl,indexM
+    Integer(fgsl_int) :: key = 6
 
     Type(c_ptr) :: ptr
     Type(fgsl_function) :: f_obj
@@ -1652,8 +1653,8 @@ contains
 
     wk = fgsl_integration_workspace_alloc(nmax)
 
-    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
-         absolute_error, relative_error, nmax, wk, result, error)
+    status = fgsl_integration_qag(f_obj, lower_limit, upper_limit,&
+         absolute_error, relative_error, nmax, key, wk, result, error)
 
     output = prefactor*result
 
@@ -1873,11 +1874,13 @@ contains
 
     use arrays
     use fiducial
+    use omp_lib
 
     Implicit none
 
     Integer*4 :: indexz, indexl
 
+    !$omp Parallel Do Shared(inte_cl_yphi_1h)
     Do indexl=1,number_of_l
 
        Do indexz=1,number_of_z
@@ -1889,6 +1892,7 @@ contains
        End Do
 
     End Do
+    !$omp End Parallel Do
 
   end subroutine compute_integrand_cl_yphi_one_halo_at_z_and_l
 
@@ -1972,15 +1976,19 @@ contains
 
     use arrays
     use fiducial
+    use omp_lib
+
     Implicit none
 
     Integer*4 :: indexl
 
+    !$omp Parallel Do Shared(Cl1h)
     Do indexl=1,number_of_l
 
        call compute_cl_yphi_one_halo_at_l(indexl,Cl1h(indexl))
 
     End Do
+    !$omp End Parallel Do
 
   end subroutine compute_Clyphi1h
 
@@ -2262,7 +2270,8 @@ contains
 
           Do indexz=1,1,number_of_z
 
-             inte_pre_cl_yphi_2h(indexl,indexM,indexz) = dndM(indexM,indexz)*bMz(indexM,indexz)*ylMz(indexl,indexM,indexz) 
+             inte_pre_cl_yphi_2h(indexl,indexM,indexz) = dndM(indexM,indexz)*bMz(indexM,indexz)*&
+                  ylMz(indexl,indexM,indexz) 
 
           End Do
 
@@ -2354,19 +2363,21 @@ contains
     use fiducial
     use arrays
     use functions
+    use omp_lib
 
     Implicit none
 
     Integer*4 :: indexl,indexz
     Real*8,dimension(number_of_z) :: f1,f2
 
+    !$omp Parallel Do Shared(f1,f2,inte_cl_yphi_2h)    
     Do indexl=1,number_of_l
 
        Do indexz=1,number_of_z
 
-          call compute_pre_cl_yphi_2h_at_z_and_l(indexz,indexl,f1(indexz)) 
-
           call compute_pre_cl_phiphi_2h_at_z_and_l(indexz,indexl,f2(indexz))
+
+          call compute_pre_cl_yphi_2h_at_z_and_l(indexz,indexl,f1(indexz)) 
 
           inte_cl_yphi_2h(indexl,indexz) = f1(indexz)*f2(indexz)*d2VdzdO(indexz)*&
             matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance_at_z(indexz),z(indexz))    !  Dimensionless
@@ -2374,6 +2385,7 @@ contains
        End Do
 
     End Do
+    !$omp End Parallel Do
 
   end subroutine compute_integrand_cl_yphi_two_halo_at_z_and_l
     
@@ -2422,7 +2434,7 @@ contains
 
     Implicit none
 
-    Integer(fgsl_size_t), parameter :: nmax=10000
+    Integer(fgsl_size_t), parameter :: nmax=1000000
 
     Integer(fgsl_int),target :: pp
     Real(fgsl_double) :: result, error, output
@@ -2433,6 +2445,7 @@ contains
 
     Integer(fgsl_int) :: status
     Integer(fgsl_int) :: indexl
+    Integer(fgsl_int),parameter :: key = 4
 
     Type(c_ptr) :: ptr
     Type(fgsl_function) :: f_obj
@@ -2446,9 +2459,9 @@ contains
 
     wk = fgsl_integration_workspace_alloc(nmax)
 
-    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
-         absolute_error, relative_error, nmax, wk, result, error)
-
+    status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
+         absolute_error, relative_error, nmax, key, wk, result, error)
+    
     output = result/h**3
 
     call fgsl_function_free(f_obj)
@@ -2461,15 +2474,19 @@ contains
 
     use arrays
     use fiducial
+    use omp_lib
+
     Implicit none
 
     Integer*4 :: indexl
 
+    !$omp Parallel Do Shared(Cl2h)    
     Do indexl=1,number_of_l
 
        call compute_cl_yphi_two_halo_at_l(indexl,Cl2h(indexl))
 
     End Do
+    !$omp End Parallel Do
 
   end subroutine compute_Clyphi2h
 

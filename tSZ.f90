@@ -132,7 +132,7 @@ Program tSZ
         write(UNIT_EXE_FILE,*) 'MASS CONVERSION FILE READ AND DERIVATIVES OF MASS CONVERSION COMPUTED'
 
      End If
-     
+
      call compute_normalization(Normalization) ! IN MATTER POWER SPECTRUM TO FIT FIDUCIAL SIGMA_8
 
      call compute_integrand_limber_approximation()
@@ -225,19 +225,17 @@ Program tSZ
 
      call compute_integrand_cl_phiphi_one_halo_at_z_and_l()
 
-     call compute_Clphiphi1h() ! ONE HALO TERM
-
      call compute_integrand_pre_cl_phiphi_2h_at_z_and_l()
 
      call compute_integrand_cl_phiphi_two_halo_at_z_and_l()
+
+     call compute_Clphiphi1h() ! ONE HALO TERM
 
      call compute_Clphiphi2h() ! TWO HALO TERM
 
      call compute_Cl()   ! TOTAL 
 
      call write_Cl()     ! OF ALL COMPUTATIONS 
-
-     stop
 
      If (compute_the_form_factor) then
 
@@ -258,21 +256,21 @@ Program tSZ
         call read_ylMz() ! READS FORM FACTOR
 
      End If
-        
+
      write(UNIT_EXE_FILE,*) 'COMPUTING ANGULAR POWER SPECTRUM OF Y-tSZ CROSS-CORRELATION'
 
-     call compute_integrand_pre_cl_yphi_at_z_and_l()
+!     call compute_integrand_pre_cl_yphi_at_z_and_l()
+ !    print *,inte_pre_cl_yphi(1,1,1)
+     call compute_integrand_pre_cl_yphi_2h_at_z_and_l() 
 
-     call compute_integrand_cl_yphi_one_halo_at_z_and_l()
-
-     call compute_Clyphi1h() ! ONE HALO TERM
-
-     call compute_integrand_pre_cl_yphi_2h_at_z_and_l()
-
+  !   call compute_integrand_cl_yphi_one_halo_at_z_and_l()
+    ! print *,inte_cl_yphi_1h(1,1)
      call compute_integrand_cl_yphi_two_halo_at_z_and_l()
 
+   !  call compute_Clyphi1h() ! ONE HALO TERM
+
      call compute_Clyphi2h() ! TWO HALO TERM
- 
+
      call compute_Cl()   ! TOTAL 
 
      call write_Cl()     ! OF ALL COMPUTATIONS 
