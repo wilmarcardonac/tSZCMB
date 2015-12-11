@@ -24,7 +24,7 @@ Program tSZ
     ! DERIVATIVE OF CRITICAL MASS DENSITY w.r.t VIRIAL MASS, ANGULAR POWER SPECTRUM OF LENSING POTENTIAL IN THE LIMBER APPROXIMATION, 
     ! HALO MASS FUNCTION, FORM FACTOR, LENSING POTENTIAL, COMOVING VOLUME, LINEAR BIAS, MEAN BIAS OF ALL MATTER, CRITICAL SURFACE,
     ! SIGMA SQUARE FOR MEAN DENSITY MASS, DERIVATIVE OF SIGMA SQUARE FOR MEAN DENSITY MASS
-    allocate (z(1:number_of_z), M(1:number_of_M), ml(1:number_of_l),k(1:number_of_k),&
+    allocate (z(1:number_of_z), M(1:number_of_M), ml(1:number_of_l),&
     Cl1h(1:number_of_l),Cl2h(1:number_of_l),Cl(1:number_of_l),M200d(1:number_of_M,1:number_of_z),&
     M200c(1:number_of_M,1:number_of_z),r200c(1:number_of_M,1:number_of_z),dM200ddM(1:number_of_M,1:number_of_z),&
     r200d(1:number_of_M,1:number_of_z),Clphiphi1h(1:number_of_l),Clphiphi2h(1:number_of_l),&
@@ -56,31 +56,27 @@ Program tSZ
 
     End If
 
-!    Do index1 = 1, number_of_k ! FILLS WAVEVECTOR ARRAY. UNITS : 1/Mpc
+    Do  index1 = 1,number_of_z!+1  ! FILLS RED-SHIFT ARRAY.     
 
- !       k(index1) = 10**(log10(kmin) + real(index1-1)*(log10(kmax) - log10(kmin))/real(number_of_k-1))
+       z(index1) = 10**(log10(zmin) + real(index1-1)*(log10(zmax) - log10(zmin))/real(number_of_z-1))
 
-  !  End Do
-
-    Do  index1 = 1,number_of_z+1  ! FILLS RED-SHIFT ARRAY.     
-
-       If ( index1 .le. 50 ) then
+!       If ( index1 .le. 50 ) then
           
-          z(index1) = zmin + dble(index1-1)*1.d-4
+ !         z(index1) = zmin + dble(index1-1)*1.d-4
 
-       Else If ( index1 .le. 140 ) then 
+  !     Else If ( index1 .le. 140 ) then 
           
-          z(index1) = z(50) + dble(index1-50)*1.d-3
+   !       z(index1) = z(50) + dble(index1-50)*1.d-3
 
-       Else If ( index1 .le. 230 ) then
+    !   Else If ( index1 .le. 230 ) then
 
-          z(index1) = z(140) + dble(index1-140)*1.d-2
+     !     z(index1) = z(140) + dble(index1-140)*1.d-2
 
-       Else If ( index1 .le. 320) then
+      ! Else If ( index1 .le. 320) then
 
-          z(index1) = z(230) + dble(index1-230)*1.d-1
+       !   z(index1) = z(230) + dble(index1-230)*1.d-1
 
-       End If
+!       End If
 
     End Do
 
@@ -134,8 +130,6 @@ Program tSZ
      End If
 
      call compute_normalization(Normalization) ! IN MATTER POWER SPECTRUM TO FIT FIDUCIAL SIGMA_8
-
-     call compute_integrand_limber_approximation()
 
      write(UNIT_EXE_FILE,*) 'NORMALIZATION OF MATTER POWER SPECTRUM TO MATCH SIGMA_8 (',sigma8,') WAS COMPUTED'
 
@@ -219,6 +213,8 @@ Program tSZ
 
      write(UNIT_EXE_FILE,*) 'COMPUTING ANGULAR POWER SPECTRUM OF LENSING POTENTIAL'
 
+     call compute_integrand_limber_approximation()
+
      call compute_Clpsilimber()! LIMBER APPROXIMATION 
 
      call compute_integrand_pre_cl_phiphi_at_z_and_l()
@@ -259,15 +255,15 @@ Program tSZ
 
      write(UNIT_EXE_FILE,*) 'COMPUTING ANGULAR POWER SPECTRUM OF Y-tSZ CROSS-CORRELATION'
 
-!     call compute_integrand_pre_cl_yphi_at_z_and_l()
- !    print *,inte_pre_cl_yphi(1,1,1)
+     call compute_integrand_pre_cl_yphi_at_z_and_l()
+
      call compute_integrand_pre_cl_yphi_2h_at_z_and_l() 
 
-  !   call compute_integrand_cl_yphi_one_halo_at_z_and_l()
-    ! print *,inte_cl_yphi_1h(1,1)
+     call compute_integrand_cl_yphi_one_halo_at_z_and_l()
+
      call compute_integrand_cl_yphi_two_halo_at_z_and_l()
 
-   !  call compute_Clyphi1h() ! ONE HALO TERM
+     call compute_Clyphi1h() ! ONE HALO TERM
 
      call compute_Clyphi2h() ! TWO HALO TERM
 
@@ -278,7 +274,7 @@ Program tSZ
      write(UNIT_EXE_FILE,*) 'COMPUTATION ENDED'
 
     ! DEALLOCATING MEMORY
-    deallocate (z,M,k,ml,Cl1h,Cl2h,Clphiphi1h,Clphiphi2h,Cl,Clphiphi,&
+    deallocate (z,M,ml,Cl1h,Cl2h,Clphiphi1h,Clphiphi2h,Cl,Clphiphi,&
     d2VdzdO,dndM,ylMz,philMz,bMz,alpha_halo_mass_function,&
     Clpsilimber,comoving_distance_at_z,mbz,M200c,M200d,r200c,r200d,dM200ddM,dM200cdM,&
     Scrit,dM200ddM_M_z)

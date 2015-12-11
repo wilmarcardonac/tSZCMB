@@ -230,11 +230,12 @@ contains
     Real(fgsl_double), target :: RR
     Real(fgsl_double) :: result, error, output, z
     Real(fgsl_double),parameter :: lower_limit = 0.0_fgsl_double
-    Real(fgsl_double) :: upper_limit !1.0E-2_fgsl_double
+    Real(fgsl_double) :: upper_limit 
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
     Real(fgsl_double),parameter :: relative_error = 1.0E-12_fgsl_double
 
     Integer(fgsl_int) :: status
+    Integer(fgsl_int),parameter :: key = 6
 
     Type(c_ptr) :: ptr
     Type(fgsl_function) :: f_obj
@@ -250,8 +251,8 @@ contains
 
     wk = fgsl_integration_workspace_alloc(nmax)
 
-    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
-         absolute_error, relative_error, nmax, wk, result, error)
+    status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
+         absolute_error, relative_error, nmax, key, wk, result, error)
 
     output = c*result
 
@@ -307,68 +308,34 @@ contains
 
     Implicit none    ! from first line of table 4. Units : 1/(solar mass*Mpc**3)
 
-    Real*8 :: nonnormalised_halo_mass_function,R,sigma,nu!,M200d_M_z
-    Real*8 :: f_nu,g_sigma,dsigma!rdeltad,dsigma
+    Real*8 :: nonnormalised_halo_mass_function,R,sigma,nu
+    Real*8 :: f_nu,g_sigma,dsigma
     Real*8,parameter :: delta_c = 1.686d0    ! page 880 in "The large-scale ..."
-!    Real*8,parameter :: beta0 = 0.589d0
- !   Real*8,parameter :: phi0 = -0.729d0
-  !  Real*8,parameter :: eta0 = -0.243d0
-   ! Real*8,parameter :: gamma0 = 0.864d0
     Integer*4 :: virial_Mass_index,redshift_index
 
-!    If (z(redshift_index) .gt. 3.d0) then
+    R = (3.d0*M200d(virial_Mass_index,redshift_index)/4.d0/Pi/mean_density(z(redshift_index))*(1.d0 + &
+         z(redshift_index) )**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
 
- !      call compute_r_delta_d_from_M_virial_at_z(M(virial_Mass_index),3.d0,DeltaSO,rdeltad)
+    sigma = sqrt(sigma_square_M200d(virial_Mass_index,redshift_index)) !sqrt(sigma_squared(M200d_M_z,redshift))    ! Units : dimensionless
 
-  !     M200d_M_z = M_delta_d_from_M_virial(3.d0,rdeltad,DeltaSO)
+    dsigma = dsigma_square_M200d(virial_Mass_index,redshift_index)
 
-   !    R = (3.d0*M200d_M_z/4.d0/Pi/mean_density(3.d0)*( 1.d0 + 3.d0 )**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
+    nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
 
-    !   call sigma_square_at_M_and_z(M200d_M_z,3.d0,sigma)
+    If (z(redshift_index) .gt. 3.d0) then
 
-     !  call dsigma_square_at_M_and_z(M200d_M_z,3.d0,dsigma)
+       f_nu = halo_mass_function_f_nu(nu,1.d0,3.d0) 
 
-      ! sigma = sqrt(sigma) !sigma_squared(M200d_M_z,3.d0))    ! Units : dimensionless
+    Else
 
-!       nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
+       f_nu = halo_mass_function_f_nu(nu,1.d0,z(redshift_index)) 
 
- !      f_nu = halo_mass_function_f_nu(nu,1.d0,3.d0) 
+    End If
 
-  !     g_sigma = nu*f_nu            ! Equation (C2) in "Toward a ... universality"
+    g_sigma = nu*f_nu            ! Equation (C2) in "Toward a ... universality"
 
-!       nonnormalised_halo_mass_function = -mean_density(3.d0)/(1.d0 + 3.d0 )**3.d0/2.d0/M200d_M_z**2&
- !           *R/3.d0/sigma**2*dsigma*g_sigma ! dsigma_squared_dR(M200d_M_z,3.d0)*g_sigma
-
-  !  Else
-
-       R = (3.d0*M200d(virial_Mass_index,redshift_index)/4.d0/Pi/mean_density(z(redshift_index))*(1.d0 + &
-            z(redshift_index) )**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
-
-       sigma = sqrt(sigma_square_M200d(virial_Mass_index,redshift_index)) !sqrt(sigma_squared(M200d_M_z,redshift))    ! Units : dimensionless
-
-       !sigma = sqrt(sigma_squared(M200d(virial_Mass_index,redshift_index),z(redshift_index)))    ! Units : dimensionless
-
-       dsigma = dsigma_square_M200d(virial_Mass_index,redshift_index)
-
-       nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
-
-       If (z(redshift_index) .gt. 3.d0) then
-
-          f_nu = halo_mass_function_f_nu(nu,1.d0,3.d0) 
-
-       Else
-
-          f_nu = halo_mass_function_f_nu(nu,1.d0,z(redshift_index)) 
-
-       End If
-
-       g_sigma = nu*f_nu            ! Equation (C2) in "Toward a ... universality"
-
-       nonnormalised_halo_mass_function = -mean_density(z(redshift_index))/(1.d0 + z(redshift_index))**3.d0/&
-            2.d0/M200d(virial_Mass_index,redshift_index)**2*&
-            R/3.d0/sigma**2*dsigma*g_sigma !dsigma_squared_dR(M200d(virial_Mass_index,redshift_index),z(redshift_index))*g_sigma
-
-!    End If
+    nonnormalised_halo_mass_function = -mean_density(z(redshift_index))/(1.d0 + z(redshift_index))**3.d0/&
+         2.d0/M200d(virial_Mass_index,redshift_index)**2*R/3.d0/sigma**2*dsigma*g_sigma 
 
   end function nonnormalised_halo_mass_function
 
@@ -382,7 +349,6 @@ contains
 
     call c_f_pointer(params, pa) ! pa = indexz !(1) = alpha, pa(2) = red-shift
 
-!    integrand_alpha_halo_mass_function =  linear_halo_bias_b_nu(nu)*halo_mass_function_f_nu(nu,pa(1),pa(2))
     integrand_alpha_halo_mass_function = integrand_alpha_halo_mass_function_at_M_and_z(virial_mass,pa)
 
   End function integrand_alpha_halo_mass_function
@@ -414,19 +380,12 @@ contains
   function integrand_alpha_halo_mass_function_at_M_and_z(virial_mass,indexz)
 
     use arrays
- !   use fiducial
-!    use omp_lib
 
     Implicit none
 
     Real*8 :: virial_mass,integrand_alpha_halo_mass_function_at_M_and_z,dalpha
-   ! Real*8,dimension(number_of_M) :: f
 
-    Integer*4 :: indexz!,indexM
-
- !   !$omp Parallel Do Shared(f,bMz,M,z,dM200ddM)
-
-  !  !$omp End Parallel Do
+    Integer*4 :: indexz
 
     call Interpolate_1D(integrand_alpha_halo_mass_function_at_M_and_z,dalpha,virial_mass,M,inte_dndM(:,indexz))
 
@@ -441,10 +400,9 @@ contains
 
     Integer(fgsl_size_t), parameter :: nmax=1000000
 
-!    Real(fgsl_double),target :: pp(2)
-    Real(fgsl_double) :: result, error, output!, redshift
-    Real(fgsl_double),parameter :: lower_limit =  Mmin !1.686/sqrt(maxval(sigma_square_M200d))! 1.0E-1_fgsl_double
-    Real(fgsl_double),parameter :: upper_limit = Mmax !1.13E2_fgsl_double
+    Real(fgsl_double) :: result, error, output
+    Real(fgsl_double),parameter :: lower_limit =  Mmin 
+    Real(fgsl_double),parameter :: upper_limit = Mmax 
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
     Real(fgsl_double),parameter :: relative_error = 1.0E-4_fgsl_double
 
@@ -456,20 +414,6 @@ contains
     Type(fgsl_function) :: f_obj
     Type(fgsl_integration_workspace) :: wk
 
-!    lower_limit = 1.686d0/sqrt(maxval(sigma_square_M200d))
-
- !   upper_limit = 1.686d0/sqrt(minval(sigma_square_M200d))
-
-  !  If (redshift .gt. 3.d0) then
-
-   !    pp = (/1.d0,3.d0/)
-
-    !Else
-
-     !  pp = (/1.d0,redshift/)
-
-!    End If
-    
     pp = indexz
 
     ptr = c_loc(pp)
@@ -555,70 +499,37 @@ contains
 
     Implicit none                 
 
-    Real*8 :: halo_mass_function,R,sigma,nu,alpha !M200d_M_z
-    Real*8 :: f_nu,g_sigma,dsigma !rdeltad
+    Real*8 :: halo_mass_function,R,sigma,nu,alpha 
+    Real*8 :: f_nu,g_sigma,dsigma 
     Real*8,parameter :: delta_c = 1.686d0    ! page 880 in "The large-scale ..."
-!    Real*8,parameter :: beta0 = 0.589d0
- !   Real*8,parameter :: phi0 = -0.729d0
-  !  Real*8,parameter :: eta0 = -0.243d0
-   ! Real*8,parameter :: gamma0 = 0.864d0
     Integer*4 :: virial_Mass_index,redshift_index
 
-    !If (z(redshift_index) .gt. 3.d0) then
+    R = (3.d0*M200d(virial_Mass_index,redshift_index)/4.d0/Pi/mean_density(z(redshift_index))*(1.d0 + &
+         z(redshift_index))**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
 
-!       call compute_r_delta_d_from_M_virial_at_z(M(virial_Mass_index),3.d0,DeltaSO,rdeltad)
+    sigma = sqrt(sigma_square_M200d(virial_Mass_index,redshift_index))    ! Units : dimensionless
 
- !      M200d_M_z = M_delta_d_from_M_virial(3.d0,rdeltad,DeltaSO)
+    dsigma = dsigma_square_M200d(virial_Mass_index,redshift_index)
 
-  !     R = (3.d0*M200d_M_z/4.d0/Pi/mean_density(3.d0)*(1.d0 + 3.d0 )**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
+    nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
 
-   !    call sigma_square_at_M_and_z(M200d_M_z,3.d0,sigma)
+    alpha = alpha_halo_mass_function(redshift_index)
 
-    !   call dsigma_square_at_M_and_z(M200d_M_z,3.d0,dsigma)
+    If (z(redshift_index) .gt. 3.d0) then
 
-     !  sigma = sqrt(sigma)!sigma_squared(M200d_M_z,3.d0))    ! Units : dimensionless
+       f_nu = halo_mass_function_f_nu(nu,alpha,3.d0)
 
-      ! nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
+    Else
 
-       !alpha = alpha_halo_redshift_3
+       f_nu = halo_mass_function_f_nu(nu,alpha,z(redshift_index))
 
-!       f_nu = halo_mass_function_f_nu(nu,alpha,3.d0)
+    End If
 
- !      g_sigma = nu*f_nu ! dimensionless           ! Equation (C2) in "Toward a ... universality"
+    g_sigma = nu*f_nu ! dimensionless           ! Equation (C2) in "Toward a ... universality"
 
-  !     halo_mass_function = -mean_density(3.d0)/(1.d0 + 3.d0)**3.d0/2.d0/M200d_M_z**2&    ! (1+z)**3 to use comoving coordinates
-   !         *R/3.d0/sigma**2*dsigma*g_sigma  !dsigma_squared_dR(M200d_M_z,3.d0)*g_sigma
-
-    !Else
-
-       R = (3.d0*M200d(virial_Mass_index,redshift_index)/4.d0/Pi/mean_density(z(redshift_index))*(1.d0 + &
-            z(redshift_index))**3.d0)**(1.d0/3.d0)    ! Units : Mpc. (1+z)**3 to use comoving coordinates
-
-       sigma = sqrt(sigma_square_M200d(virial_Mass_index,redshift_index))    ! Units : dimensionless
-
-       dsigma = dsigma_square_M200d(virial_Mass_index,redshift_index)
-
-       nu = delta_c/sigma           ! page 880 in "The large-scale ... tests"
-
-       alpha = alpha_halo_mass_function(redshift_index)
-
-       If (z(redshift_index) .gt. 3.d0) then
-
-          f_nu = halo_mass_function_f_nu(nu,alpha,3.d0)
-
-       Else
-
-          f_nu = halo_mass_function_f_nu(nu,alpha,z(redshift_index))
-
-       End If
-
-       g_sigma = nu*f_nu ! dimensionless           ! Equation (C2) in "Toward a ... universality"
-
-       halo_mass_function = -mean_density(z(redshift_index))/(1.d0 + z(redshift_index) )**3.d0/2.d0/&
-            M200d(virial_Mass_index,redshift_index)**2*&    ! (1+z)**3 to use comoving coordinates
-            R/3.d0/sigma**2*dsigma*g_sigma !dsigma_squared_dR(M200d(virial_Mass_index,redshift_index),z(redshift_index))*g_sigma
-
-    !End If
+    halo_mass_function = -mean_density(z(redshift_index))/(1.d0 + z(redshift_index) )**3.d0/2.d0/&
+         M200d(virial_Mass_index,redshift_index)**2*&    ! (1+z)**3 to use comoving coordinates
+         R/3.d0/sigma**2*dsigma*g_sigma 
 
   end function halo_mass_function
 
@@ -626,6 +537,7 @@ contains
 
     use arrays
     use fiducial
+
     Implicit none
 
     Integer*4 :: indexz,indexM
@@ -711,16 +623,8 @@ contains
     Implicit none
 
     Real*8 :: virial_mass,integrand_mean_bias_matter_at_z,dalpha
-!    Real*8,dimension(number_of_M) :: f
 
     Integer*4 :: indexz
-
-!    Do indexM=1,number_of_M
-
-!       f(indexM) = dndM(indexM,indexz)*bMz(indexM,indexz)*M(indexM)/&
- !           mean_density(z(indexz))*(1.d0 + z(indexz))**3.d0
-
-  !  End Do
 
     call Interpolate_1D(integrand_mean_bias_matter_at_z,dalpha,virial_mass,M,inte_mbz(:,indexz))
 
@@ -736,14 +640,14 @@ contains
 
     Integer(fgsl_int),target :: pp
     Real(fgsl_double) :: result, error, output
-    Real(fgsl_double),parameter :: lower_limit = Mmin!1.0E-3_fgsl_double
-    Real(fgsl_double),parameter :: upper_limit = Mmax!1.0E-2_fgsl_double
+    Real(fgsl_double),parameter :: lower_limit = Mmin
+    Real(fgsl_double),parameter :: upper_limit = Mmax
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
     Real(fgsl_double),parameter :: relative_error = 1.0E-4_fgsl_double
 
     Integer(fgsl_int) :: status
     Integer(fgsl_int) :: indexz
-    Integer(fgsl_int),parameter :: key = 4
+    Integer(fgsl_int),parameter :: key = 6
 
     Type(c_ptr) :: ptr
     Type(fgsl_function) :: f_obj
@@ -833,7 +737,6 @@ contains
   function integrand_pre_cl_phiphi_at_z_and_l(virial_mass,indexz,indexl)
 
     use arrays
-    !use fiducial
 
     Implicit none
 
@@ -855,14 +758,14 @@ contains
 
     Integer(fgsl_int),target :: pp(2)
     Real(fgsl_double) :: result, error, output
-    Real(fgsl_double),parameter :: lower_limit = Mmin!1.0E-3_fgsl_double
-    Real(fgsl_double),parameter :: upper_limit = Mmax!1.0E-2_fgsl_double
+    Real(fgsl_double),parameter :: lower_limit = Mmin
+    Real(fgsl_double),parameter :: upper_limit = Mmax
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
     Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
 
     Integer(fgsl_int) :: status
     Integer(fgsl_int) :: indexz,indexl
-    Integer(fgsl_int),parameter :: key = 4
+    Integer(fgsl_int),parameter :: key = 6
 
     Type(c_ptr) :: ptr
     Type(fgsl_function) :: f_obj
@@ -876,8 +779,6 @@ contains
 
     wk = fgsl_integration_workspace_alloc(nmax)
 
-!    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
- !        absolute_error, relative_error, nmax, wk, result, error)
     status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
          absolute_error, relative_error, nmax, key, wk, result, error)
 
@@ -897,17 +798,8 @@ contains
     Implicit none
 
     Real*8 :: redshift,integrand_cl_phiphi_one_halo_at_z_and_l,dalpha
-    !Real*8,dimension(number_of_z) :: f
 
-    Integer*4 :: indexl !indexl
-
-    !Do indexz=1,number_of_z
-
-    !   call compute_pre_cl_phiphi_at_z_and_l(indexz,indexl,f(indexz)) 
-
-    !   f(indexz) = f(indexz)*d2VdzdO(indexz)
-
-    !End Do
+    Integer*4 :: indexl
 
     call Interpolate_1D(integrand_cl_phiphi_one_halo_at_z_and_l,dalpha,redshift,z,inte_cl_phiphi_1h(indexl,:))
 
@@ -960,13 +852,14 @@ contains
 
     Integer(fgsl_int),target :: pp
     Real(fgsl_double) :: result, error, output
-    Real(fgsl_double),parameter :: lower_limit = zmin!1.0E-3_fgsl_double
-    Real(fgsl_double),parameter :: upper_limit = zmax!1.0E-2_fgsl_double
+    Real(fgsl_double),parameter :: lower_limit = zmin
+    Real(fgsl_double),parameter :: upper_limit = zmax
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
     Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
 
     Integer(fgsl_int) :: status
     Integer(fgsl_int) :: indexl
+    Integer(fgsl_int),parameter :: key = 6
 
     Type(c_ptr) :: ptr
     Type(fgsl_function) :: f_obj
@@ -980,8 +873,8 @@ contains
 
     wk = fgsl_integration_workspace_alloc(nmax)
 
-    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
-         absolute_error, relative_error, nmax, wk, result, error)
+    status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
+         absolute_error, relative_error, nmax, key, wk, result, error)
 
     output = result
 
@@ -1011,93 +904,6 @@ contains
 
   end subroutine compute_Clphiphi1h
 
-
-!  function pre_Clphiphi(indexz,indexl) ! Required function to compute one halo term of lensing potential angular power spectrum. Dimensionless
-
- !   use fiducial
-  !  use arrays
-   ! Implicit none
-
-    !Real*8 :: pre_Clphiphi,sum
-!    Integer*4 :: indexl,i,indexM,indexz
- !   Integer*4,parameter :: intervals = number_of_M - 1 
-  !  Real*8,dimension(number_of_M) :: f
-
-   ! Do indexM = 1, number_of_M
-
-    !   f(indexM) = dndM(indexM,indexz)*philMz(indexl,indexM,indexz)**2 ! Units : 1/solar mass/Mpc**3
-
-!    End Do
-
- !   open(15,file='./output/preclphiphi.dat')
-
-  !  write(15,*) '# Virial_ Mass[solar mass]  f_in_preclphiphi',z(indexz),ml(indexl)
-
-    !        Do indexM=1,number_of_M
-
-    !            write(15,'(2es18.10)') M(indexM), f(indexM)
-
-    !        End Do
-
-    !        close(15)
-
-!    sum = 0.d0
-
- !   Do i=1,intervals
-
-  !     sum = (M(i+1)- M(i))/2.d0*( f(i) + f(i+1) ) + sum   ! Units : 1/Mpc**3
-
-   ! End Do
-
-    !pre_Clphiphi = sum     ! Dimensionless                     
-
-  !end function pre_Clphiphi
-
-!  function C_l_phiphi_one_halo(indexl) ! It computes lensing potential angular power spectrum for a single multipole. Dimensionless
-
- !   use fiducial
-  !  use arrays
-    !use omp_lib
-   ! Implicit none
-
-    !Real*8 :: C_l_phiphi_one_halo,sum
-!    Integer*4 :: indexl,indexz
- !   Integer*4,parameter :: number_of_redshift = number_of_z_functions 
-  !  Integer*4,parameter :: intervals = number_of_redshift - 1
-   ! Real*8,dimension(number_of_redshift):: f
-
-!!$omp Parallel Do Shared(f)
-
-    !Do indexz=1,number_of_redshift
-
-!       f(indexz) = pre_Clphiphi(indexz,indexl)*d2VdzdO(indexz)          ! Dimensionless
-
- !   End Do
-
-!!$omp End Parallel Do
-
-    !    open(16,file='./output/clphiphi.dat')
-
-    !    Do indexz=1,number_of_z
-
-    !        write(16,'(2es18.10)') z(indexz),f(indexz) 
-
-    !    End Do
-
-    !    close(16)
-
-  !  sum = 0.d0
-
-   ! Do indexz=1,intervals
-
-    !   sum = (z_functions(indexz+1) -  z_functions(indexz))/2.d0*( f(indexz) + f(indexz+1) ) + sum
-
-!    End Do
-
- !   C_l_phiphi_one_halo = sum
-
-  !end function C_l_phiphi_one_halo
-
   function integrand_limber_approximation_at_z_and_l(redshift,indexl)
 
     use arrays
@@ -1110,20 +916,7 @@ contains
 
     Integer*4 :: indexl
 
-!    prefactor = 4.d0/dble(ml(indexl))**2/(dble(ml(indexl))+1.d0)**2*9.d0/4.d0/&
- !        c**4*Hubble_parameter(0.d0)**4*Omega_m(0.d0)**2    !    Units : 
-
-    !Do indexz=1,number_of_z_limber
-
-     !  f(indexz) = (1.d0 + zlimber(indexz))**2*( com_dist_at_z_dec - comoving_distance(zlimber(indexz)) )**2/&
-      !      com_dist_at_z_dec**2*c/Hubble_parameter(zlimber(indexz))*&
-       !     matter_power_spectrum((dble(ml(indexl)) + 1.d0/2.d0)/comoving_distance(zlimber(indexz)),zlimber(indexz))
-
-!    End Do
-
     call Interpolate_1D(integrand_limber_approximation_at_z_and_l,dalpha,redshift,zlimber,integrand_limber(:,indexl))
-
-!    integrand_limber_approximation_at_z_and_l = integrand_limber_approximation_at_z_and_l!*prefactor/h**3
 
   End function integrand_limber_approximation_at_z_and_l
 
@@ -1151,12 +944,13 @@ contains
     Integer(fgsl_int),target :: pp
     Real(fgsl_double) :: result, error, output
     Real(fgsl_double),parameter :: lower_limit = 1.0E-5_fgsl_double
-    Real(fgsl_double),parameter :: upper_limit = z_dec!1.0E-2_fgsl_double
+    Real(fgsl_double),parameter :: upper_limit = z_dec
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
     Real(fgsl_double),parameter :: relative_error = 1.0E-8_fgsl_double
 
     Integer(fgsl_int) :: status
     Integer(fgsl_int) :: indexl
+    Integer(fgsl_int),parameter :: key = 6
 
     Type(c_ptr) :: ptr
     Type(fgsl_function) :: f_obj
@@ -1170,8 +964,8 @@ contains
 
     wk = fgsl_integration_workspace_alloc(nmax)
 
-    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
-         absolute_error, relative_error, nmax, wk, result, error)
+    status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
+         absolute_error, relative_error, nmax, key, wk, result, error)
 
     output = result
 
@@ -1202,90 +996,6 @@ contains
     !$omp End Parallel Do
 
   end subroutine compute_Clpsilimber
-
-
-!  function C_l_psi_limber(indexl)    ! It computes the angular power spectrum of the lensing potential in the Limber approximation 
-
- !   use fiducial    ! for a single multipole as in Lewis and Challinor. Units : Dimensionless
-  !  use arrays
-   ! Implicit none
-
-!    Real*8 :: C_l_psi_limber,sum,prefactor
- !   Integer*4 :: indexl,indexz
-  !  Integer*4,parameter :: intervals = number_of_z_limber - 1 
-   ! Real*8,dimension(number_of_z_limber):: f,zlimber
-    !Real*8,parameter :: zminlimber = 1.d-5
-
-    ! Red-shift array. Dimensionless.
-
-!    Do indexz = 1, number_of_z_limber      
-
- !      zlimber(indexz) = 10**(log10(zminlimber) + real(indexz-1)*(log10(z_dec) - log10(zminlimber))/real(number_of_z_limber-1))
-
-  !  End Do
-
-   ! prefactor = 4.d0/dble(ml(indexl))**2/(dble(ml(indexl))+1.d0)**2*9.d0/4.d0/&
-    !     c**4*Hubble_parameter(0.d0)**4*Omega_m(0.d0)**2    !    Units : 
-
-!    Do indexz=1,number_of_z_limber
-
- !      f(indexz) = (1.d0 + zlimber(indexz))**2*( com_dist_at_z_dec - comoving_distance(zlimber(indexz)) )**2/&
-  !          com_dist_at_z_dec**2*c/Hubble_parameter(zlimber(indexz))*&
-   !         matter_power_spectrum((dble(ml(indexl)) + 1.d0/2.d0)/comoving_distance(zlimber(indexz)),zlimber(indexz))
-
-    !End Do
-
-!    sum = 0.d0
-
- !   Do indexz=1,intervals
-
-  !     sum = (zlimber(indexz+1)-zlimber(indexz))/2.d0*( f(indexz) + f(indexz+1) ) + sum
-
-   ! End Do
-
-    !C_l_psi_limber = prefactor*sum/h**3    
-
-!  end function C_l_psi_limber
-
-!  function pre_Cl_1(indexz,indexl) ! Units 1/Mpc**3. 
-
- !   use fiducial
-    !use omp_lib
-  !  use arrays
-   ! Implicit none
-
-!    Real*8 :: pre_Cl_1,sum
- !   Integer*4 :: indexl,indexM,indexz
-  !  Integer*4,parameter :: intervals = number_of_M - 1
-   ! Real*8,dimension(number_of_M) :: f
-
-!    Do indexM = 1, number_of_M    
-
- !      f(indexM) = dndM(indexM,indexz)*bMz(indexM,indexz)*philMz(indexl,indexM,indexz) 
-
-  !  End Do
-
-    !    open(16,file='./output/clphiphi.dat')
-
-    !    Do indexM=1,number_of_M
-
-    !        write(16,'(2es18.10)') M(indexM),f(indexM) 
-
-    !    End Do
-
-    !    close(16)
-
-   ! sum = 0.d0
-
-    !Do indexM=1,intervals
-
-!       sum = (M(indexM+1)-M(indexM))/2.d0*( f(indexM) + f(indexM+1) ) + sum
-
- !   End Do
-
-  !  pre_Cl_1 = sum
-
-!  end function pre_Cl_1
 
   subroutine compute_integrand_pre_cl_phiphi_2h_at_z_and_l()
 
@@ -1349,14 +1059,14 @@ contains
 
     Integer(fgsl_int),target :: pp(2)
     Real(fgsl_double) :: result, error, output
-    Real(fgsl_double),parameter :: lower_limit = Mmin!1.0E-3_fgsl_double
-    Real(fgsl_double),parameter :: upper_limit = Mmax!1.0E-2_fgsl_double
+    Real(fgsl_double),parameter :: lower_limit = Mmin
+    Real(fgsl_double),parameter :: upper_limit = Mmax
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
     Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
 
     Integer(fgsl_int) :: status
     Integer(fgsl_int) :: indexz,indexl
-    Integer(fgsl_int),parameter :: key = 4
+    Integer(fgsl_int),parameter :: key = 6
 
     Type(c_ptr) :: ptr
     Type(fgsl_function) :: f_obj
@@ -1369,9 +1079,6 @@ contains
     f_obj = fgsl_function_init(integrand_pre_cl_phiphi_2h, ptr)
 
     wk = fgsl_integration_workspace_alloc(nmax)
-
-!    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
- !        absolute_error, relative_error, nmax, wk, result, error)
 
     status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
          absolute_error, relative_error, nmax, key, wk, result, error)
@@ -1420,18 +1127,8 @@ contains
     Implicit none
 
     Real*8 :: redshift,integrand_cl_phiphi_two_halo_at_z_and_l,dalpha
-    !Real*8,dimension(number_of_z) :: f
 
-    Integer*4 :: indexl!,indexl
-
-    !Do indexz=1,number_of_z
-
-    !   call compute_pre_cl_phiphi_2h_at_z_and_l(indexz,indexl,f(indexz)) 
-
-    !   f(indexz) = f(indexz)**2*d2VdzdO(indexz)*&
-     !       matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance_at_z(indexz),z(indexz))    !  Dimensionless
-
-    !End Do
+    Integer*4 :: indexl
 
     call Interpolate_1D(integrand_cl_phiphi_two_halo_at_z_and_l,dalpha,redshift,z,inte_cl_phiphi_2h(indexl,:))
 
@@ -1458,14 +1155,14 @@ contains
 
     Integer(fgsl_int),target :: pp
     Real(fgsl_double) :: result, error, output
-    Real(fgsl_double),parameter :: lower_limit = zmin!1.0E-3_fgsl_double
-    Real(fgsl_double),parameter :: upper_limit = zmax!1.0E-2_fgsl_double
+    Real(fgsl_double),parameter :: lower_limit = zmin
+    Real(fgsl_double),parameter :: upper_limit = zmax
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
     Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
 
     Integer(fgsl_int) :: status
     Integer(fgsl_int) :: indexl
-!    Integer(fgsl_int),parameter :: key = 4
+    Integer(fgsl_int),parameter :: key = 6
 
     Type(c_ptr) :: ptr
     Type(fgsl_function) :: f_obj
@@ -1479,15 +1176,10 @@ contains
 
     wk = fgsl_integration_workspace_alloc(nmax)
 
-    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
-         absolute_error, relative_error, nmax, wk, result, error)
-!    status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
- !        absolute_error, relative_error, nmax, key, wk, result, error)
-
+    status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
+         absolute_error, relative_error, nmax, key, wk, result, error)
 
     output = result/h**3
-
-!    print *, output, error, indexl
 
     call fgsl_function_free(f_obj)
 
@@ -1514,56 +1206,6 @@ contains
     !$omp End Parallel Do 
 
   end subroutine compute_Clphiphi2h
-
-!  function C_l_phiphi_two_halo(indexl)    ! It computes two halo term lensing potential angular power spectrum for a single multipole. 
-
- !   use fiducial    ! Equation (2.11) in 1312.4525. Dimensionless
-  !  use arrays
-    !        use omp_lib
-   ! Implicit none
-
-!    Real*8 :: C_l_phiphi_two_halo,sum
- !   Integer*4 :: indexl,indexz
-  !  Integer*4,parameter :: number_of_redshift = number_of_z!_functions  !1d4
-   ! Integer*4,parameter :: intervals = number_of_redshift - 1 
-    !Real*8,dimension(number_of_redshift):: f!,redshift
-
-    !      Do indexz=1,number_of_redshift
-
-    !            redshift(indexz) = 10**(log10(zmin) + real(indexz-1)*(log10(zmax) - log10(zmin))/real(number_of_redshift-1))
-
-    !        End Do
-
-    !        !$omp Parallel Do Default(Shared)
-!    Do indexz=1,number_of_redshift
-
- !      f(indexz) = pre_Cl_1(indexz,indexl)**2*d2VdzdO(indexz)*&
-  !          matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance_at_z(indexz),z(indexz))    !  Dimensionless
-
-   ! End Do
-    !        !$omp End Parallel Do
-
-    !    open(16,file='./output/clphiphi.dat')
-
-    !    Do indexz=1,number_of_z
-
-    !        write(16,'(2es18.10)') z(indexz),f(indexz) 
-
-    !    End Do
-
-    !    close(16)
-
-!    sum = 0.d0
-
- !   Do indexz=1,intervals
-
-  !     sum = (z(indexz+1)-z(indexz))/2.d0*( f(indexz) + f(indexz+1) ) + sum
-
-   ! End Do
-
-    !C_l_phiphi_two_halo = sum/h**3
-
-!  end function C_l_phiphi_two_halo
 
   function integrand_form_factor_at_M_z_and_l(x,indexM,indexz,indexl)
 
@@ -1653,13 +1295,18 @@ contains
 
     use arrays
     use fiducial
-    !use omp_lib
+    use omp_lib
     Implicit none
 
     Integer*4 :: indexl,indexM,indexz
 
-!!$omp Parallel Do Shared(ylMz)
+    open(15,file='./precomputed_quantities/form_factor/form_factor.dat')
 
+    write(15,*) '# Form factor file. Number of lines is ',number_of_l*number_of_z*number_of_M
+
+    write(15,*) '# index_of_l    l    index_of_M    virial_mass[solar mass]    index_of_z    red-shift    y'
+
+!    !$omp Parallel Do Shared(ylMz)
     Do indexl=1,number_of_l
 
        Do indexM=1,number_of_M
@@ -1669,18 +1316,11 @@ contains
              call compute_form_factor_at_M_z_and_l(indexM,indexz,indexl,ylMz(indexl,indexM,indexz))
 
           End Do
-
+ 
        End Do
 
     End Do
-
-!!$omp End Parallel Do
-
-    open(15,file='./precomputed_quantities/form_factor/form_factor.dat')
-
-    write(15,*) '# Form factor file. Number of lines is ',number_of_l*number_of_z*number_of_M
-
-    write(15,*) '# index_of_l    l    index_of_M    virial_mass[solar mass]    index_of_z    red-shift    y'
+!    !$omp End Parallel Do
 
     Do indexl=1,number_of_l
 
@@ -1700,58 +1340,6 @@ contains
     close(15)
 
   end subroutine compute_form_factor
-
-!  function pre_Cl(indexz,indexl) ! Dimensionless
-
- !   use fiducial
-  !  use arrays
-   ! Implicit none
-
-!    Real*8 :: pre_Cl,sum!,dndM_M_z,ylMz_M_z,philMz_M_z
- !   Integer*4 :: indexl,i,indexM,indexz
-  !  Integer*4,parameter :: number_of_virial_Mass = number_of_M_functions 
-   ! Integer*4,parameter :: intervals = number_of_virial_Mass - 1 
-    !Real*8,dimension(number_of_virial_Mass) :: f!,virial_Mass
-
-!    Do indexM = 1, number_of_virial_Mass    
-
-       !            virial_Mass(indexM) = 10**(log10(Mmin) + real(indexM-1)*(log10(Mmax) - log10(Mmin))/real(number_of_virial_Mass-1))
-
-       !            call Interpolate_2D(dndM_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
-       !                z_functions(1:number_of_z_functions),dndM(1:number_of_M_functions,1:number_of_z_functions))
-
-       !          call Interpolate_2D(philMz_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
-       !              z_functions(1:number_of_z_functions),philMz(indexl,1:number_of_M_functions,1:number_of_z_functions))
-
-       !        call Interpolate_2D(ylMz_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
-       !            z_functions(1:number_of_z_functions),ylMz(indexl,1:number_of_M_functions,1:number_of_z_functions))
-
- !      f(indexM) = dndM_interpolation(indexM,indexz)*ylMz_interpolation(indexl,indexM,indexz)*&
-  !          philMz_interpolation(indexl,indexM,indexz) ! Units : 1/solar mass/Mpc**3
-
-   ! End Do
-
-    !    open(16,file='./output/clphiphi.dat')
-
-    !    Do indexM=1,number_of_M
-
-    !        write(16,'(2es18.10)') M(indexM),f(indexM) 
-
-    !    End Do
-
-    !    close(16)
-
-    !sum = 0.d0
-
-!    Do i=1,intervals
-
- !      sum = (M_functions(i+1)- M_functions(i))/2.d0*( f(i) + f(i+1) ) + sum 
-
-  !  End Do
-
-   ! pre_Cl = sum       ! dimensionless                   
-
-!  end function pre_Cl
 
   subroutine compute_integrand_pre_cl_yphi_at_z_and_l()
 
@@ -1787,7 +1375,7 @@ contains
 
     Real*8 :: virial_mass,integrand_pre_cl_yphi_at_z_and_l,dalpha
 
-    Integer*4 :: indexz,indexl!,indexl
+    Integer*4 :: indexz,indexl
 
     call Interpolate_1D(integrand_pre_cl_yphi_at_z_and_l,dalpha,virial_mass,M,inte_pre_cl_yphi(indexl,:,indexz))
 
@@ -1817,14 +1405,14 @@ contains
 
     Integer(fgsl_int),target :: pp(2)
     Real(fgsl_double) :: result, error, output
-    Real(fgsl_double),parameter :: lower_limit = Mmin!1.0E-3_fgsl_double
-    Real(fgsl_double),parameter :: upper_limit = Mmax!1.0E-2_fgsl_double
+    Real(fgsl_double),parameter :: lower_limit = Mmin
+    Real(fgsl_double),parameter :: upper_limit = Mmax
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
     Real(fgsl_double),parameter :: relative_error = 1.0E-4_fgsl_double
 
     Integer(fgsl_int) :: status
     Integer(fgsl_int) :: indexz,indexl
-    Integer(fgsl_int),parameter :: key = 4
+    Integer(fgsl_int),parameter :: key = 6
 
     Type(c_ptr) :: ptr
     Type(fgsl_function) :: f_obj
@@ -1909,14 +1497,14 @@ contains
 
     Integer(fgsl_int),target :: pp
     Real(fgsl_double) :: result, error, output
-    Real(fgsl_double),parameter :: lower_limit = zmin!1.0E-3_fgsl_double
-    Real(fgsl_double),parameter :: upper_limit = zmax!1.0E-2_fgsl_double
+    Real(fgsl_double),parameter :: lower_limit = zmin
+    Real(fgsl_double),parameter :: upper_limit = zmax
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
     Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
 
     Integer(fgsl_int) :: status
     Integer(fgsl_int) :: indexl
-    Integer(fgsl_int),parameter :: key = 4
+    Integer(fgsl_int),parameter :: key = 6
 
     Type(c_ptr) :: ptr
     Type(fgsl_function) :: f_obj
@@ -1960,79 +1548,6 @@ contains
     !$omp End Parallel Do
 
   end subroutine compute_Clyphi1h
-
-
-
-  !function C_l_yphi_one_halo(indexl) ! Dimensionless
-
-   ! use fiducial
-    !use arrays
-!    use omp_lib
- !   Implicit none
-
-  !  Real*8 :: C_l_yphi_one_halo,sum
-   ! Integer*4 :: indexl,indexz
-    !Integer*4,parameter :: number_of_redshift = number_of_z_functions 
-!    Integer*4,parameter :: intervals = number_of_redshift - 1
- !   Real*8,dimension(number_of_redshift):: f
-
-  !  !$omp Parallel Do Shared(f)
-
-   ! Do indexz=1,number_of_redshift
-
-    !   f(indexz) = pre_Cl(indexz,indexl)*d2VdzdO(indexz)          ! Dimensionless
-
-!    End Do
-
- !   !$omp End Parallel Do
-
-    !    open(16,file='./output/clphiphi.dat')
-
-    !    Do indexz=1,number_of_z
-
-    !        write(16,'(2es18.10)') z(indexz),f(indexz) 
-
-    !    End Do
-
-    !    close(16)
-
-  !  sum = 0.d0
-
-   ! Do indexz=1,intervals
-
-    !   sum = (z_functions(indexz+1) -  z_functions(indexz))/2.d0*( f(indexz) + f(indexz+1) ) + sum
-
-!    End Do
-
- !   C_l_yphi_one_halo = sum
-
-  !end function C_l_yphi_one_halo
-
-!  subroutine compute_Cl1h()  ! Dimensionless
-
- !   use arrays
-  !  use fiducial
-   ! Implicit none
-
-!    Integer*4 :: indexl
-
- !   If (compute_functions) then
-
-  !     print *, 'ONE HALO TERM OF CROSS-CORRELATION YPHI ONLY IS COMPUTED WHEN INTERPOLATING FUNCTIONS USED'
-
-   !    stop
-
-    !Else
-
-     !  Do indexl=1,number_of_l
-
-      !    Cl1h(indexl) = C_l_yphi_one_halo(indexl)
-
-!       End Do
-
- !   End If
-
-!  end subroutine compute_Cl1h
 
 !  function form_factor(indexM,indexz,indexl)    ! Form factor. Equation (2.9) in 1312.4525. Units of M: solar mass. 
 
@@ -2170,60 +1685,6 @@ contains
 
 !  end function form_factor
 
-!  function pre_Cl_2(indexz,indexl) ! Units 1/Mpc**3
-
- !   use fiducial
-  !  use arrays
-   ! use omp_lib
-    !Implicit none
-
-!    Real*8 :: pre_Cl_2,sum!,redshift,dndM_M_z,bMz_M_z,ylMz_M_z
- !   Integer*4 :: indexl,indexM,indexz
-  !  Integer*4,parameter :: number_of_virial_Mass = number_of_M_functions !1d5
-   ! Integer*4,parameter :: intervals = number_of_virial_Mass - 1
-    !Real*8,dimension(number_of_virial_Mass) :: f!,virial_Mass
-
-!    Do indexM = 1, number_of_virial_Mass    
-
-       !            virial_Mass(indexM) = 10**(log10(Mmin) + real(indexM-1)*(log10(Mmax) - log10(Mmin))/real(number_of_virial_Mass-1))
-
-       !           call Interpolate_2D(dndM_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
-       !               z_functions(1:number_of_z_functions),dndM(1:number_of_M_functions,1:number_of_z_functions))
-
-       !         call Interpolate_2D(bMz_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
-       !             z_functions(1:number_of_z_functions),bMz(1:number_of_M_functions,1:number_of_z_functions))
-
-       !       call Interpolate_2D(ylMz_M_z,virial_Mass(indexM),redshift,M_functions(1:number_of_M_functions),&
-       !           z_functions(1:number_of_z_functions),ylMz(indexl,1:number_of_M_functions,1:number_of_z_functions))
-
- !      f(indexM) = dndM_interpolation(indexM,indexz)*bMz_interpolation(indexM,indexz)*&
-  !          ylMz_interpolation(indexl,indexM,indexz)
-
-   ! End Do
-
-
-    !    open(16,file='./output/clphiphi.dat')
-
-    !    Do indexM=1,number_of_M
-
-    !        write(16,'(2es18.10)') M(indexM),f(indexM) 
-
-    !    End Do
-
-    !    close(16)
-
-   ! sum = 0.d0
-
-    !Do indexM=1,intervals
-
-     !  sum = (M_functions(indexM+1)-M_functions(indexM))/2.d0*( f(indexM) + f(indexM+1) ) + sum
-
-!    End Do
-
- !   pre_Cl_2 = sum
-
-  !end function pre_Cl_2
-
   subroutine compute_integrand_pre_cl_yphi_2h_at_z_and_l()
 
     use arrays 
@@ -2258,15 +1719,8 @@ contains
     Implicit none
 
     Real*8 :: virial_mass,integrand_pre_cl_yphi_2h_at_z_and_l,dalpha
-!    Real*8,dimension(number_of_M) :: f
 
-    Integer*4 :: indexz,indexl!,indexl
-
- !   Do indexM=1,number_of_M
-
-  !     f(indexM) = dndM(indexM,indexz)*bMz(indexM,indexz)*ylMz(indexl,indexM,indexz) 
-
-   ! End Do
+    Integer*4 :: indexz,indexl
 
     call Interpolate_1D(integrand_pre_cl_yphi_2h_at_z_and_l,dalpha,virial_mass,M,inte_pre_cl_yphi_2h(indexl,:,indexz))
 
@@ -2285,7 +1739,7 @@ contains
 
   End function integrand_pre_cl_yphi_2h
 
-  Subroutine compute_pre_cl_yphi_2h_at_z_and_l(indexz,indexl,output)
+  Subroutine integral_one(indexz,indexl,output)
 
     use fiducial
     use arrays
@@ -2295,53 +1749,101 @@ contains
     Integer(fgsl_size_t), parameter :: nmax=1000000
 
     Integer(fgsl_int),target :: pp(2)
-    Real(fgsl_double) :: result, error, output, output1, output2
-    Real(fgsl_double),parameter :: lower_limit = Mmin!1.0E-3_fgsl_double
-    Real(fgsl_double),parameter :: upper_limit = Mmax!1.0E-2_fgsl_double
+    Real(fgsl_double) :: result1, error1, output
+    Real(fgsl_double),parameter :: lower_limit = Mmin
+    Real(fgsl_double),parameter :: upper_limit = Mmax
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
     Real(fgsl_double),parameter :: relative_error = 1.0E-4_fgsl_double
 
-    Integer(fgsl_int) :: status
+    Integer(fgsl_int) :: statu1
     Integer(fgsl_int) :: indexz,indexl
-    Integer(fgsl_int),parameter :: key = 4
+    Integer(fgsl_int),parameter :: key = 6
 
     Type(c_ptr) :: ptr
-    Type(fgsl_function) :: f_obj
-    Type(fgsl_integration_workspace) :: wk
+    Type(fgsl_function) :: f_obj1
+    Type(fgsl_integration_workspace) :: wk1
 
     pp = (/indexz,indexl/)
 
     ptr = c_loc(pp)
 
-    f_obj = fgsl_function_init(integrand_pre_cl_yphi_2h, ptr)
+    f_obj1 = fgsl_function_init(integrand_pre_cl_yphi_2h, ptr)
 
-    wk = fgsl_integration_workspace_alloc(nmax)
+    wk1 = fgsl_integration_workspace_alloc(nmax)
 
-    status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
-         absolute_error, relative_error, nmax, key, wk, result, error)
+    statu1 = fgsl_integration_qag(f_obj1, lower_limit, upper_limit, &
+         absolute_error, relative_error, nmax, key, wk1, result1, error1)
 
-    output1 = result
+    output = result1
 
-    call fgsl_function_free(f_obj)
+    call fgsl_function_free(f_obj1)
 
-    call fgsl_integration_workspace_free(wk)
+    call fgsl_integration_workspace_free(wk1)
 
-    f_obj = fgsl_function_init(integrand_pre_cl_phiphi_2h, ptr)
+  End subroutine integral_one
 
-    wk = fgsl_integration_workspace_alloc(nmax)
+  Subroutine integral_two(indexz,indexl,output)
 
-    status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
-         absolute_error, relative_error, nmax, key, wk, result, error)
+    use fiducial
+    use arrays
 
-    output2 = result
+    Implicit none
+
+    Integer(fgsl_size_t), parameter :: nmax=1000000
+
+    Integer(fgsl_int),target :: pp(2)
+    Real(fgsl_double) :: result2, error2, output
+    Real(fgsl_double),parameter :: lower_limit = Mmin
+    Real(fgsl_double),parameter :: upper_limit = Mmax
+    Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
+    Real(fgsl_double),parameter :: relative_error = 1.0E-4_fgsl_double
+
+    Integer(fgsl_int) :: statu2
+    Integer(fgsl_int) :: indexz,indexl
+    Integer(fgsl_int),parameter :: key = 6
+
+    Type(c_ptr) :: ptr
+    Type(fgsl_function) :: f_obj2
+    Type(fgsl_integration_workspace) :: wk2
+
+    pp = (/indexz,indexl/)
+
+    ptr = c_loc(pp)
+
+    f_obj2 = fgsl_function_init(integrand_pre_cl_phiphi_2h, ptr)
+
+    wk2 = fgsl_integration_workspace_alloc(nmax)
+
+    statu2 = fgsl_integration_qag(f_obj2, lower_limit, upper_limit, &
+         absolute_error, relative_error, nmax, key, wk2, result2, error2)
+
+    output = result2
+
+    call fgsl_function_free(f_obj2)
+
+    call fgsl_integration_workspace_free(wk2)
+
+  End subroutine integral_two
+
+
+  Subroutine compute_pre_cl_yphi_2h_at_z_and_l(indexz,indexl,output)
+
+    use fiducial
+    use arrays
+
+    Implicit none
+
+    Real*8 :: output,output1,output2 
+
+    Integer*4 :: indexz,indexl
+
+    call integral_one(indexz,indexl,output1)
+
+    call integral_two(indexz,indexl,output2)
 
     output = output1*output2*d2VdzdO(indexz)*&
          matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance_at_z(indexz),z(indexz))    !  Dimensionless
-
-    call fgsl_function_free(f_obj)
-
-    call fgsl_integration_workspace_free(wk)
-
+    
   End subroutine compute_pre_cl_yphi_2h_at_z_and_l
 
   subroutine compute_integrand_cl_yphi_two_halo_at_z_and_l()
@@ -2405,14 +1907,14 @@ contains
 
     Integer(fgsl_int),target :: pp
     Real(fgsl_double) :: result, error, output
-    Real(fgsl_double),parameter :: lower_limit = zmin!1.0E-3_fgsl_double
-    Real(fgsl_double),parameter :: upper_limit = zmax!1.0E-2_fgsl_double
+    Real(fgsl_double),parameter :: lower_limit = zmin
+    Real(fgsl_double),parameter :: upper_limit = zmax
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
     Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
 
     Integer(fgsl_int) :: status
     Integer(fgsl_int) :: indexl
-    Integer(fgsl_int),parameter :: key = 4
+    Integer(fgsl_int),parameter :: key = 6
 
     Type(c_ptr) :: ptr
     Type(fgsl_function) :: f_obj
@@ -2456,86 +1958,6 @@ contains
     !$omp End Parallel Do
 
   end subroutine compute_Clyphi2h
-
-
-
-!  function C_l_yphi_two_halo(indexl) ! Equation (2.11) in 1312.4525
-
- !   use fiducial                   ! Units : dimensionless
-  !  use arrays
-   ! use omp_lib
-    !Implicit none
-
-!    Real*8 :: C_l_yphi_two_halo,sum
- !   Integer*4 :: indexl,indexz
-  !  Integer*4,parameter :: number_of_redshift = number_of_z_functions !1d4
-   ! Integer*4,parameter :: intervals = number_of_redshift - 1 
-    !Real*8,dimension(number_of_redshift):: f!,redshift
-
-    !        Do indexz=1,number_of_redshift
-
-    !           redshift(indexz) = 10**(log10(zmin) + real(indexz-1)*(log10(zmax) - log10(zmin))/real(number_of_redshift-1))
-
-    !      End Do
-
-    !!$omp Parallel Do Default(Shared)
-
-!    Do indexz=1,number_of_redshift
-
- !      f(indexz) = pre_Cl_1(indexz,indexl)*pre_Cl_2(indexz,indexl)*d2VdzdO(indexz)*&
-  !          matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance_at_z(indexz),z_functions(indexz)) ! Units : 1/h**3
-
-   ! End Do
-
-    !!$omp End Parallel Do
-
-    !        open(16,file='./output/clphiphi.dat')
-
-    !        Do indexz=1,number_of_z
-
-    !            write(16,'(2es18.10)') z(indexz),f(indexz) 
-
-    !        End Do
-
-    !        close(16)
-
-    !sum = 0.d0
-
-    !Do indexz=1,intervals
-
-     !  sum = (z_functions(indexz+1)-z_functions(indexz))/2.d0*( f(indexz) + f(indexz+1) ) + sum
-
-!    End Do
-
- !   C_l_yphi_two_halo = sum/h**3
-
-  !end function C_l_yphi_two_halo
-
-!  subroutine compute_Cl2h()
-
- !   use arrays
-  !  use fiducial
-   ! Implicit none
-
-    !Integer*4 :: indexl
-
-!    If (compute_functions) then
-
- !      print *, 'TWO HALO TERM FOR CROSS-CORRELATIONS YPHI IS COMPUTED ONLY WITH INTERPOLATING FUNCTIONS'
-
-  !     stop
-
-   ! Else
-
-    !   Do indexl=1,number_of_l
-
-     !     Cl2h(indexl) = C_l_yphi_two_halo(indexl)
-
-      ! End Do
-
- !   End If
-
-  !end subroutine compute_Cl2h
 
   subroutine compute_Cl()
 
