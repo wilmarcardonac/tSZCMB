@@ -838,15 +838,8 @@ contains
     Implicit none
 
     Real*8 :: virial_mass,integrand_pre_cl_phiphi_at_z_and_l,dalpha
-    !Real*8,dimension(number_of_M) :: f
 
     Integer*4 :: indexz,indexl
-
-    !Do indexM=1,number_of_M
-
-    !   f(indexM) = dndM(indexM,indexz)*philMz(indexl,indexM,indexz)**2 ! Units : 1/solar mass/Mpc**3
-
-    !End Do
 
     call Interpolate_1D(integrand_pre_cl_phiphi_at_z_and_l,dalpha,virial_mass,M,inte_pre_cl_phiphi(indexl,:,indexz))
 
@@ -1322,20 +1315,12 @@ contains
   function integrand_pre_cl_phiphi_2h_at_z_and_l(virial_mass,indexz,indexl)
 
     use arrays
-    !use fiducial
 
     Implicit none
 
     Real*8 :: virial_mass,integrand_pre_cl_phiphi_2h_at_z_and_l,dalpha
-    !Real*8,dimension(number_of_M) :: f
 
     Integer*4 :: indexz,indexl
-
-    !Do indexM=1,number_of_M
-
-    !   f(indexM) = dndM(indexM,indexz)*bMz(indexM,indexz)*philMz(indexl,indexM,indexz)  
-
-    !End Do
 
     call Interpolate_1D(integrand_pre_cl_phiphi_2h_at_z_and_l,dalpha,virial_mass,M,inte_pre_cl_phiphi_2h(indexl,:,indexz))
 
@@ -1801,15 +1786,8 @@ contains
     Implicit none
 
     Real*8 :: virial_mass,integrand_pre_cl_yphi_at_z_and_l,dalpha
-!    Real*8,dimension(number_of_M) :: f
 
     Integer*4 :: indexz,indexl!,indexl
-
-!    Do indexM=1,number_of_M
-
- !      f(indexM) = dndM(indexM,indexz)*ylMz(indexl,indexM,indexz)*philMz(indexl,indexM,indexz) ! Units : 1/solar mass/Mpc**3 
-
-  !  End Do
 
     call Interpolate_1D(integrand_pre_cl_yphi_at_z_and_l,dalpha,virial_mass,M,inte_pre_cl_yphi(indexl,:,indexz))
 
@@ -1831,6 +1809,7 @@ contains
   Subroutine compute_pre_cl_yphi_at_z_and_l(indexz,indexl,output)
 
     use fiducial 
+    use arrays
 
     Implicit none
 
@@ -1862,7 +1841,7 @@ contains
     status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
          absolute_error, relative_error, nmax, key, wk, result, error)
 
-    output = result
+    output = result*d2VdzdO(indexz)
 
     call fgsl_function_free(f_obj)
 
@@ -1887,8 +1866,6 @@ contains
 
           call compute_pre_cl_yphi_at_z_and_l(indexz,indexl,inte_cl_yphi_1h(indexl,indexz))
 
-          inte_cl_yphi_1h(indexl,indexz)  = inte_cl_yphi_1h(indexl,indexz)*d2VdzdO(indexz)
-
        End Do
 
     End Do
@@ -1904,17 +1881,8 @@ contains
     Implicit none
 
     Real*8 :: redshift,integrand_cl_yphi_one_halo_at_z_and_l,dalpha
-!    Real*8,dimension(number_of_z) :: f
 
-    Integer*4 :: indexl!,indexl
-
-!    Do indexz=1,number_of_z
-
- !      call compute_pre_cl_yphi_at_z_and_l(indexz,indexl,f(indexz)) 
-
-  !     f(indexz) = f(indexz)*d2VdzdO(indexz)
-
-   ! End Do
+    Integer*4 :: indexl
 
     call Interpolate_1D(integrand_cl_yphi_one_halo_at_z_and_l,dalpha,redshift,z,inte_cl_yphi_1h(indexl,:))
 
@@ -1937,7 +1905,7 @@ contains
 
     Implicit none
 
-    Integer(fgsl_size_t), parameter :: nmax=10000
+    Integer(fgsl_size_t), parameter :: nmax=1000000
 
     Integer(fgsl_int),target :: pp
     Real(fgsl_double) :: result, error, output
@@ -1948,6 +1916,7 @@ contains
 
     Integer(fgsl_int) :: status
     Integer(fgsl_int) :: indexl
+    Integer(fgsl_int),parameter :: key = 4
 
     Type(c_ptr) :: ptr
     Type(fgsl_function) :: f_obj
@@ -1961,8 +1930,8 @@ contains
 
     wk = fgsl_integration_workspace_alloc(nmax)
 
-    status = fgsl_integration_qags(f_obj, lower_limit, upper_limit, &
-         absolute_error, relative_error, nmax, wk, result, error)
+    status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
+         absolute_error, relative_error, nmax, key, wk, result, error)
 
     output = result
 
@@ -2319,13 +2288,14 @@ contains
   Subroutine compute_pre_cl_yphi_2h_at_z_and_l(indexz,indexl,output)
 
     use fiducial
+    use arrays
 
     Implicit none
 
     Integer(fgsl_size_t), parameter :: nmax=1000000
 
     Integer(fgsl_int),target :: pp(2)
-    Real(fgsl_double) :: result, error, output
+    Real(fgsl_double) :: result, error, output, output1, output2
     Real(fgsl_double),parameter :: lower_limit = Mmin!1.0E-3_fgsl_double
     Real(fgsl_double),parameter :: upper_limit = Mmax!1.0E-2_fgsl_double
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
@@ -2350,7 +2320,23 @@ contains
     status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
          absolute_error, relative_error, nmax, key, wk, result, error)
 
-    output = result
+    output1 = result
+
+    call fgsl_function_free(f_obj)
+
+    call fgsl_integration_workspace_free(wk)
+
+    f_obj = fgsl_function_init(integrand_pre_cl_phiphi_2h, ptr)
+
+    wk = fgsl_integration_workspace_alloc(nmax)
+
+    status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
+         absolute_error, relative_error, nmax, key, wk, result, error)
+
+    output2 = result
+
+    output = output1*output2*d2VdzdO(indexz)*&
+         matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance_at_z(indexz),z(indexz))    !  Dimensionless
 
     call fgsl_function_free(f_obj)
 
@@ -2368,19 +2354,13 @@ contains
     Implicit none
 
     Integer*4 :: indexl,indexz
-    Real*8,dimension(number_of_z) :: f1,f2
 
-    !$omp Parallel Do Shared(f1,f2,inte_cl_yphi_2h)    
+    !$omp Parallel Do Shared(inte_cl_yphi_2h)    
     Do indexl=1,number_of_l
 
        Do indexz=1,number_of_z
 
-          call compute_pre_cl_phiphi_2h_at_z_and_l(indexz,indexl,f2(indexz))
-
-          call compute_pre_cl_yphi_2h_at_z_and_l(indexz,indexl,f1(indexz)) 
-
-          inte_cl_yphi_2h(indexl,indexz) = f1(indexz)*f2(indexz)*d2VdzdO(indexz)*&
-            matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance_at_z(indexz),z(indexz))    !  Dimensionless
+          call compute_pre_cl_yphi_2h_at_z_and_l(indexz,indexl,inte_cl_yphi_2h(indexl,indexz)) 
 
        End Do
 
@@ -2393,25 +2373,12 @@ contains
 
     use arrays
     use fiducial
-!    use functions
 
     Implicit none
 
     Real*8 :: redshift,integrand_cl_yphi_two_halo_at_z_and_l,dalpha
-!    Real*8,dimension(number_of_z) :: f1,f2,f3
 
-    Integer*4 :: indexl!,indexl
-
- !   Do indexz=1,number_of_z
-
-  !     call compute_pre_cl_yphi_2h_at_z_and_l(indexz,indexl,f1(indexz)) 
-
-   !    call compute_pre_cl_phiphi_2h_at_z_and_l(indexz,indexl,f2(indexz))
-
-    !   f3(indexz) = f1(indexz)*f2(indexz)*d2VdzdO(indexz)*&
-     !       matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance_at_z(indexz),z(indexz))    !  Dimensionless
-
-!    End Do
+    Integer*4 :: indexl
 
     call Interpolate_1D(integrand_cl_yphi_two_halo_at_z_and_l,dalpha,redshift,z,inte_cl_yphi_2h(indexl,:))
 
