@@ -233,37 +233,37 @@ Program tSZ
 
      write(UNIT_EXE_FILE,*) 'COMPUTING ANGULAR POWER SPECTRUM OF LENSING POTENTIAL'
 
-     !call compute_integrand_limber_approximation()
+     call compute_integrand_limber_approximation()
 
-     !call compute_Clpsilimber()! LIMBER APPROXIMATION 
+     call compute_Clpsilimber()! LIMBER APPROXIMATION 
 
-     !call compute_integrand_pre_cl_phiphi_at_z_and_l()
+     call compute_integrand_pre_cl_phiphi_at_z_and_l()
 
-     !call compute_integrand_cl_phiphi_one_halo_at_z_and_l()
+     call compute_integrand_cl_phiphi_one_halo_at_z_and_l()
 
      call compute_integrand_pre_cl_phiphi_2h_at_z_and_l()
 
      call compute_integrand_cl_phiphi_two_halo_at_z_and_l()
 
-     !call compute_Clphiphi1h() ! ONE HALO TERM
+     call compute_Clphiphi1h() ! ONE HALO TERM
 
-     !call compute_Clphiphi2h() ! TWO HALO TERM
+     call compute_Clphiphi2h() ! TWO HALO TERM
 
      write(UNIT_EXE_FILE,*) 'COMPUTING ANGULAR POWER SPECTRUM OF Y-tSZ CROSS-CORRELATION'
 
- !    call compute_integrand_pre_cl_yphi_at_z_and_l()
+     call compute_integrand_pre_cl_yphi_at_z_and_l()
 
      call compute_integrand_pre_cl_yphi_2h_at_z_and_l() 
 
-!     call compute_integrand_cl_yphi_one_halo_at_z_and_l()
+     call compute_integrand_cl_yphi_one_halo_at_z_and_l()
 
      call compute_integrand_cl_yphi_two_halo_at_z_and_l()
 
- !    call compute_Clyphi1h() ! ONE HALO TERM
+     call compute_Clyphi1h() ! ONE HALO TERM
 
      call compute_Clyphi2h() ! TWO HALO TERM
 
-!     call compute_Cl()   ! TOTAL 
+     call compute_Cl()   ! TOTAL 
 
      call write_Cl()     ! OF ALL COMPUTATIONS 
 

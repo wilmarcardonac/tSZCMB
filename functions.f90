@@ -2219,7 +2219,6 @@ Module functions
 
          Do indexz=1,number_of_z
 
-            !                bMz(indexM,indexz) = linear_halo_bias(M(indexM),z(indexz))
             bMz(indexM,indexz) = linear_halo_bias(indexM,indexz)
 
          End Do

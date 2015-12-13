@@ -557,8 +557,6 @@ contains
 
           dndM(indexM,indexz) = halo_mass_function(indexM,indexz)*dM200ddM(indexM,indexz)
 
-          write(15,'(i10,es18.10,i5,2es18.10)') indexM, M(indexM), indexz, z(indexz), dndM(indexM,indexz)
-
        End Do
 
     End Do
@@ -815,7 +813,7 @@ contains
 
     Integer*4 :: indexl,indexz
 
-    !$omp Parallel Do Shared(inte_cl_phiphi_1h)
+    !!$omp Parallel Do Shared(inte_cl_phiphi_1h)
     Do indexl=1,number_of_l
 
        Do indexz=1,number_of_z
@@ -827,7 +825,7 @@ contains
        End Do
 
     End Do
-    !$omp End Parallel Do
+    !!$omp End Parallel Do
 
   end subroutine compute_integrand_cl_phiphi_one_halo_at_z_and_l
 
@@ -894,13 +892,13 @@ contains
 
     Integer*4 :: indexl
 
-    !$omp Parallel Do Shared(Clphiphi1h)
+    !!$omp Parallel Do Shared(Clphiphi1h)
     Do indexl=1,number_of_l
 
        call compute_cl_phiphi_one_halo_at_l(indexl,Clphiphi1h(indexl))
 
     End Do
-    !$omp End Parallel Do
+    !!$omp End Parallel Do
 
   end subroutine compute_Clphiphi1h
 
@@ -985,7 +983,7 @@ contains
 
     Integer*4 :: indexl
 
-    !$omp Parallel Do Shared(Clpsilimber)
+    !!$omp Parallel Do Shared(Clpsilimber)
 
     Do indexl=1,number_of_l
 
@@ -993,7 +991,7 @@ contains
 
     End Do
 
-    !$omp End Parallel Do
+    !!$omp End Parallel Do
 
   end subroutine compute_Clpsilimber
 
@@ -1101,7 +1099,7 @@ contains
 
     Integer*4 :: indexz,indexl
 
-    !$omp Parallel Do Shared(inte_cl_phiphi_2h)
+    !!$omp Parallel Do Shared(inte_cl_phiphi_2h)
     Do indexl=1,number_of_l
 
        Do indexz=1,number_of_z
@@ -1111,7 +1109,7 @@ contains
        End Do
 
     End Do
-    !$omp End Parallel Do
+    !!$omp End Parallel Do
 
     call compute_f5()
 
@@ -1218,13 +1216,13 @@ contains
 
     Integer*4 :: indexl
 
-    !$omp Parallel Do Shared(Clphiphi2h)
+    !!$omp Parallel Do Shared(Clphiphi2h)
     Do indexl=1,number_of_l
 
        call compute_cl_phiphi_two_halo_at_l(indexl,Clphiphi2h(indexl))
 
     End Do
-    !$omp End Parallel Do 
+    !!$omp End Parallel Do 
 
   end subroutine compute_Clphiphi2h
 
@@ -1277,7 +1275,7 @@ contains
     Real(fgsl_double) :: upper_limit 
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
     Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
-    Real(fgsl_double),parameter :: betafactor = 1.037d0!1.037d0!1.045d0 !1.060d0!1.037d0
+    Real(fgsl_double),parameter :: betafactor = 1.5d0!1.037d0!1.045d0 !1.060d0!1.037d0
 
     Integer(fgsl_int) :: status
     Integer(fgsl_int) :: indexz,indexl,indexM
@@ -1316,7 +1314,7 @@ contains
 
     use arrays
     use fiducial
-    use omp_lib
+    !use omp_lib
     Implicit none
 
     Integer*4 :: indexl,indexM,indexz
@@ -1327,7 +1325,7 @@ contains
 
     write(15,*) '# index_of_l    l    index_of_M    virial_mass[solar mass]    index_of_z    red-shift    y'
 
-!    !$omp Parallel Do Shared(ylMz)
+    !!$omp Parallel Do Shared(ylMz)
     Do indexl=1,number_of_l
 
        Do indexM=1,number_of_M
@@ -1341,7 +1339,7 @@ contains
        End Do
 
     End Do
-!    !$omp End Parallel Do
+    !!$omp End Parallel Do
 
     Do indexl=1,number_of_l
 
@@ -1468,7 +1466,7 @@ contains
 
     Integer*4 :: indexz, indexl
 
-    !$omp Parallel Do Shared(inte_cl_yphi_1h)
+    !!$omp Parallel Do Shared(inte_cl_yphi_1h)
     Do indexl=1,number_of_l
 
        Do indexz=1,number_of_z
@@ -1478,7 +1476,7 @@ contains
        End Do
 
     End Do
-    !$omp End Parallel Do
+    !!$omp End Parallel Do
 
   end subroutine compute_integrand_cl_yphi_one_halo_at_z_and_l
 
@@ -1560,13 +1558,13 @@ contains
 
     Integer*4 :: indexl
 
-    !$omp Parallel Do Shared(Cl1h)
+    !!$omp Parallel Do Shared(Cl1h)
     Do indexl=1,number_of_l
 
        call compute_cl_yphi_one_halo_at_l(indexl,Cl1h(indexl))
 
     End Do
-    !$omp End Parallel Do
+    !!$omp End Parallel Do
 
   end subroutine compute_Clyphi1h
 
@@ -1714,7 +1712,7 @@ contains
     Implicit none 
 
     Integer*4 :: indexl,indexM,indexz
-    
+
     Do indexl=1,number_of_l
 
        Do indexM=1,number_of_M
@@ -1729,7 +1727,7 @@ contains
        End Do
 
     End Do
-    
+
   end subroutine compute_integrand_pre_cl_yphi_2h_at_z_and_l
 
   function integrand_pre_cl_yphi_2h_at_z_and_l(virial_mass,indexz,indexl)
@@ -1739,11 +1737,19 @@ contains
 
     Implicit none
 
-    Real*8 :: virial_mass,integrand_pre_cl_yphi_2h_at_z_and_l,dalpha
+    Real*8 :: virial_mass,integrand_pre_cl_yphi_2h_at_z_and_l,dalpha,A1,A2,A3,d1,d2,d3
 
     Integer*4 :: indexz,indexl
 
-    call Interpolate_1D(integrand_pre_cl_yphi_2h_at_z_and_l,dalpha,virial_mass,M,inte_pre_cl_yphi_2h(indexl,:,indexz))
+!    call Interpolate_1D(integrand_pre_cl_yphi_2h_at_z_and_l,dalpha,virial_mass,M,inte_pre_cl_yphi_2h(indexl,:,indexz))
+
+    call Interpolate_1D(A1,d1,virial_mass,M,dndM(:,indexz))
+
+    call Interpolate_1D(A2,d2,virial_mass,M,bMz(:,indexz))
+
+    call Interpolate_1D(A3,d3,virial_mass,M,ylMz(indexl,:,indexz))
+
+    integrand_pre_cl_yphi_2h_at_z_and_l = A1*A2*A3
 
   End function integrand_pre_cl_yphi_2h_at_z_and_l
 
@@ -1796,13 +1802,6 @@ contains
          absolute_error, relative_error, nmax, key, wk1, result, error)
 
     output = result
-
-    print *,result,error,indexz,indexl
-
-    If (result .eq. 0.d0) then
-
-       stop
-    End If
 
     call fgsl_function_free(f_obj1)
 
@@ -1914,12 +1913,6 @@ contains
 
        Do indexz=1,number_of_z
 
-          !call compute_pre_cl_yphi_2h_at_z_and_l(indexz,indexl,inte_cl_yphi_2h(indexl,indexz)) 
-
-!          inte_cl_yphi_2h(indexl,indexz) = inte_cl_yphi_2h(indexl,indexz)**2*d2VdzdO(indexz)*&
- !           matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance_at_z(indexz),z(indexz))    !  Dimensionless
- !         inte_cl_yphi_2h(indexl,indexz) = inte_cl_phiphi_2h(indexl,indexz)**2*d2VdzdO(indexz)*&
-  !          matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance_at_z(indexz),z(indexz))    !  Dimensionless
           inte_cl_yphi_2h(indexl,indexz) = inte_cl_phiphi_2h(indexl,indexz)*f4(indexl,indexz)*d2VdzdO(indexz)*&
             matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance_at_z(indexz),z(indexz))    !  Dimensionless
 
@@ -1927,13 +1920,6 @@ contains
 
     End Do
     !!$omp End Parallel Do
-
-    open(30,file='./output/kernel.dat')
-
-    Do indexz=1,number_of_z
-       write(30,*) z(indexz),f4(3,indexz)
-    End Do
-    close(30)
 
   end subroutine compute_integrand_cl_yphi_two_halo_at_z_and_l
     
