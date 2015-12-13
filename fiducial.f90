@@ -8,10 +8,10 @@ Module fiducial
     ! NOMINAL MISSION DATA" BY HILL & SPERGEL.
 
     Integer*4,parameter :: number_of_k = 1000          ! SIZE OF WAVEVECTOR ARRAY 
-    Integer*4,parameter :: number_of_z = 200           ! SIZE OF RED-SHIFT ARRAY 
+    Integer*4,parameter :: number_of_z = 100           ! SIZE OF RED-SHIFT ARRAY 
     Integer*4,parameter :: number_of_z_limber = 1000   ! SIZE OF RED-SHIFT ARRAY FOR LIMBER APPROXIMATION 
     Integer*4,parameter :: number_of_M = 500 !number_of_M_log + number_of_M_linear
-    Integer*4,parameter :: number_of_l = 5!10  ! SIZE OF MULTIPOLE ARRAY 
+    Integer*4,parameter :: number_of_l = 5  ! SIZE OF MULTIPOLE ARRAY 
     Integer*4,parameter :: lmax = 10000        ! HIGHEST MULTIPOLE
     Integer*4,parameter :: lmin = 1        ! LOWEST MULTIPOLE
     Integer*4,parameter :: UNIT_EXE_FILE = 90 ! UNIT FOR EXECUTION INFORMATION FILE

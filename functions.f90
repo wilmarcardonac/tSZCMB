@@ -1207,7 +1207,7 @@ Module functions
                          ! Xia et al. M is the virial mass. The Fourier transform is truncated to the virial radius
         Real*8 :: k,M,z,FT_NFW_density_profile,Si1,Si2,Ci1,Ci2
         Real*8 :: alpha     ! It determines upper limit in Eq. (2.10) of 1312.4525
-        Real*8,parameter :: alphafactor = 1.045d0!1.060d0!1.037d0
+        Real*8,parameter :: alphafactor = 1.037d0!1.045d0!1.060d0!1.037d0
 
         alpha = alphafactor*concentration_mass_virial(M,z)
 

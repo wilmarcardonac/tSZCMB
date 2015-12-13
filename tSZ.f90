@@ -36,8 +36,8 @@ Program tSZ
     comoving_distance_at_z(1:number_of_z),Scrit(1:number_of_z),&
     angular_diameter_distance_at_z(1:number_of_z),&
     dM200ddM_M_z(1:number_of_M,1:number_of_z),inte_dndM(number_of_M,number_of_z),&
-    sigma_square_M200d(1:number_of_M,1:number_of_z),&
-    dsigma_square_M200d(1:number_of_M,1:number_of_z),&
+    sigma_square_M200d(1:number_of_M,1:number_of_z),f4(number_of_l,number_of_z),&
+    dsigma_square_M200d(1:number_of_M,1:number_of_z),f5(number_of_l,number_of_z),&
     zlimber(number_of_z_limber),integrand_limber(number_of_z_limber,number_of_l),&
     inte_pre_cl_phiphi(number_of_l,number_of_M,number_of_z),inte_cl_phiphi_1h(number_of_l,number_of_z),&
     inte_pre_cl_phiphi_2h(number_of_l,number_of_M,number_of_z),inte_cl_yphi_1h(number_of_l,number_of_z),&
@@ -85,7 +85,7 @@ Program tSZ
        M(index1) = 10**(log10(Mmin) + real(index1-1)*(log10(Mmax) - log10(Mmin))/real(number_of_M-1))
 
     End Do
-    
+
     Do index1 = 1, number_of_l ! FILLS MULTIPOLE ARRAY.    
 
         ml(index1) = int(10**(log10(dble(lmin)) + real(index1-1)*(log10(dble(lmax)) - &
@@ -211,28 +211,6 @@ Program tSZ
 
      End If
 
-     write(UNIT_EXE_FILE,*) 'COMPUTING ANGULAR POWER SPECTRUM OF LENSING POTENTIAL'
-
-     call compute_integrand_limber_approximation()
-
-     call compute_Clpsilimber()! LIMBER APPROXIMATION 
-
-     call compute_integrand_pre_cl_phiphi_at_z_and_l()
-
-     call compute_integrand_cl_phiphi_one_halo_at_z_and_l()
-
-     call compute_integrand_pre_cl_phiphi_2h_at_z_and_l()
-
-     call compute_integrand_cl_phiphi_two_halo_at_z_and_l()
-
-     call compute_Clphiphi1h() ! ONE HALO TERM
-
-     call compute_Clphiphi2h() ! TWO HALO TERM
-
-     call compute_Cl()   ! TOTAL 
-
-     call write_Cl()     ! OF ALL COMPUTATIONS 
-
      If (compute_the_form_factor) then
 
         wtime = omp_get_wtime() ! SETTING STARTING TIME OF FORM FACTOR COMPUTATION
@@ -253,21 +231,39 @@ Program tSZ
 
      End If
 
+     write(UNIT_EXE_FILE,*) 'COMPUTING ANGULAR POWER SPECTRUM OF LENSING POTENTIAL'
+
+     !call compute_integrand_limber_approximation()
+
+     !call compute_Clpsilimber()! LIMBER APPROXIMATION 
+
+     !call compute_integrand_pre_cl_phiphi_at_z_and_l()
+
+     !call compute_integrand_cl_phiphi_one_halo_at_z_and_l()
+
+     call compute_integrand_pre_cl_phiphi_2h_at_z_and_l()
+
+     call compute_integrand_cl_phiphi_two_halo_at_z_and_l()
+
+     !call compute_Clphiphi1h() ! ONE HALO TERM
+
+     !call compute_Clphiphi2h() ! TWO HALO TERM
+
      write(UNIT_EXE_FILE,*) 'COMPUTING ANGULAR POWER SPECTRUM OF Y-tSZ CROSS-CORRELATION'
 
-     call compute_integrand_pre_cl_yphi_at_z_and_l()
+ !    call compute_integrand_pre_cl_yphi_at_z_and_l()
 
      call compute_integrand_pre_cl_yphi_2h_at_z_and_l() 
 
-     call compute_integrand_cl_yphi_one_halo_at_z_and_l()
+!     call compute_integrand_cl_yphi_one_halo_at_z_and_l()
 
      call compute_integrand_cl_yphi_two_halo_at_z_and_l()
 
-     call compute_Clyphi1h() ! ONE HALO TERM
+ !    call compute_Clyphi1h() ! ONE HALO TERM
 
      call compute_Clyphi2h() ! TWO HALO TERM
 
-     call compute_Cl()   ! TOTAL 
+!     call compute_Cl()   ! TOTAL 
 
      call write_Cl()     ! OF ALL COMPUTATIONS 
 
