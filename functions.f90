@@ -2360,12 +2360,13 @@ Module functions
 
         open(15,file='./output/Cl_yphi.dat')
 
-        write(15,*) '#   l   Clyphi1h    Clyphi2h    Clyphi    Clphiphi1h    Clphiphi2h    Clphiphi    Clpsilimber '
+        write(15,*) '#   l   Clyphi1h    Clyphi2h    Clyphi    Clphiphi1h    Clphiphi2h    Clphiphi    Clpsilimber'&
+             //trim('Clyy1h    Clyy2h    Clyy')//''
 
         Do indexl=1,number_of_l
 
-            write(15,'(i5,7es18.10)') ml(indexl), Cl1h(indexl), Cl2h(indexl), Cl(indexl),Clphiphi1h(indexl),&
-                 Clphiphi2h(indexl),Clphiphi(indexl),Clpsilimber(indexl)
+            write(15,'(i5,10es18.10)') ml(indexl), Cl1h(indexl), Cl2h(indexl), Cl(indexl),Clphiphi1h(indexl),&
+                 Clphiphi2h(indexl),Clphiphi(indexl),Clpsilimber(indexl),Clyy1h(indexl),Clyy2h(indexl),Clyy(indexl)
 
         End Do
 

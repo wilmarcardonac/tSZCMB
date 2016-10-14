@@ -24,17 +24,17 @@ Program tSZ
     ! DERIVATIVE OF CRITICAL MASS DENSITY w.r.t VIRIAL MASS, ANGULAR POWER SPECTRUM OF LENSING POTENTIAL IN THE LIMBER APPROXIMATION, 
     ! HALO MASS FUNCTION, FORM FACTOR, LENSING POTENTIAL, COMOVING VOLUME, LINEAR BIAS, MEAN BIAS OF ALL MATTER, CRITICAL SURFACE,
     ! SIGMA SQUARE FOR MEAN DENSITY MASS, DERIVATIVE OF SIGMA SQUARE FOR MEAN DENSITY MASS
-    allocate (z(1:number_of_z), M(1:number_of_M), ml(1:number_of_l),&
+    allocate (z(1:number_of_z), M(1:number_of_M), ml(1:number_of_l),Clyy2h(number_of_l),Clyy(number_of_l),&
     Cl1h(1:number_of_l),Cl2h(1:number_of_l),Cl(1:number_of_l),M200d(1:number_of_M,1:number_of_z),&
     M200c(1:number_of_M,1:number_of_z),r200c(1:number_of_M,1:number_of_z),dM200ddM(1:number_of_M,1:number_of_z),&
     r200d(1:number_of_M,1:number_of_z),Clphiphi1h(1:number_of_l),Clphiphi2h(1:number_of_l),&
     Clphiphi(1:number_of_l),alpha_halo_mass_function(1:number_of_z),dM200cdM(1:number_of_M,1:number_of_z),&
     Clpsilimber(1:number_of_l),dndM(1:number_of_M,1:number_of_z),&
-    ylMz(1:number_of_l,1:number_of_M,1:number_of_z),&
+    ylMz(1:number_of_l,1:number_of_M,1:number_of_z),inte_cl_yy_1h(number_of_l,number_of_z),&
     philMz(1:number_of_l,1:number_of_M,1:number_of_z),d2VdzdO(1:number_of_z),&
     bMz(1:number_of_M,1:number_of_z),mbz(1:number_of_z),inte_mbz(number_of_M,number_of_z),&
-    comoving_distance_at_z(1:number_of_z),Scrit(1:number_of_z),&
-    angular_diameter_distance_at_z(1:number_of_z),&
+    comoving_distance_at_z(1:number_of_z),Scrit(1:number_of_z),Clyy1h(number_of_l),&
+    angular_diameter_distance_at_z(1:number_of_z),inte_cl_yy_2h(number_of_l,number_of_z),&
     dM200ddM_M_z(1:number_of_M,1:number_of_z),inte_dndM(number_of_M,number_of_z),&
     sigma_square_M200d(1:number_of_M,1:number_of_z),f4(number_of_l,number_of_z),&
     dsigma_square_M200d(1:number_of_M,1:number_of_z),f5(number_of_l,number_of_z),&
@@ -262,6 +262,14 @@ Program tSZ
      call compute_Clyphi1h() ! ONE HALO TERM
 
      call compute_Clyphi2h() ! TWO HALO TERM
+
+     call compute_integrand_cl_yy_one_halo_at_z_and_l()
+
+     call compute_integrand_cl_yy_two_halo_at_z_and_l()
+
+     call compute_Clyy1h()
+
+     call compute_Clyy2h()
 
      call compute_Cl()   ! TOTAL 
 

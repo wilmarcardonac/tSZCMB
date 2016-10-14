@@ -1275,7 +1275,7 @@ contains
     Real(fgsl_double) :: upper_limit 
     Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
     Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
-    Real(fgsl_double),parameter :: betafactor = 1.5d0!1.037d0!1.045d0 !1.060d0!1.037d0
+    Real(fgsl_double),parameter :: betafactor = 1.037d0!1.045d0 !1.060d0!1.037d0
 
     Integer(fgsl_int) :: status
     Integer(fgsl_int) :: indexz,indexl,indexM
@@ -1456,6 +1456,81 @@ contains
 
   End subroutine compute_pre_cl_yphi_at_z_and_l
 
+  function integrand_pre_cl_yy_at_z_and_l(virial_mass,indexz,indexl)
+
+    use arrays
+    use fiducial
+
+    Implicit none
+
+    Real*8 :: virial_mass,integrand_pre_cl_yy_at_z_and_l,A1,A2,dA1,dA2
+
+    Integer*4 :: indexz,indexl
+
+    call Interpolate_1D(A1,dA1,virial_mass,M,dndM(:,indexz))
+
+    call Interpolate_1D(A2,dA2,virial_mass,M,ylMz(indexl,:,indexz))
+
+    integrand_pre_cl_yy_at_z_and_l = A1*A2**2
+
+  End function integrand_pre_cl_yy_at_z_and_l
+
+  Function integrand_pre_cl_yy(virial_mass, params) bind(c)
+
+    real(c_double), value :: virial_mass
+    type(c_ptr), value :: params
+    real(c_double) :: integrand_pre_cl_yy
+    Integer(c_int), pointer :: pa(:)
+
+    call c_f_pointer(params, pa,(/2/)) ! pa(1) = indexz, pa(2) = indexl
+
+    integrand_pre_cl_yy =  integrand_pre_cl_yy_at_z_and_l(virial_mass,pa(1),pa(2))
+
+  End function integrand_pre_cl_yy
+
+  Subroutine compute_pre_cl_yy_at_z_and_l(indexz,indexl,output)
+
+    use fiducial 
+    use arrays
+
+    Implicit none
+
+    Integer(fgsl_size_t), parameter :: nmax=1000000
+
+    Integer(fgsl_int),target :: pp(2)
+    Real(fgsl_double) :: result, error, output
+    Real(fgsl_double),parameter :: lower_limit = Mmin
+    Real(fgsl_double),parameter :: upper_limit = Mmax
+    Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
+    Real(fgsl_double),parameter :: relative_error = 1.0E-4_fgsl_double
+
+    Integer(fgsl_int) :: status
+    Integer(fgsl_int) :: indexz,indexl
+    Integer(fgsl_int),parameter :: key = 6
+
+    Type(c_ptr) :: ptr
+    Type(fgsl_function) :: f_obj
+    Type(fgsl_integration_workspace) :: wk
+
+    pp = (/indexz,indexl/)
+
+    ptr = c_loc(pp)
+
+    f_obj = fgsl_function_init(integrand_pre_cl_yy, ptr)
+
+    wk = fgsl_integration_workspace_alloc(nmax)
+
+    status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
+         absolute_error, relative_error, nmax, key, wk, result, error)
+
+    output = result*d2VdzdO(indexz)
+
+    call fgsl_function_free(f_obj)
+
+    call fgsl_integration_workspace_free(wk)
+
+  End subroutine compute_pre_cl_yy_at_z_and_l
+
   subroutine compute_integrand_cl_yphi_one_halo_at_z_and_l()
 
     use arrays
@@ -1480,6 +1555,30 @@ contains
 
   end subroutine compute_integrand_cl_yphi_one_halo_at_z_and_l
 
+  subroutine compute_integrand_cl_yy_one_halo_at_z_and_l()
+
+    use arrays
+    use fiducial
+    use omp_lib
+
+    Implicit none
+
+    Integer*4 :: indexz, indexl
+
+    !!$omp Parallel Do Shared(inte_cl_yy_1h)
+    Do indexl=1,number_of_l
+
+       Do indexz=1,number_of_z
+
+          call compute_pre_cl_yy_at_z_and_l(indexz,indexl,inte_cl_yy_1h(indexl,indexz))
+
+       End Do
+
+    End Do
+    !!$omp End Parallel Do
+
+  end subroutine compute_integrand_cl_yy_one_halo_at_z_and_l
+
   function integrand_cl_yphi_one_halo_at_z_and_l(redshift,indexl)
 
     use arrays
@@ -1495,6 +1594,21 @@ contains
 
   End function integrand_cl_yphi_one_halo_at_z_and_l
 
+  function integrand_cl_yy_one_halo_at_z_and_l(redshift,indexl)
+
+    use arrays
+    use fiducial
+
+    Implicit none
+
+    Real*8 :: redshift,integrand_cl_yy_one_halo_at_z_and_l,dalpha
+
+    Integer*4 :: indexl
+
+    call Interpolate_1D(integrand_cl_yy_one_halo_at_z_and_l,dalpha,redshift,z,inte_cl_yy_1h(indexl,:))
+
+  End function integrand_cl_yy_one_halo_at_z_and_l
+
   Function integrand_cl_yphi_one_halo(redshift, params) bind(c)
 
     real(c_double), value :: redshift
@@ -1507,6 +1621,19 @@ contains
     integrand_cl_yphi_one_halo =  integrand_cl_yphi_one_halo_at_z_and_l(redshift,pa)
 
   End function integrand_cl_yphi_one_halo
+
+  Function integrand_cl_yy_one_halo(redshift, params) bind(c)
+
+    real(c_double), value :: redshift
+    type(c_ptr), value :: params
+    real(c_double) :: integrand_cl_yy_one_halo
+    Integer(c_int), pointer :: pa
+
+    call c_f_pointer(params, pa) ! pa = indexl
+
+    integrand_cl_yy_one_halo =  integrand_cl_yy_one_halo_at_z_and_l(redshift,pa)
+
+  End function integrand_cl_yy_one_halo
 
   Subroutine compute_cl_yphi_one_halo_at_l(indexl,output)
 
@@ -1548,6 +1675,46 @@ contains
 
   End subroutine compute_cl_yphi_one_halo_at_l
 
+  Subroutine compute_cl_yy_one_halo_at_l(indexl,output)
+
+    Implicit none
+
+    Integer(fgsl_size_t), parameter :: nmax=1000000
+
+    Integer(fgsl_int),target :: pp
+    Real(fgsl_double) :: result, error, output
+    Real(fgsl_double),parameter :: lower_limit = zmin
+    Real(fgsl_double),parameter :: upper_limit = zmax
+    Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
+    Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
+
+    Integer(fgsl_int) :: status
+    Integer(fgsl_int) :: indexl
+    Integer(fgsl_int),parameter :: key = 6
+
+    Type(c_ptr) :: ptr
+    Type(fgsl_function) :: f_obj
+    Type(fgsl_integration_workspace) :: wk
+
+    pp = indexl
+
+    ptr = c_loc(pp)
+
+    f_obj = fgsl_function_init(integrand_cl_yy_one_halo, ptr)
+
+    wk = fgsl_integration_workspace_alloc(nmax)
+
+    status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
+         absolute_error, relative_error, nmax, key, wk, result, error)
+
+    output = result
+
+    call fgsl_function_free(f_obj)
+
+    call fgsl_integration_workspace_free(wk)
+
+  End subroutine compute_cl_yy_one_halo_at_l
+
   subroutine compute_Clyphi1h()  ! It fills lensing potential angular power spectrum array. Dimensionless
 
     use arrays
@@ -1567,6 +1734,26 @@ contains
     !!$omp End Parallel Do
 
   end subroutine compute_Clyphi1h
+
+  subroutine compute_Clyy1h()  ! It fills lensing potential angular power spectrum array. Dimensionless
+
+    use arrays
+    use fiducial
+    use omp_lib
+
+    Implicit none
+
+    Integer*4 :: indexl
+
+    !!$omp Parallel Do Shared(Clyy1h)
+    Do indexl=1,number_of_l
+
+       call compute_cl_yy_one_halo_at_l(indexl,Clyy1h(indexl))
+
+    End Do
+    !!$omp End Parallel Do
+
+  end subroutine compute_Clyy1h
 
 !  function form_factor(indexM,indexz,indexl)    ! Form factor. Equation (2.9) in 1312.4525. Units of M: solar mass. 
 
@@ -1922,6 +2109,34 @@ contains
     !!$omp End Parallel Do
 
   end subroutine compute_integrand_cl_yphi_two_halo_at_z_and_l
+
+  subroutine compute_integrand_cl_yy_two_halo_at_z_and_l()
+
+    use fiducial
+    use arrays
+    use functions
+    use omp_lib
+
+    Implicit none
+
+    Integer*4 :: indexl,indexz
+
+    !call compute_f4()
+
+    !!$omp Parallel Do Shared(inte_cl_yy_2h)    
+    Do indexl=1,number_of_l
+
+       Do indexz=1,number_of_z
+
+          inte_cl_yy_2h(indexl,indexz) = f4(indexl,indexz)**2*d2VdzdO(indexz)*&
+            matter_power_spectrum((dble(ml(indexl))+1.d0/2.d0)/comoving_distance_at_z(indexz),z(indexz))    !  Dimensionless
+
+       End Do
+
+    End Do
+    !!$omp End Parallel Do
+
+  end subroutine compute_integrand_cl_yy_two_halo_at_z_and_l
     
   function integrand_cl_yphi_two_halo_at_z_and_l(redshift,indexl)
 
@@ -1938,6 +2153,21 @@ contains
 
   End function integrand_cl_yphi_two_halo_at_z_and_l
 
+  function integrand_cl_yy_two_halo_at_z_and_l(redshift,indexl)
+
+    use arrays
+    use fiducial
+
+    Implicit none
+
+    Real*8 :: redshift,integrand_cl_yy_two_halo_at_z_and_l,dalpha
+
+    Integer*4 :: indexl
+
+    call Interpolate_1D(integrand_cl_yy_two_halo_at_z_and_l,dalpha,redshift,z,inte_cl_yy_2h(indexl,:))
+
+  End function integrand_cl_yy_two_halo_at_z_and_l
+
   Function integrand_cl_yphi_two_halo(redshift, params) bind(c)
 
     real(c_double), value :: redshift
@@ -1950,6 +2180,19 @@ contains
     integrand_cl_yphi_two_halo =  integrand_cl_yphi_two_halo_at_z_and_l(redshift,pb)
 
   End function integrand_cl_yphi_two_halo
+
+  Function integrand_cl_yy_two_halo(redshift, params) bind(c)
+
+    real(c_double), value :: redshift
+    type(c_ptr), value :: params
+    real(c_double) :: integrand_cl_yy_two_halo
+    Integer(c_int), pointer :: pb
+
+    call c_f_pointer(params, pb) ! pb = indexl
+
+    integrand_cl_yy_two_halo =  integrand_cl_yy_two_halo_at_z_and_l(redshift,pb)
+
+  End function integrand_cl_yy_two_halo
 
   Subroutine compute_cl_yphi_two_halo_at_l(indexl,output)
 
@@ -1991,6 +2234,46 @@ contains
 
   End subroutine compute_cl_yphi_two_halo_at_l
 
+  Subroutine compute_cl_yy_two_halo_at_l(indexl,output)
+
+    Implicit none
+
+    Integer(fgsl_size_t), parameter :: nmax=1000000
+
+    Integer(fgsl_int),target :: pp
+    Real(fgsl_double) :: result, error, output
+    Real(fgsl_double),parameter :: lower_limit = zmin
+    Real(fgsl_double),parameter :: upper_limit = zmax
+    Real(fgsl_double),parameter :: absolute_error = 0.0_fgsl_double
+    Real(fgsl_double),parameter :: relative_error = 1.0E-5_fgsl_double
+
+    Integer(fgsl_int) :: status
+    Integer(fgsl_int) :: indexl
+    Integer(fgsl_int),parameter :: key = 6
+
+    Type(c_ptr) :: ptr
+    Type(fgsl_function) :: f_obj
+    Type(fgsl_integration_workspace) :: wk
+
+    pp = indexl
+
+    ptr = c_loc(pp)
+
+    f_obj = fgsl_function_init(integrand_cl_yy_two_halo, ptr)
+
+    wk = fgsl_integration_workspace_alloc(nmax)
+
+    status = fgsl_integration_qag(f_obj, lower_limit, upper_limit, &
+         absolute_error, relative_error, nmax, key, wk, result, error)
+    
+    output = result/h**3
+
+    call fgsl_function_free(f_obj)
+
+    call fgsl_integration_workspace_free(wk)
+
+  End subroutine compute_cl_yy_two_halo_at_l
+
   subroutine compute_Clyphi2h()   ! It fills two halo term of lensing potential angular power spectrum array. 
 
     use arrays
@@ -2011,6 +2294,26 @@ contains
 
   end subroutine compute_Clyphi2h
 
+  subroutine compute_Clyy2h()   ! It fills two halo term of lensing potential angular power spectrum array. 
+
+    use arrays
+    use fiducial
+    use omp_lib
+
+    Implicit none
+
+    Integer*4 :: indexl
+
+    !!$omp Parallel Do Shared(Clyy2h)    
+    Do indexl=1,number_of_l
+
+       call compute_cl_yy_two_halo_at_l(indexl,Clyy2h(indexl))
+
+    End Do
+    !!$omp End Parallel Do
+
+  end subroutine compute_Clyy2h
+
   subroutine compute_Cl()
 
     use arrays
@@ -2024,6 +2327,8 @@ contains
        Cl(indexl) = Cl1h(indexl) + Cl2h(indexl)
 
        Clphiphi(indexl) = Clphiphi1h(indexl) + Clphiphi2h(indexl)
+
+       Clyy(indexl) = Clyy1h(indexl) + Clyy2h(indexl)
 
     End Do
 

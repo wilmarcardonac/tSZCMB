@@ -50,12 +50,12 @@ Module fiducial
 
     Character(len=*),parameter :: path_to_execution_information = './output/execution_information.txt' ! EXECUTION INFORMATION FILE
 
-    Logical,parameter :: do_mass_conversion = .true.       ! COMPUTE MASSES FOR OTHER HALO DEFINITIONS IF SET IT TRUE
-    Logical,parameter :: compute_sigma_square = .true.              ! COMPUTE SIGMA SQUARE AND ITS DERIVATIVE IF SET IT TRUE
+    Logical,parameter :: do_mass_conversion = .false.!.true.       ! COMPUTE MASSES FOR OTHER HALO DEFINITIONS IF SET IT TRUE
+    Logical,parameter :: compute_sigma_square = .false.!.true.              ! COMPUTE SIGMA SQUARE AND ITS DERIVATIVE IF SET IT TRUE
     Logical,parameter :: compute_linear_halo_bias = .true. ! COMPUTE LINEAR HALO BIAS IF SET IT TRUE
     Logical,parameter :: compute_alpha_in_halo_mass_function = .true. ! COMPUTE CONSTANT ALPHA IN HALO MASS FUNCTION IF SET IT TRUE
     Logical,parameter :: compute_halo_mass_function = .true. ! COMPUTE HALO MASS FUNCTION IF SET IT TRUE
-    Logical,parameter :: compute_the_lensing_potential = .true. !.false.!.true. ! COMPUTE LENSING POTENTIAL IF SET IT TRUE
-    Logical,parameter :: compute_the_form_factor = .true. ! COMPUTE FORM FACTOR IF SET IT TRUE
+    Logical,parameter :: compute_the_lensing_potential = .false.!.true. ! COMPUTE LENSING POTENTIAL IF SET IT TRUE
+    Logical,parameter :: compute_the_form_factor = .false.!.true. ! COMPUTE FORM FACTOR IF SET IT TRUE
 
 End Module fiducial
